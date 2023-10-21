@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!--
+    Increment CFBundleVersion for each development build.
+    If CFBundleShortVersionString changes, reset CFBundleVersion to 0.
+  -->
+  <key>CFBundleShortVersionString</key>
+  <string>0.1.0</string>
+  <key>CFBundleVersion</key>
+  <string>0</string>
+
+  <key>CFBundleIconFile</key>
+  <string>app</string>
+  <key>NSHumanReadableCopyright</key>
+  <string>Copyright © 2023 Jason Han</string>
+  
+  <key>NSSupportsAutomaticGraphicsSwitching</key>
+  <true/>
+
+  <!-- TODO: Implement handling document types -->
+  <key>CFBundleDocumentTypes</key>
+  <array>
+    <!-- Enables app in Open With for unrecognized filetypes -->
+    <dict>
+      <key>CFBundleTypeIconFile</key>
+      <string>Document</string>
+      <key>CFBundleTypeName</key>
+      <string>Document</string>
+      <key>CFBundleTypeRole</key>
+      <string>Editor</string>
+      <key>CFBundleTypeOSTypes</key>
+      <array>
+        <string>****</string>
+      </array>
+    </dict>
+  </array>
+</dict>
+</plist>

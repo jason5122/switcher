@@ -1,0 +1,90 @@
+import("//build/config/mac/bundle_identifier_prefix.gni")
+import("//build/config/mac/templates/macos_binary_bundle.gni")
+import("//build/config/mac/templates/merge_plist.gni")
+
+# Template to generate an app bundle.
+#
+# All the other parameters are forwarded to a shared_library target that will
+# generate the bundle binary. In general, you want to pass at least "sources"
+# or "deps" to have some binary objects included in your shared library.
+#
+# Arguments
+#
+#   - info_plist (optional)
+#
+#       path to additional Info.plist to merge into the final bundle Info.plist
+#
+#   - bundle_identifier_prefix (optional)
+#
+#       prefix for the bundle identifier (the full identifier will be defined
+#       to $bundle_identifier_prefix.$output_name); if unset will defaults to
+#       default_bundle_identifier_prefix
+#
+#   - output_name (optional)
+#
+#       name of the bundle without the extension; defaults to $target_name
+#
+template("macos_app_bundle") {
+  _output_name = target_name
+  if (defined(invoker.output_name)) {
+    _output_name = invoker.output_name
+  }
+
+  _bundle_identifier_prefix = default_bundle_identifier_prefix
+  if (defined(invoker.bundle_identifier_prefix)) {
+    _bundle_identifier_prefix = invoker.bundle_identifier_prefix
+  }
+
+  _bundle_identifier = "$_bundle_identifier_prefix.$_output_name"
+
+  _executable_target = target_name + "_executable"
+  _executable_bundle = target_name + "_executable_bundle"
+
+  executable(_executable_target) {
+    forward_variables_from(invoker,
+                           "*",
+                           [
+                             "bundle_extension",
+                             "bundle_identifier_prefix",
+                             "bundle_type",
+                             "display_name",
+                             "info_plist",
+                             "output_name",
+                             "public_headers",
+                           ])
+
+    output_extension = ""
+    output_name = _output_name
+    output_prefix_override = true
+    output_dir = "$target_out_dir/$_executable_target"
+  }
+
+  bundle_data(_executable_bundle) {
+    public_deps = [ ":$_executable_target" ]
+    sources = [ "$target_out_dir/$_executable_target/$_output_name" ]
+    outputs = [ "{{bundle_executable_dir}}/{{source_file_part}}" ]
+  }
+
+  macos_binary_bundle(target_name) {
+    forward_variables_from(invoker,
+                           "*",
+                           [
+                             "bundle_extension",
+                             "bundle_identifier_prefix",
+                             "bundle_type",
+                             "deps",
+                             "output_name",
+                             "public_deps",
+                             "public_headers",
+                           ])
+
+    output_name = _output_name
+    product_type = "com.apple.product-type.application"
+
+    bundle_identifier = _bundle_identifier
+    bundle_extension = "app"
+    bundle_type = "AAPL"
+
+    public_deps = [ ":$_executable_bundle" ]
+  }
+}
