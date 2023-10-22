@@ -1,4 +1,3 @@
-import("//build/config/mac/templates/macos_binary_bundle.gni")
 import("//build/config/mac/templates/merge_plist.gni")
 
 template("macos_app_bundle") {
@@ -11,6 +10,14 @@ template("macos_app_bundle") {
   if (defined(invoker.bundle_identifier_prefix)) {
     _bundle_identifier_prefix = invoker.bundle_identifier_prefix
   }
+
+  _display_name = _output_name
+  if (defined(invoker.display_name)) {
+    _display_name = invoker.display_name
+  }
+
+  _plist_target = target_name + "_plist"
+  _plist_bundle = target_name + "_plist_bundle"
 
   _executable_target = target_name + "_executable"
   _executable_bundle = target_name + "_executable_bundle"
@@ -40,25 +47,46 @@ template("macos_app_bundle") {
     outputs = [ "{{bundle_executable_dir}}/{{source_file_part}}" ]
   }
 
-  macos_binary_bundle(target_name) {
+  merge_plist(_plist_target) {
+    substitutions = {
+      DEVELOPMENT_LANGUAGE = "en"
+      EXECUTABLE_NAME = "$_output_name"
+      PRODUCT_BUNDLE_IDENTIFIER = "$_bundle_identifier_prefix.$_output_name"
+      PRODUCT_BUNDLE_PACKAGE_TYPE = "AAPL"
+      PRODUCT_NAME = "$_display_name"
+    }
+
+    format = "xml1"
+    output = "$target_out_dir/$_plist_target/Info.plist"
+
+    plists = [ "//build/config/mac/resources/Info.plist" ]
+    if (defined(invoker.info_plist)) {
+      plists += [ invoker.info_plist ]
+    }
+  }
+
+  bundle_data(_plist_bundle) {
+    public_deps = [ ":$_plist_target" ]
+    sources = [ "$target_out_dir/$_plist_target/Info.plist" ]
+    outputs = [ "{{bundle_contents_dir}}/Info.plist" ]
+  }
+
+  create_bundle(target_name) {
     forward_variables_from(invoker,
                            "*",
                            [
-                             "bundle_extension",
-                             "bundle_identifier_prefix",
-                             "bundle_type",
-                             "deps",
+                             "display_name",
                              "output_name",
-                             "public_deps",
-                             "public_headers",
+                             "bundle_type",
                            ])
+    bundle_root_dir = "$root_out_dir/$_output_name.app"
+    bundle_contents_dir = "$bundle_root_dir/Contents"
+    bundle_resources_dir = "$bundle_contents_dir/Resources"
+    bundle_executable_dir = "$bundle_contents_dir/MacOS"
 
-    output_name = _output_name
-    product_type = "com.apple.product-type.application"
-
-    bundle_identifier = "$_bundle_identifier_prefix.$_output_name"
-    bundle_type = "AAPL"
-
-    public_deps = [ ":$_executable_bundle" ]
+    public_deps = [
+      ":$_executable_bundle",
+      ":$_plist_bundle",
+    ]
   }
 }

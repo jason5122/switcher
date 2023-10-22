@@ -1,11 +1,10 @@
 import("//build/config/mac/templates/icon.gni")
 import("//build/config/mac/templates/macos_app_bundle.gni")
-import("//build/config/mac/templates/simple_app_bundle.gni")
 
 macos_app_bundle("app") {
-  info_plist = "resources/Info.plist"
-  bundle_identifier_prefix = "com.jason"
   output_name = "ObjCppApp"
+  bundle_identifier_prefix = "com.jason"
+  info_plist = "resources/Info.plist"
 
   # code_signing_identity = "34C6CC573389B86AB2388388E5091CBD104B8FF2"
 
