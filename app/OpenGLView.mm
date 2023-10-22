@@ -1,4 +1,5 @@
 #import "OpenGLView.h"
+#import <os/log.h>
 
 enum {
     up_key_pressed = 1,
@@ -24,12 +25,10 @@ enum {
 }
 
 // This is the renderer output callback function
-static CVReturn
-MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeStamp* now,
-                      const CVTimeStamp* outputTime, CVOptionFlags flagsIn,
-                      CVOptionFlags* flagsOut, void* displayLinkContext) {
-    CVReturn result =
-        [(__bridge OpenGLView*)displayLinkContext getFrameForTime:outputTime];
+static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeStamp* now,
+                                      const CVTimeStamp* outputTime, CVOptionFlags flagsIn,
+                                      CVOptionFlags* flagsOut, void* displayLinkContext) {
+    CVReturn result = [(__bridge OpenGLView*)displayLinkContext getFrameForTime:outputTime];
     return result;
 }
 
@@ -53,8 +52,7 @@ MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeStamp* now,
                                               NSOpenGLProfileVersion3_2Core,
                                               0};
 
-    NSOpenGLPixelFormat* pf =
-        [[NSOpenGLPixelFormat alloc] initWithAttributes:attribs];
+    NSOpenGLPixelFormat* pf = [[NSOpenGLPixelFormat alloc] initWithAttributes:attribs];
     if (!pf) {
         NSLog(@"Failed to create pixel format.");
         return nil;
@@ -112,14 +110,12 @@ MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeStamp* now,
     CVDisplayLinkCreateWithActiveCGDisplays(&displayLink);
 
     // Set the renderer output callback function
-    CVDisplayLinkSetOutputCallback(displayLink, &MyDisplayLinkCallback,
-                                   (__bridge void*)self);
+    CVDisplayLinkSetOutputCallback(displayLink, &MyDisplayLinkCallback, (__bridge void*)self);
 
     // Set the display link for the current renderer
     CGLContextObj cglContext = [[self openGLContext] CGLContextObj];
     CGLPixelFormatObj cglPixelFormat = [[self pixelFormat] CGLPixelFormatObj];
-    CVDisplayLinkSetCurrentCGDisplayFromOpenGLContext(displayLink, cglContext,
-                                                      cglPixelFormat);
+    CVDisplayLinkSetCurrentCGDisplayFromOpenGLContext(displayLink, cglContext, cglPixelFormat);
 
     // Activate the display link
     CVDisplayLinkStart(displayLink);
@@ -133,6 +129,19 @@ MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeStamp* now,
     CGFloat width = self.bounds.size.width;
     CGFloat height = self.bounds.size.height;
     renderer = new BoingRenderer(width, height);
+
+    CaptureEngine capture_engine = CaptureEngine(width, height);
+    // capture_engine.screen_capture_build_content_list();
+
+    NSArray<SCWindow*>* windows = capture_engine.shareable_content.windows;
+    os_log_t customLog = os_log_create("com.jason.switcher", "OpenGLView.mm");
+    // os_log_with_type(customLog, OS_LOG_TYPE_ERROR, "%lu", [windows count]);
+
+    SCWindow* target_window = nil;
+    target_window = [capture_engine.shareable_content.windows objectAtIndex:0];
+
+    // os_log_with_type(customLog, OS_LOG_TYPE_ERROR, "%@", target_window.title);
+
     [self drawView];  // initial draw call
 }
 
@@ -160,7 +169,7 @@ MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeStamp* now,
     uint64_t start = clock_gettime_nsec_np(CLOCK_MONOTONIC);
     renderer->render(width, height);
     uint64_t end = clock_gettime_nsec_np(CLOCK_MONOTONIC);
-    std::cout << (end - start) / 1e6 << " ms\n";
+    // std::cout << (end - start) / 1e6 << " ms\n";
 
     [[self openGLContext] flushBuffer];
 

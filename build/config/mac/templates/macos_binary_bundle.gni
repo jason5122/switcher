@@ -1,56 +1,6 @@
 import("//build/config/mac/templates/merge_plist.gni")
 
-# Template to create an Apple bundle containing a binary file (e.g. .app or
-# .framework bundle).
-#
-# Arguments
-#
-#   - bundle_extension
-#
-#       extension of the bundle (e.g. "app", "framework", ...); must not
-#       include the dot preceding the extension
-#
-#   - bundle_type
-#
-#       four letter code corresponding to the bundle type ("FMWK", "AAPL",
-#       ...); used to fill the "Bundle OS Type code" value in the generated
-#       Info.plist for the bundle
-#
-#   - bundle_identitier
-#
-#       bundle identitifier
-#
-#   - product_type
-#
-#       type of the generated bundle (used for Xcode project)
-#
-#   - output_name (optional)
-#
-#       name of the bundle without the extension; the bundle binary (i.e.
-#       the application or the library) must have the same name; defaults
-#       to $target_name
-#
-#   - display_name (optional)
-#
-#       display name of the bundle (e.g. the name that is displayed to the
-#       user); defaults to $output_name
-#
-#   - info_plist (optional)
-#
-#       path to additional Info.plist to merge into the final bundle Info.plist
-#
 template("macos_binary_bundle") {
-  assert(
-      defined(invoker.bundle_extension),
-      "bundle_extension must be defined for macos_binary_bundle ($target_name)")
-  assert(
-      defined(invoker.bundle_identifier),
-      "bundle_identifier must be defined for macos_binary_bundle ($target_name)")
-  assert(defined(invoker.bundle_type),
-         "bundle_type must be defined for macos_binary_bundle ($target_name)")
-  assert(defined(invoker.product_type),
-         "product_type must be defined for macos_binary_bundle ($target_name)")
-
   _output_name = target_name
   if (defined(invoker.output_name)) {
     _output_name = invoker.output_name
@@ -101,7 +51,6 @@ template("macos_binary_bundle") {
                            [
                              "display_name",
                              "output_name",
-                             "bundle_extension",
                              "bundle_type",
                            ])
 
@@ -109,20 +58,10 @@ template("macos_binary_bundle") {
       public_deps = []
     }
     public_deps += [ ":$_plist_bundle" ]
-    bundle_root_dir = "$root_out_dir/$_output_name.${invoker.bundle_extension}"
+    bundle_root_dir = "$root_out_dir/$_output_name.app"
 
     bundle_contents_dir = "${bundle_root_dir}/Contents"
     bundle_resources_dir = "${bundle_contents_dir}/Resources"
     bundle_executable_dir = "${bundle_contents_dir}/MacOS"
-
-    # bundle_contents_dir = bundle_root_dir
-    # bundle_executable_dir = bundle_contents_dir
-    # bundle_resources_dir = bundle_contents_dir
-
-    # xcode_extra_attributes = {
-    #   CODE_SIGN_IDENTITY = ""
-    #   CODE_SIGNING_REQUIRED = "NO"
-    #   CODE_SIGNING_ALLOWED = "NO"
-    # }
   }
 }

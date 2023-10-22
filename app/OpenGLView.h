@@ -1,4 +1,5 @@
 #import "BoingRenderer.hh"
+#import "CaptureEngine.hh"
 #import <Cocoa/Cocoa.h>
 #import <OpenGL/OpenGL.h>
 #import <OpenGL/gl3.h>

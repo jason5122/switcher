@@ -1,4 +1,0 @@
-declare_args() {
-  # Default bundle identifier prefix.
-  default_bundle_identifier_prefix = "com.jason"
-}
