@@ -3,10 +3,10 @@ import("//build/config/mac/templates/macos_app_bundle.gni")
 
 macos_app_bundle("app") {
   output_name = "ObjCppApp"
-  bundle_identifier_prefix = "com.jason"
+  executable_name = "obj_cpp_app"
+  bundle_identifier = "com.jason.obj-cpp-app"
   info_plist = "resources/Info.plist"
-
-  # code_signing_identity = "34C6CC573389B86AB2388388E5091CBD104B8FF2"
+  code_signing_identity = "34C6CC573389B86AB2388388E5091CBD104B8FF2"
 
   sources = [
     "AppDelegate.h",
