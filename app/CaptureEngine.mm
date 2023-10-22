@@ -19,18 +19,23 @@ CaptureEngine::CaptureEngine(int width, int height) {
 void CaptureEngine::screen_capture_build_content_list() {
     os_log_t customLog = os_log_create("com.jason.switcher", "CaptureEngine.mm");
 
+    dispatch_semaphore_t sem = dispatch_semaphore_create(0);
+
     typedef void (^shareable_content_callback)(SCShareableContent*, NSError*);
     shareable_content_callback new_content_received =
         ^void(SCShareableContent* shareable_content, NSError* error) {
           if (error == nil) {
               this->shareable_content = shareable_content;
-              os_log_with_type(customLog, OS_LOG_TYPE_ERROR, "success building content list");
           } else {
               os_log_with_type(customLog, OS_LOG_TYPE_ERROR, "error building content list");
           }
+
+          dispatch_semaphore_signal(sem);
         };
 
     [SCShareableContent getShareableContentExcludingDesktopWindows:TRUE
                                                onScreenWindowsOnly:TRUE
                                                  completionHandler:new_content_received];
+
+    dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
 }

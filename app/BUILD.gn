@@ -2,8 +2,8 @@ import("//build/config/mac/templates/icon.gni")
 import("//build/config/mac/templates/macos_app_bundle.gni")
 
 macos_app_bundle("app") {
-  output_name = "ObjCppApp"
-  bundle_identifier = "com.jason.obj-cpp-app"
+  output_name = "Switcher"
+  bundle_identifier = "com.jason.switcher"
   info_plist = "resources/Info.plist"
   code_signing_identity = "34C6CC573389B86AB2388388E5091CBD104B8FF2"
 

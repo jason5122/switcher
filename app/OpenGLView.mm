@@ -131,16 +131,16 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
     renderer = new BoingRenderer(width, height);
 
     CaptureEngine capture_engine = CaptureEngine(width, height);
-    // capture_engine.screen_capture_build_content_list();
+    capture_engine.screen_capture_build_content_list();
 
     NSArray<SCWindow*>* windows = capture_engine.shareable_content.windows;
     os_log_t customLog = os_log_create("com.jason.switcher", "OpenGLView.mm");
-    // os_log_with_type(customLog, OS_LOG_TYPE_ERROR, "%lu", [windows count]);
+    os_log_with_type(customLog, OS_LOG_TYPE_ERROR, "%lu", [windows count]);
 
     SCWindow* target_window = nil;
     target_window = [capture_engine.shareable_content.windows objectAtIndex:0];
 
-    // os_log_with_type(customLog, OS_LOG_TYPE_ERROR, "%@", target_window.title);
+    os_log_with_type(customLog, OS_LOG_TYPE_ERROR, "%{public}@", target_window.title);
 
     [self drawView];  // initial draw call
 }
