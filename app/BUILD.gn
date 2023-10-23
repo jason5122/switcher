@@ -10,11 +10,11 @@ macos_app_bundle("app") {
   sources = [
     "AppDelegate.h",
     "AppDelegate.m",
-    "Renderer.mm",
     "CaptureEngine.mm",
     "FileUtil.mm",
     "Menu.m",
     "OpenGLView.mm",
+    "Renderer.mm",
     "ViewController.h",
     "ViewController.mm",
     "WindowController.m",
@@ -28,48 +28,22 @@ macos_app_bundle("app") {
     "ScreenCaptureKit.framework",
   ]
 
-  include_dirs = [ "third_party" ]
   defines = [ "GL_SILENCE_DEPRECATION" ]
 
   deps = [
-    ":fonts",
     ":icon",
-    ":images",
     ":shaders",
   ]
 }
 
 icon("icon") {
-  sources = [
-    "resources/app.iconset",
-    "resources/document.iconset",
-  ]
-}
-
-bundle_data("images") {
-  sources = [
-    "resources/images/awesomeface.png",
-    "resources/images/container.jpg",
-    "resources/images/tux.png",
-  ]
-  outputs = [ "{{bundle_resources_dir}}/images/{{source_file_part}}" ]
-}
-
-bundle_data("fonts") {
-  sources = [
-    "resources/fonts/SourceCodePro-Bold.ttf",
-    "resources/fonts/SourceCodePro-Italic.ttf",
-    "resources/fonts/SourceCodePro-Regular.ttf",
-  ]
-  outputs = [ "{{bundle_resources_dir}}/fonts/{{source_file_part}}" ]
+  sources = [ "resources/app.iconset" ]
 }
 
 bundle_data("shaders") {
   sources = [
-    "resources/shaders/coordinate_system.fs",
-    "resources/shaders/coordinate_system.vs",
-    "resources/shaders/text.fs",
-    "resources/shaders/text.vs",
+    "resources/shaders/triangle.fs",
+    "resources/shaders/triangle.vs",
   ]
   outputs = [ "{{bundle_resources_dir}}/shaders/{{source_file_part}}" ]
 }

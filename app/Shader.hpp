@@ -7,10 +7,6 @@
 #include <iostream>
 #include <string>
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
 class Shader {
 public:
     GLuint id;
@@ -41,6 +37,10 @@ public:
         glDeleteShader(fragment);
     }
 
+    ~Shader() {
+        glDeleteProgram(id);
+    }
+
     void use() {
         glUseProgram(id);
     }
@@ -57,14 +57,8 @@ public:
         glUniform1f(glGetUniformLocation(id, name.c_str()), value);
     }
 
-    void set_4float(const std::string& name, float f1, float f2, float f3,
-                    float f4) const {
+    void set_4float(const std::string& name, float f1, float f2, float f3, float f4) const {
         glUniform4f(glGetUniformLocation(id, name.c_str()), f1, f2, f3, f4);
-    }
-
-    void set_mat4(const std::string& name, const glm::mat4& mat) const {
-        glUniformMatrix4fv(glGetUniformLocation(id, name.c_str()), 1, GL_FALSE,
-                           &mat[0][0]);
     }
 
 private:
@@ -75,8 +69,7 @@ private:
             glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
             if (!success) {
                 glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-                std::cout << "ERROR::SHADER_COMPILATION_ERROR of type: "
-                          << type << "\n"
+                std::cout << "ERROR::SHADER_COMPILATION_ERROR of type: " << type << "\n"
                           << infoLog
                           << "\n -- "
                              "------------------------------------------------"
@@ -87,8 +80,7 @@ private:
             glGetProgramiv(shader, GL_LINK_STATUS, &success);
             if (!success) {
                 glGetProgramInfoLog(shader, 1024, NULL, infoLog);
-                std::cout << "ERROR::PROGRAM_LINKING_ERROR of type: " << type
-                          << "\n"
+                std::cout << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n"
                           << infoLog
                           << "\n -- "
                              "------------------------------------------------"

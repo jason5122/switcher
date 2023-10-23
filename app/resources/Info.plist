@@ -18,23 +18,5 @@
   
   <key>NSSupportsAutomaticGraphicsSwitching</key>
   <true/>
-
-  <!-- TODO: Implement handling document types -->
-  <key>CFBundleDocumentTypes</key>
-  <array>
-    <!-- Enables app in Open With for unrecognized filetypes -->
-    <dict>
-      <key>CFBundleTypeIconFile</key>
-      <string>Document</string>
-      <key>CFBundleTypeName</key>
-      <string>Document</string>
-      <key>CFBundleTypeRole</key>
-      <string>Editor</string>
-      <key>CFBundleTypeOSTypes</key>
-      <array>
-        <string>****</string>
-      </array>
-    </dict>
-  </array>
 </dict>
 </plist>
