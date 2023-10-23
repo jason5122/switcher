@@ -1,4 +1,4 @@
-#import "BoingRenderer.hh"
+#import "Renderer.hh"
 #import "CaptureEngine.hh"
 #import <Cocoa/Cocoa.h>
 #import <OpenGL/OpenGL.h>
@@ -7,7 +7,7 @@
 @interface OpenGLView : NSOpenGLView {
     NSOpenGLPixelFormat* pixelFormat;
     CVDisplayLinkRef displayLink;
-    BoingRenderer* renderer;
+    Renderer* renderer;
     BOOL enableMultisample;
     BOOL isPaused;
     uint32_t pressed_keys;

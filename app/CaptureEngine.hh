@@ -3,7 +3,7 @@
 #import <iostream>
 
 class CaptureEngine {
-    SCStreamConfiguration* stream_properties;
+    SCStreamConfiguration* stream_config;
     SCContentFilter* content_filter;
 
 public:

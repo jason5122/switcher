@@ -2,15 +2,15 @@
 #import <os/log.h>
 
 CaptureEngine::CaptureEngine(int width, int height) {
-    this->stream_properties = [[SCStreamConfiguration alloc] init];
+    this->stream_config = [[SCStreamConfiguration alloc] init];
 
-    [this->stream_properties setWidth:width];
-    [this->stream_properties setHeight:height];
+    [this->stream_config setWidth:width];
+    [this->stream_config setHeight:height];
 
-    [this->stream_properties setQueueDepth:8];
-    [this->stream_properties setShowsCursor:NO];
-    [this->stream_properties setColorSpaceName:kCGColorSpaceSRGB];
-    [this->stream_properties setPixelFormat:'BGRA'];
+    [this->stream_config setQueueDepth:8];
+    [this->stream_config setShowsCursor:NO];
+    [this->stream_config setColorSpaceName:kCGColorSpaceSRGB];
+    [this->stream_config setPixelFormat:'BGRA'];
 
     // this->content_filter =
     //     [[SCContentFilter alloc] initWithDesktopIndependentWindow:target_window];
@@ -19,6 +19,7 @@ CaptureEngine::CaptureEngine(int width, int height) {
 void CaptureEngine::screen_capture_build_content_list() {
     os_log_t customLog = os_log_create("com.jason.switcher", "CaptureEngine.mm");
 
+    // https://stackoverflow.com/a/14697903/14698275
     dispatch_semaphore_t sem = dispatch_semaphore_create(0);
 
     typedef void (^shareable_content_callback)(SCShareableContent*, NSError*);

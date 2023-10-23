@@ -10,7 +10,7 @@ macos_app_bundle("app") {
   sources = [
     "AppDelegate.h",
     "AppDelegate.m",
-    "BoingRenderer.mm",
+    "Renderer.mm",
     "CaptureEngine.mm",
     "FileUtil.mm",
     "Menu.m",

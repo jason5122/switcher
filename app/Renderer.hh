@@ -3,8 +3,6 @@
 
 #import "FileUtil.hh"
 #import "Shader.hpp"
-#import <Foundation/Foundation.h>
-// #import <GLKit/GLKit.h>
 #import <iostream>
 #import <map>
 #import <string>
@@ -24,7 +22,7 @@ struct Character {
     unsigned int advance;     // Horizontal offset to advance to next glyph
 };
 
-class BoingRenderer {
+class Renderer {
     GLuint VBO, VAO;
     GLuint texture1, texture2;
     Shader* shader;
@@ -41,9 +39,9 @@ public:
     float z = -5.0f;
     bool can_rotate = true;
 
-    BoingRenderer(CGFloat width, CGFloat height);
-    ~BoingRenderer();
-    void render(CGFloat width, CGFloat height);
+    Renderer();
+    ~Renderer();
+    void render(float width, float height);
 };
 
 #endif

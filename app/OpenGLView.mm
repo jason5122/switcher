@@ -121,14 +121,9 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
     CVDisplayLinkStart(displayLink);
 }
 
-- (void)prepareOpenGL {
-    [super prepareOpenGL];
-    [self initGL];
-    [self setupDisplayLink];
-
+- (void)setupCaptureEngine {
     CGFloat width = self.bounds.size.width;
     CGFloat height = self.bounds.size.height;
-    renderer = new BoingRenderer(width, height);
 
     CaptureEngine capture_engine = CaptureEngine(width, height);
     capture_engine.screen_capture_build_content_list();
@@ -141,6 +136,15 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
     target_window = [capture_engine.shareable_content.windows objectAtIndex:0];
 
     os_log_with_type(customLog, OS_LOG_TYPE_ERROR, "%{public}@", target_window.title);
+}
+
+- (void)prepareOpenGL {
+    [super prepareOpenGL];
+    [self initGL];
+    [self setupDisplayLink];
+    [self setupCaptureEngine];
+
+    renderer = new Renderer();
 
     [self drawView];  // initial draw call
 }
@@ -164,7 +168,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
     glViewport(0, 0, width * 2, height * 2);
 
     // FIXME: this call is needed for resizeView() not to segfault
-    if (!renderer) renderer = new BoingRenderer(width, height);
+    if (!renderer) renderer = new Renderer();
 
     uint64_t start = clock_gettime_nsec_np(CLOCK_MONOTONIC);
     renderer->render(width, height);
