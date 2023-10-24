@@ -1,4 +1,4 @@
-#import "WindowController.h"
+#import "controller/window_controller.h"
 
 @implementation WindowController
 

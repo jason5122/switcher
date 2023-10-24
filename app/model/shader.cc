@@ -1,6 +1,6 @@
-#include "FileUtil.h"
-#include "LogUtil.h"
-#include "Shader.hpp"
+#include "model/shader.h"
+#include "util/file_util.h"
+#include "util/log_util.h"
 #include <OpenGL/gl3.h>
 #include <string>
 

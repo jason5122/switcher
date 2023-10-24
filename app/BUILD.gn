@@ -8,19 +8,17 @@ macos_app_bundle("app") {
   code_signing_identity = "34C6CC573389B86AB2388388E5091CBD104B8FF2"
 
   sources = [
-    "AppDelegate.h",
     "AppDelegate.m",
-    "CaptureEngine.mm",
-    "FileUtil.mm",
-    "LogUtil.mm",
     "Menu.m",
-    "OpenGLView.mm",
-    "Renderer.cpp",
-    "Shader.cpp",
-    "ViewController.h",
-    "ViewController.mm",
-    "WindowController.m",
+    "controller/view_controller.mm",
+    "controller/window_controller.m",
     "main.m",
+    "model/capture_engine.mm",
+    "model/renderer.cc",
+    "model/shader.cc",
+    "util/file_util.mm",
+    "util/log_util.mm",
+    "view/opengl_view.mm",
   ]
 
   frameworks = [
@@ -29,6 +27,8 @@ macos_app_bundle("app") {
     "QuartzCore.framework",
     "ScreenCaptureKit.framework",
   ]
+
+  include_dirs = [ "//app" ]
 
   defines = [ "GL_SILENCE_DEPRECATION" ]
 

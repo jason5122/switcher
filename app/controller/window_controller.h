@@ -1,4 +1,4 @@
-#import "ViewController.h"
+#import "controller/view_controller.h"
 #import <Cocoa/Cocoa.h>
 
 @interface WindowController : NSWindowController <NSWindowDelegate>

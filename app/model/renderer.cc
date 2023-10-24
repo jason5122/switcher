@@ -1,4 +1,4 @@
-#include "Renderer.hpp"
+#include "model/renderer.h"
 #include <OpenGL/gl3.h>
 
 Renderer::Renderer() {

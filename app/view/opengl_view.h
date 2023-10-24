@@ -1,4 +1,4 @@
-#import "Renderer.hpp"
+#import "model/renderer.h"
 #import <Cocoa/Cocoa.h>
 
 @interface OpenGLView : NSOpenGLView {

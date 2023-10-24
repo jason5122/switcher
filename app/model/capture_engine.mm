@@ -1,5 +1,5 @@
-#import "CaptureEngine.hh"
-#import "LogUtil.h"
+#import "model/capture_engine.h"
+#import "util/log_util.h"
 
 CaptureEngine::CaptureEngine(int width, int height) {
   this->stream_config = [[SCStreamConfiguration alloc] init];

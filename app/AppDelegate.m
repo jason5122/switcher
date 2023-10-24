@@ -1,6 +1,6 @@
 #import "AppDelegate.h"
 #import "Menu.h"
-#import "ViewController.h"
+#import "controller/view_controller.h"
 
 @implementation AppDelegate
 

@@ -1,6 +1,6 @@
-#import "CaptureEngine.hh"
-#import "LogUtil.h"
-#import "OpenGLView.hh"
+#import "model/capture_engine.h"
+#import "util/log_util.h"
+#import "view/opengl_view.h"
 #import <Cocoa/Cocoa.h>
 #import <OpenGL/OpenGL.h>
 #import <OpenGL/gl3.h>
@@ -101,10 +101,6 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
         message = [[NSString stringWithFormat:@"%@", window.title] UTF8String];
         log_default(message, "OpenGLView.mm");
     }
-
-    // SCWindow* target_window = nil;
-    // target_window = [capture_engine.shareable_content.windows objectAtIndex:0];
-    // os_log(customLog, "%{public}@", target_window.title);
 }
 
 - (void)prepareOpenGL {

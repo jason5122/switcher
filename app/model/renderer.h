@@ -1,6 +1,6 @@
 #pragma once
 
-#import "Shader.hpp"
+#import "model/shader.h"
 #import <OpenGL/OpenGL.h>
 
 class Renderer {
