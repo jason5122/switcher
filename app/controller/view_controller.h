@@ -5,6 +5,5 @@
 }
 
 - (instancetype)initWithBounds:(CGRect)bounds;
-- (void)resizeView;
 
 @end

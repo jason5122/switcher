@@ -30,8 +30,4 @@
     return self;
 }
 
-- (void)windowDidResize:(NSNotification*)notification {
-    [(ViewController*)self.contentViewController resizeView];
-}
-
 @end

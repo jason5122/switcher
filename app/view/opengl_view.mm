@@ -59,8 +59,26 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
     self = [super initWithFrame:frame pixelFormat:pf];
     if (self) {
         _cppMembers = new CppMembers;
+        [self setupCaptureEngine];
     }
     return self;
+}
+
+- (void)setupCaptureEngine {
+    CGFloat width = self.bounds.size.width;
+    CGFloat height = self.bounds.size.height;
+
+    CaptureEngine capture_engine = CaptureEngine(width, height);
+    capture_engine.screen_capture_build_content_list();
+
+    NSArray<SCWindow*>* windows = capture_engine.shareable_content.windows;
+
+    const char* message = [[NSString stringWithFormat:@"%lu", [windows count]] UTF8String];
+    log_default(message, "OpenGLView.mm");
+    for (SCWindow* window in windows) {
+        message = [[NSString stringWithFormat:@"%@", window.title] UTF8String];
+        log_default(message, "OpenGLView.mm");
+    }
 }
 
 - (void)initGL {
@@ -93,28 +111,10 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
     CVDisplayLinkStart(displayLink);
 }
 
-- (void)setupCaptureEngine {
-    CGFloat width = self.bounds.size.width;
-    CGFloat height = self.bounds.size.height;
-
-    CaptureEngine capture_engine = CaptureEngine(width, height);
-    capture_engine.screen_capture_build_content_list();
-
-    NSArray<SCWindow*>* windows = capture_engine.shareable_content.windows;
-
-    const char* message = [[NSString stringWithFormat:@"%lu", [windows count]] UTF8String];
-    log_default(message, "OpenGLView.mm");
-    for (SCWindow* window in windows) {
-        message = [[NSString stringWithFormat:@"%@", window.title] UTF8String];
-        log_default(message, "OpenGLView.mm");
-    }
-}
-
 - (void)prepareOpenGL {
     [super prepareOpenGL];
     [self initGL];
     [self setupDisplayLink];
-    [self setupCaptureEngine];
 
     _cppMembers->renderer = new Renderer();
 
@@ -136,9 +136,6 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
     CGFloat width = self.bounds.size.width;
     CGFloat height = self.bounds.size.height;
     glViewport(0, 0, width * 2, height * 2);
-
-    // FIXME: this call is needed for resizeView() not to segfault
-    if (!_cppMembers->renderer) _cppMembers->renderer = new Renderer();
 
     _cppMembers->renderer->render(width, height);
 
