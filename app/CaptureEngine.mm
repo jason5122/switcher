@@ -1,5 +1,5 @@
 #import "CaptureEngine.hh"
-#import <os/log.h>
+#import "LogUtil.h"
 
 CaptureEngine::CaptureEngine(int width, int height) {
   this->stream_config = [[SCStreamConfiguration alloc] init];
@@ -17,8 +17,6 @@ CaptureEngine::CaptureEngine(int width, int height) {
 }
 
 void CaptureEngine::screen_capture_build_content_list() {
-  os_log_t customLog = os_log_create("com.jason.switcher", "CaptureEngine.mm");
-
   // https://stackoverflow.com/a/14697903/14698275
   dispatch_semaphore_t sem = dispatch_semaphore_create(0);
 
@@ -28,7 +26,7 @@ void CaptureEngine::screen_capture_build_content_list() {
         if (error == nil) {
           this->shareable_content = shareable_content;
         } else {
-          os_log_error(customLog, "error building content list");
+          log_error("error building content list", "CaptureEngine.mm");
         }
 
         dispatch_semaphore_signal(sem);

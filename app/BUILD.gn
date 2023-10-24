@@ -12,6 +12,7 @@ macos_app_bundle("app") {
     "AppDelegate.m",
     "CaptureEngine.mm",
     "FileUtil.mm",
+    "LogUtil.mm",
     "Menu.m",
     "OpenGLView.mm",
     "Renderer.cpp",

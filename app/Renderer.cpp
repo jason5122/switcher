@@ -1,4 +1,3 @@
-#include "FileUtil.h"
 #include "Renderer.hpp"
 #include <OpenGL/gl3.h>
 

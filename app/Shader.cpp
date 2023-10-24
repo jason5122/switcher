@@ -1,11 +1,12 @@
-#import "FileUtil.h"
+#include "FileUtil.h"
+#include "LogUtil.h"
 #include "Shader.hpp"
-#import <OpenGL/gl3.h>
-#import <iostream>
+#include <OpenGL/gl3.h>
+#include <string>
 
 Shader::Shader(const std::string& vertex_path, const std::string& fragment_path) {
-    char* vsrc = read_file(resource_path(vertex_path));
-    char* fsrc = read_file(resource_path(fragment_path));
+    const char* vsrc = read_file(resource_path(vertex_path.c_str()));
+    const char* fsrc = read_file(resource_path(fragment_path.c_str()));
 
     GLuint vertex, fragment;
 
@@ -55,28 +56,27 @@ void Shader::set_4float(const std::string& name, float f1, float f2, float f3, f
 
 void Shader::check_compile_errors(GLuint shader, const std::string& type) {
     int success;
-    char infoLog[1024];
+    int len;
+    std::string message;
     if (type != "PROGRAM") {
         glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &len);
         if (!success) {
-            glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-            std::cout << "ERROR::SHADER_COMPILATION_ERROR of type: " << type << "\n"
-                      << infoLog
-                      << "\n -- "
-                         "------------------------------------------------"
-                         "--- -- "
-                      << std::endl;
+            message.resize(len);
+            glGetShaderInfoLog(shader, 1024, NULL, &message[0]);
+            message = "shader compilation error: " + message;
         }
     } else {
         glGetProgramiv(shader, GL_LINK_STATUS, &success);
+        glGetProgramiv(shader, GL_INFO_LOG_LENGTH, &len);
         if (!success) {
-            glGetProgramInfoLog(shader, 1024, NULL, infoLog);
-            std::cout << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n"
-                      << infoLog
-                      << "\n -- "
-                         "------------------------------------------------"
-                         "--- -- "
-                      << std::endl;
+            message.resize(len);
+            glGetProgramInfoLog(shader, 1024, NULL, &message[0]);
+            message = "program linking error: " + message;
         }
+    }
+
+    if (!success) {
+        log_error(message.c_str(), "Shader.cpp");
     }
 }

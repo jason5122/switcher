@@ -1,9 +1,9 @@
 #import "CaptureEngine.hh"
+#import "LogUtil.h"
 #import "OpenGLView.hh"
 #import <Cocoa/Cocoa.h>
 #import <OpenGL/OpenGL.h>
 #import <OpenGL/gl3.h>
-#import <os/log.h>
 
 @implementation OpenGLView
 
@@ -94,11 +94,12 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
     capture_engine.screen_capture_build_content_list();
 
     NSArray<SCWindow*>* windows = capture_engine.shareable_content.windows;
-    os_log_t customLog = os_log_create("com.jason.switcher", "OpenGLView.mm");
 
-    os_log(customLog, "%lu", [windows count]);
+    const char* message = [[NSString stringWithFormat:@"%lu", [windows count]] UTF8String];
+    log_default(message, "OpenGLView.mm");
     for (SCWindow* window in windows) {
-        os_log(customLog, "%{public}@", window.title);
+        message = [[NSString stringWithFormat:@"%@", window.title] UTF8String];
+        log_default(message, "OpenGLView.mm");
     }
 
     // SCWindow* target_window = nil;
