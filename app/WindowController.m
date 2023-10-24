@@ -1,4 +1,4 @@
-#include "WindowController.h"
+#import "WindowController.h"
 
 @implementation WindowController
 
@@ -6,11 +6,10 @@
     int mask = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable |
                NSWindowStyleMaskMiniaturizable | NSWindowStyleMaskResizable;
 
-    NSWindow* window =
-        [[NSWindow alloc] initWithContentRect:bounds
-                                    styleMask:mask
-                                      backing:NSBackingStoreBuffered
-                                        defer:YES];
+    NSWindow* window = [[NSWindow alloc] initWithContentRect:bounds
+                                                   styleMask:mask
+                                                     backing:NSBackingStoreBuffered
+                                                       defer:YES];
 
     id bundleInfo = [[NSBundle mainBundle] infoDictionary];
     NSString* appName = [bundleInfo objectForKey:@"CFBundleName"];

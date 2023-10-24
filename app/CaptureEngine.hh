@@ -1,6 +1,4 @@
-#include <Foundation/Foundation.h>
-#include <ScreenCaptureKit/ScreenCaptureKit.h>
-#import <iostream>
+#import <ScreenCaptureKit/ScreenCaptureKit.h>
 
 class CaptureEngine {
     SCStreamConfiguration* stream_config;

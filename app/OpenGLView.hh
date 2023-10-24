@@ -1,8 +1,5 @@
-#import "CaptureEngine.hh"
-#import "Renderer.hh"
+#import "Renderer.hpp"
 #import <Cocoa/Cocoa.h>
-#import <OpenGL/OpenGL.h>
-#import <OpenGL/gl3.h>
 
 @interface OpenGLView : NSOpenGLView {
     CVDisplayLinkRef displayLink;

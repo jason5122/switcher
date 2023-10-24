@@ -1,9 +1,11 @@
-#import "FileUtil.hh"
+#import "FileUtil.h"
+#import <Foundation/Foundation.h>
+#import <sys/stat.h>
 
 const char* resource_path(const std::string& name) {
-    NSString* path = [[NSBundle mainBundle]
-        pathForResource:[NSString stringWithUTF8String:name.c_str()]
-                 ofType:nil];
+    NSString* path =
+        [[NSBundle mainBundle] pathForResource:[NSString stringWithUTF8String:name.c_str()]
+                                        ofType:nil];
     return [path fileSystemRepresentation];
 }
 

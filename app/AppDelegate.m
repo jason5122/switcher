@@ -8,10 +8,8 @@
     if (windowController == nil) {
         NSSize size = [[NSScreen mainScreen] frame].size;
         CGRect contentSize = CGRectMake(0, 0, size.width, size.height);
-        windowController =
-            [[WindowController alloc] initWithBounds:contentSize];
-        ViewController* viewController =
-            [[ViewController alloc] initWithBounds:contentSize];
+        windowController = [[WindowController alloc] initWithBounds:contentSize];
+        ViewController* viewController = [[ViewController alloc] initWithBounds:contentSize];
         windowController.contentViewController = viewController;
     }
     [windowController showWindow:nil];

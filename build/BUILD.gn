@@ -65,6 +65,7 @@ config("objc_standard") {
 config("mac_minimum_version") {
   cflags_objc = [ "-mmacosx-version-min=$mac_deployment_target" ]
   cflags_objcc = cflags_objc
+  cflags_cc = cflags_objc
   ldflags = [ "-mmacosx-version-min=$mac_deployment_target" ]
 }
 

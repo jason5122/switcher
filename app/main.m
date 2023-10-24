@@ -1,5 +1,5 @@
-#include "AppDelegate.h"
-#include <Cocoa/Cocoa.h>
+#import "AppDelegate.h"
+#import <Cocoa/Cocoa.h>
 
 int main() {
     @autoreleasepool {

@@ -1,5 +1,6 @@
-#define STB_IMAGE_IMPLEMENTATION
-#import "Renderer.hh"
+#include "FileUtil.h"
+#include "Renderer.hpp"
+#include <OpenGL/gl3.h>
 
 Renderer::Renderer() {
     shader = new Shader("shaders/triangle.vs", "shaders/triangle.fs");

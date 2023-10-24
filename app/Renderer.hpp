@@ -1,8 +1,7 @@
-#ifndef BOING_RENDERER_H
-#define BOING_RENDERER_H
+#pragma once
 
-#import "FileUtil.hh"
 #import "Shader.hpp"
+#import <OpenGL/OpenGL.h>
 
 class Renderer {
     GLuint VBO, VAO;
@@ -13,5 +12,3 @@ public:
     ~Renderer();
     void render(float width, float height);
 };
-
-#endif
