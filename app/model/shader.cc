@@ -4,34 +4,39 @@
 #include <OpenGL/gl3.h>
 #include <string>
 
-Shader::Shader(const std::string& vertex_path, const std::string& fragment_path) {
-    const char* vsrc = read_file(resource_path(vertex_path.c_str()));
-    const char* fsrc = read_file(resource_path(fragment_path.c_str()));
-
-    GLuint vertex, fragment;
-
-    vertex = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertex, 1, &vsrc, NULL);
-    glCompileShader(vertex);
-    check_compile_errors(vertex, "VERTEX");
-
-    fragment = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragment, 1, &fsrc, NULL);
-    glCompileShader(fragment);
-    check_compile_errors(fragment, "FRAGMENT");
-
+Shader::Shader() {
     id = glCreateProgram();
-    glAttachShader(id, vertex);
-    glAttachShader(id, fragment);
-    glLinkProgram(id);
-    check_compile_errors(id, "PROGRAM");
-
-    glDeleteShader(vertex);
-    glDeleteShader(fragment);
 }
 
 Shader::~Shader() {
     glDeleteProgram(id);
+}
+
+void Shader::attach_vertex_shader(const std::string& vertex_path) {
+    const char* vsrc = read_file(resource_path(vertex_path.c_str()));
+    GLuint vertex = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertex, 1, &vsrc, NULL);
+    glCompileShader(vertex);
+    check_compile_errors(vertex, "VERTEX");
+
+    glAttachShader(id, vertex);
+    glDeleteShader(vertex);
+}
+
+void Shader::attach_fragment_shader(const std::string& fragment_path) {
+    const char* fsrc = read_file(resource_path(fragment_path.c_str()));
+    GLuint fragment = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragment, 1, &fsrc, NULL);
+    glCompileShader(fragment);
+    check_compile_errors(fragment, "FRAGMENT");
+
+    glAttachShader(id, fragment);
+    glDeleteShader(fragment);
+}
+
+void Shader::link_program() {
+    glLinkProgram(id);
+    check_compile_errors(id, "PROGRAM");
 }
 
 void Shader::use() {
@@ -77,6 +82,6 @@ void Shader::check_compile_errors(GLuint shader, const std::string& type) {
     }
 
     if (!success) {
-        log_error(message.c_str(), "Shader.cpp");
+        log_error(message.c_str(), "shader.cc");
     }
 }

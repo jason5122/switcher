@@ -5,7 +5,7 @@
 
 class Renderer {
     GLuint VBO, VAO;
-    Shader* shader;
+    Shader shader;
 
 public:
     Renderer();

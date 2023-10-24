@@ -2,7 +2,9 @@
 #include <OpenGL/gl3.h>
 
 Renderer::Renderer() {
-    shader = new Shader("shaders/triangle.vs", "shaders/triangle.fs");
+    shader.attach_vertex_shader("shaders/triangle.vs");
+    shader.attach_fragment_shader("shaders/triangle.fs");
+    shader.link_program();
 
     float vertices[] = {
         -0.5f, -0.5f, 0.0f,  //
@@ -30,7 +32,7 @@ void Renderer::render(float width, float height) {
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    shader->use();
+    shader.use();
 
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLES, 0, 3);

@@ -7,9 +7,12 @@ class Shader {
 public:
     GLuint id;
 
-    Shader(const std::string& vertex_path, const std::string& fragment_path);
+    Shader();
     ~Shader();
 
+    void attach_vertex_shader(const std::string& vertex_path);
+    void attach_fragment_shader(const std::string& fragment_path);
+    void link_program();
     void use();
     void set_1bool(const std::string& name, bool value) const;
     void set_1int(const std::string& name, int value) const;
