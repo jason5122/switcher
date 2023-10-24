@@ -10,7 +10,7 @@ macos_app_bundle("app") {
   sources = [
     "AppDelegate.m",
     "Menu.m",
-    "controller/view_controller.mm",
+    "controller/view_controller.m",
     "controller/window_controller.m",
     "main.m",
     "model/capture_engine.mm",

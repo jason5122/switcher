@@ -1,9 +1,14 @@
 #import "model/capture_engine.h"
+#import "model/renderer.h"
 #import "util/log_util.h"
 #import "view/opengl_view.h"
 #import <Cocoa/Cocoa.h>
 #import <OpenGL/OpenGL.h>
 #import <OpenGL/gl3.h>
+
+struct CppMembers {
+    Renderer* renderer;
+};
 
 @implementation OpenGLView
 
@@ -52,7 +57,9 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
     }
 
     self = [super initWithFrame:frame pixelFormat:pf];
-
+    if (self) {
+        _cppMembers = new CppMembers;
+    }
     return self;
 }
 
@@ -109,7 +116,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
     [self setupDisplayLink];
     [self setupCaptureEngine];
 
-    renderer = new Renderer();
+    _cppMembers->renderer = new Renderer();
 
     [self drawView];  // initial draw call
 }
@@ -131,9 +138,9 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
     glViewport(0, 0, width * 2, height * 2);
 
     // FIXME: this call is needed for resizeView() not to segfault
-    if (!renderer) renderer = new Renderer();
+    if (!_cppMembers->renderer) _cppMembers->renderer = new Renderer();
 
-    renderer->render(width, height);
+    _cppMembers->renderer->render(width, height);
 
     [[self openGLContext] flushBuffer];
 

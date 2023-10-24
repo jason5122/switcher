@@ -1,9 +1,10 @@
-#import "model/renderer.h"
 #import <Cocoa/Cocoa.h>
+
+struct CppMembers;
 
 @interface OpenGLView : NSOpenGLView {
     CVDisplayLinkRef displayLink;
-    Renderer* renderer;
+    struct CppMembers* _cppMembers;
 }
 
 - (void)drawView;
