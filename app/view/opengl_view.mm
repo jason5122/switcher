@@ -69,16 +69,6 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
     CGFloat height = self.bounds.size.height;
 
     CaptureEngine capture_engine = CaptureEngine(width, height);
-    capture_engine.screen_capture_build_content_list();
-
-    NSArray<SCWindow*>* windows = capture_engine.shareable_content.windows;
-
-    const char* message = [[NSString stringWithFormat:@"%lu", [windows count]] UTF8String];
-    log_default(message, "OpenGLView.mm");
-    for (SCWindow* window in windows) {
-        message = [[NSString stringWithFormat:@"%@", window.title] UTF8String];
-        log_default(message, "OpenGLView.mm");
-    }
 }
 
 - (void)initGL {
