@@ -1,92 +1,145 @@
 #import "model/capture_engine.h"
 #import "util/log_util.h"
+#import <ScreenCaptureKit/ScreenCaptureKit.h>
 #import <os/log.h>
 
-CaptureEngine::CaptureEngine(int width, int height) {
-    stream_config = [[SCStreamConfiguration alloc] init];
+@interface ScreenCaptureDelegate : NSObject <SCStreamOutput>
 
-    [stream_config setWidth:width];
-    [stream_config setHeight:height];
+@property struct screen_capture* sc;
 
-    [stream_config setQueueDepth:8];
-    [stream_config setShowsCursor:NO];
-    [stream_config setColorSpaceName:kCGColorSpaceSRGB];
-    [stream_config setPixelFormat:'BGRA'];
+@end
 
-    excluded_window_titles = [NSSet setWithObjects:@"Menubar", @"Item-0", nil];
-    excluded_application_names = [NSSet setWithObjects:@"Control Center", @"Dock", nil];
+struct screen_capture {
+    SCStream* disp;
+    SCStreamConfiguration* stream_config;
+    SCShareableContent* shareable_content;
+    ScreenCaptureDelegate* capture_delegate;
 
-    populate_windows();
-    filter_windows();
+    dispatch_semaphore_t shareable_content_available;
 
-    selected_window = [windows firstObject];
+    CGWindowID window;
+};
 
-    content_filter = [[SCContentFilter alloc] initWithDesktopIndependentWindow:selected_window];
+static NSArray* filter_content_windows(NSArray* windows) {
+    NSSet* excluded_window_titles = [NSSet setWithObjects:@"Menubar", @"Item-0", nil];
+    NSSet* excluded_application_names = [NSSet setWithObjects:@"Control Center", @"Dock", nil];
 
-    for (SCWindow* window in windows) {
-        log_default(window.title, @"capture-engine");
+    return [windows
+        filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(SCWindow* window,
+                                                                          NSDictionary* bindings) {
+          NSString* app_name = window.owningApplication.applicationName;
+          NSString* title = window.title;
+
+          if (app_name == NULL || title == NULL) return FALSE;
+          if ([app_name isEqualToString:@""] || [title isEqualToString:@""]) return FALSE;
+
+          return ![excluded_window_titles containsObject:title] &&
+                 ![excluded_application_names containsObject:app_name];
+        }]];
+}
+
+static bool init_screen_stream(struct screen_capture* sc) {
+    SCContentFilter* content_filter;
+
+    sc->stream_config = [[SCStreamConfiguration alloc] init];
+    dispatch_semaphore_wait(sc->shareable_content_available, DISPATCH_TIME_FOREVER);
+
+    NSArray* filtered_windows = filter_content_windows(sc->shareable_content.windows);
+
+    for (SCWindow* window in filtered_windows) {
+        NSString* app_name = window.owningApplication.applicationName;
+        NSString* title = window.title;
+        NSString* message = [NSString stringWithFormat:@"%@ \"%@\"", title, app_name];
+        log_default(message, @"capture-engine");
     }
 
-    capture_delegate = [[ScreenCaptureDelegate alloc] init];
-    dispatch = [[SCStream alloc] initWithFilter:content_filter
-                                  configuration:stream_config
+    __block SCWindow* target_window = nil;
+    if (sc->window != 0) {
+        [filtered_windows indexOfObjectPassingTest:^BOOL(SCWindow* _Nonnull window, NSUInteger idx,
+                                                         BOOL* _Nonnull stop) {
+          if (window.windowID == sc->window) {
+              target_window = filtered_windows[idx];
+              *stop = TRUE;
+          }
+          return *stop;
+        }];
+    } else {
+        target_window = [filtered_windows objectAtIndex:0];
+        sc->window = target_window.windowID;
+    }
+    content_filter = [[SCContentFilter alloc] initWithDesktopIndependentWindow:target_window];
+
+    if (target_window) {
+        [sc->stream_config setWidth:target_window.frame.size.width];
+        [sc->stream_config setHeight:target_window.frame.size.height];
+    }
+
+    [sc->stream_config setQueueDepth:8];
+    [sc->stream_config setShowsCursor:FALSE];
+    [sc->stream_config setPixelFormat:'BGRA'];
+    [sc->stream_config setColorSpaceName:kCGColorSpaceSRGB];
+
+    sc->disp = [[SCStream alloc] initWithFilter:content_filter
+                                  configuration:sc->stream_config
                                        delegate:nil];
 
     NSError* error = nil;
-    BOOL did_add_output = [dispatch addStreamOutput:capture_delegate
+    BOOL did_add_output = [sc->disp addStreamOutput:sc->capture_delegate
                                                type:SCStreamOutputTypeScreen
                                  sampleHandlerQueue:nil
                                               error:&error];
-
     if (!did_add_output) {
-        if (error != nil) log_error([error localizedFailureReason], @"capture-engine");
+        log_error([error localizedFailureReason], @"capture-engine");
+        return !did_add_output;
     }
 
     dispatch_semaphore_t stream_start_completed = dispatch_semaphore_create(0);
 
-    [dispatch startCaptureWithCompletionHandler:^(NSError* _Nullable error) {
-      if (error != nil) {
+    __block BOOL did_stream_start = false;
+    [sc->disp startCaptureWithCompletionHandler:^(NSError* _Nullable error) {
+      did_stream_start = (BOOL)(error == nil);
+      if (!did_stream_start) {
           log_error([error localizedFailureReason], @"capture-engine");
       }
       dispatch_semaphore_signal(stream_start_completed);
     }];
     dispatch_semaphore_wait(stream_start_completed, DISPATCH_TIME_FOREVER);
+
+    return did_stream_start;
 }
 
-void CaptureEngine::populate_windows() {
-    // https://stackoverflow.com/a/14697903/14698275
-    dispatch_semaphore_t sem = dispatch_semaphore_create(0);
-
+static void screen_capture_build_content_list(struct screen_capture* sc) {
     typedef void (^shareable_content_callback)(SCShareableContent*, NSError*);
-    shareable_content_callback new_content_received =
-        ^void(SCShareableContent* shareable_content, NSError* error) {
-          if (error == nil) {
-              windows = shareable_content.windows;
-          } else {
-              log_error(@"error building content list", @"capture-engine");
-          }
-          dispatch_semaphore_signal(sem);
-        };
+    shareable_content_callback new_content_received = ^void(SCShareableContent* shareable_content,
+                                                            NSError* error) {
+      if (error == nil && sc->shareable_content_available != NULL) {
+          sc->shareable_content = shareable_content;
+      } else {
+          log_error(@"Unable to get list of available applications or windows. Please check if app"
+                    @"has necessary screen capture permissions.",
+                    @"capture-engine");
+      }
+      dispatch_semaphore_signal(sc->shareable_content_available);
+    };
 
+    dispatch_semaphore_wait(sc->shareable_content_available, DISPATCH_TIME_FOREVER);
     [SCShareableContent getShareableContentExcludingDesktopWindows:TRUE
                                                onScreenWindowsOnly:TRUE
                                                  completionHandler:new_content_received];
-
-    dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
 }
 
-void CaptureEngine::filter_windows() {
-    NSArray* filteredWindows = [windows
-        filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(SCWindow* window,
-                                                                          NSDictionary* bindings) {
-          return ![excluded_window_titles containsObject:window.title] &&
-                 ![excluded_application_names
-                     containsObject:window.owningApplication.applicationName];
-        }]];
+CaptureEngine::CaptureEngine() {
+    sc = new screen_capture();
 
-    windows = filteredWindows;
+    sc->shareable_content_available = dispatch_semaphore_create(1);
+    screen_capture_build_content_list(sc);
 
-    log_default([NSString stringWithFormat:@"%lu", [windows count]], @"capture-engine");
+    sc->capture_delegate = [[ScreenCaptureDelegate alloc] init];
+    sc->capture_delegate.sc = sc;
+
+    if (!init_screen_stream(sc)) {
+        log_default(@"initializing screen stream failed", @"capture-engine");
+    }
 }
 
 @implementation ScreenCaptureDelegate

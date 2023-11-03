@@ -60,16 +60,9 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
     self = [super initWithFrame:frame pixelFormat:pf];
     if (self) {
         _cppMembers = new CppMembers;
-        [self setupCaptureEngine];
+        _cppMembers->capture_engine = new CaptureEngine();
     }
     return self;
-}
-
-- (void)setupCaptureEngine {
-    CGFloat width = self.bounds.size.width;
-    CGFloat height = self.bounds.size.height;
-
-    _cppMembers->capture_engine = new CaptureEngine(width, height);
 }
 
 - (void)initGL {
@@ -105,7 +98,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 - (void)prepareOpenGL {
     [super prepareOpenGL];
     [self initGL];
-    [self setupDisplayLink];
+    // [self setupDisplayLink];
 
     _cppMembers->renderer = new Renderer();
 
