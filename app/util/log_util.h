@@ -1,2 +1,4 @@
-void log_default(const char* message, const char* category);
-void log_error(const char* message, const char* category);
+#import <Foundation/Foundation.h>
+
+void log_default(NSString* message, NSString* category);
+void log_error(NSString* message, NSString* category);

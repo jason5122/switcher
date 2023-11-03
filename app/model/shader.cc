@@ -1,6 +1,5 @@
 #include "model/shader.h"
 #include "util/file_util.h"
-#include "util/log_util.h"
 #include <OpenGL/gl3.h>
 #include <string>
 
@@ -12,31 +11,35 @@ Shader::~Shader() {
     glDeleteProgram(id);
 }
 
-void Shader::attach_vertex_shader(const std::string& vertex_path) {
+std::string Shader::attach_vertex_shader(const std::string& vertex_path) {
     const char* vsrc = read_file(resource_path(vertex_path.c_str()));
     GLuint vertex = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertex, 1, &vsrc, NULL);
     glCompileShader(vertex);
-    check_compile_errors(vertex, "VERTEX");
+
+    std::string error = get_compile_errors(vertex, "VERTEX");
 
     glAttachShader(id, vertex);
     glDeleteShader(vertex);
+    return error;
 }
 
-void Shader::attach_fragment_shader(const std::string& fragment_path) {
+std::string Shader::attach_fragment_shader(const std::string& fragment_path) {
     const char* fsrc = read_file(resource_path(fragment_path.c_str()));
     GLuint fragment = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragment, 1, &fsrc, NULL);
     glCompileShader(fragment);
-    check_compile_errors(fragment, "FRAGMENT");
+
+    std::string error = get_compile_errors(fragment, "FRAGMENT");
 
     glAttachShader(id, fragment);
     glDeleteShader(fragment);
+    return error;
 }
 
 void Shader::link_program() {
     glLinkProgram(id);
-    check_compile_errors(id, "PROGRAM");
+    get_compile_errors(id, "PROGRAM");
 }
 
 void Shader::use() {
@@ -59,7 +62,7 @@ void Shader::set_4float(const std::string& name, float f1, float f2, float f3, f
     glUniform4f(glGetUniformLocation(id, name.c_str()), f1, f2, f3, f4);
 }
 
-void Shader::check_compile_errors(GLuint shader, const std::string& type) {
+std::string Shader::get_compile_errors(GLuint shader, const std::string& type) {
     int success;
     int len;
     std::string message;
@@ -80,8 +83,5 @@ void Shader::check_compile_errors(GLuint shader, const std::string& type) {
             message = "program linking error: " + message;
         }
     }
-
-    if (!success) {
-        log_error(message.c_str(), "shader.cc");
-    }
+    return message;
 }

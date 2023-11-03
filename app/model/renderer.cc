@@ -2,8 +2,10 @@
 #include <OpenGL/gl3.h>
 
 Renderer::Renderer() {
+    // TODO: handle shader errors
     shader.attach_vertex_shader("shaders/triangle.vs");
     shader.attach_fragment_shader("shaders/triangle.fs");
+
     shader.link_program();
 
     float vertices[] = {

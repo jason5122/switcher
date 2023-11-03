@@ -2,11 +2,12 @@
 
 class CaptureEngine {
 public:
-    NSArray<SCWindow*>* windows;
-
     CaptureEngine(int width, int height);
 
 private:
+    SCWindow* selected_window;
+    NSArray<SCWindow*>* windows;
+
     SCStreamConfiguration* stream_config;
     SCContentFilter* content_filter;
     NSSet* excluded_window_titles;
