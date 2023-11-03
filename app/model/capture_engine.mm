@@ -61,20 +61,37 @@ CaptureEngine::CaptureEngine(int width, int height) {
     content_filter = [[SCContentFilter alloc] initWithDesktopIndependentWindow:selected_window];
 
     for (SCWindow* window in windows) {
-        log_default(window.title, @"capture_engine.mm");
+        log_default(window.title, @"capture-engine");
     }
 
     SCStream* disp = [[SCStream alloc] initWithFilter:content_filter
                                         configuration:stream_config
                                              delegate:nil];
 
-    ScreenCaptureDelegate* capture_delegate;
+    ScreenCaptureDelegate* capture_delegate = [[ScreenCaptureDelegate alloc] init];
 
     NSError* error = nil;
     BOOL did_add_output = [disp addStreamOutput:capture_delegate
                                            type:SCStreamOutputTypeScreen
                              sampleHandlerQueue:nil
                                           error:&error];
+
+    if (!did_add_output) {
+        if (error != nil) log_error([error localizedFailureReason], @"capture-engine");
+    }
+
+    dispatch_semaphore_t stream_start_completed = dispatch_semaphore_create(0);
+
+    [disp startCaptureWithCompletionHandler:^(NSError* _Nullable error) {
+      log_error(@"HEYO", @"capture-engine");
+      if (error != nil) {
+          log_error([error localizedFailureReason], @"capture-engine");
+      }
+      // dispatch_semaphore_signal(stream_start_completed);
+    }];
+    dispatch_semaphore_wait(stream_start_completed, DISPATCH_TIME_FOREVER);
+
+    log_default(@"reached the end", @"capture-engine");
 }
 
 void CaptureEngine::populate_windows() {
@@ -87,9 +104,8 @@ void CaptureEngine::populate_windows() {
           if (error == nil) {
               windows = shareable_content.windows;
           } else {
-              log_error(@"error building content list", @"CaptureEngine.mm");
+              log_error(@"error building content list", @"capture-engine");
           }
-
           dispatch_semaphore_signal(sem);
         };
 
@@ -111,7 +127,7 @@ void CaptureEngine::filter_windows() {
 
     windows = filteredWindows;
 
-    log_default([NSString stringWithFormat:@"%lu", [windows count]], @"capture_engine.mm");
+    log_default([NSString stringWithFormat:@"%lu", [windows count]], @"capture-engine");
 }
 
 @implementation ScreenCaptureDelegate
@@ -119,11 +135,12 @@ void CaptureEngine::filter_windows() {
 - (void)stream:(SCStream*)stream
     didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
                    ofType:(SCStreamOutputType)type {
-    if (self.sc != NULL) {
-        if (type == SCStreamOutputTypeScreen) {
-            // screen_stream_video_update(self.sc, sampleBuffer);
-        }
+    // if (self.sc != NULL) {
+    if (type == SCStreamOutputTypeScreen) {
+        log_default(@"screen update", @"capture-engine");
+        // screen_stream_video_update(self.sc, sampleBuffer);
     }
+    // }
 }
 
 @end

@@ -8,6 +8,7 @@
 
 struct CppMembers {
     Renderer* renderer;
+    CaptureEngine* capture_engine;
 };
 
 @implementation OpenGLView
@@ -68,7 +69,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
     CGFloat width = self.bounds.size.width;
     CGFloat height = self.bounds.size.height;
 
-    CaptureEngine capture_engine = CaptureEngine(width, height);
+    _cppMembers->capture_engine = new CaptureEngine(width, height);
 }
 
 - (void)initGL {
