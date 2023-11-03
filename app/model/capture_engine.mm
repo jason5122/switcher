@@ -2,37 +2,6 @@
 #import "util/log_util.h"
 #import <os/log.h>
 
-struct screen_capture {
-    // obs_source_t* source;
-
-    // gs_samplerstate_t* sampler;
-    // gs_effect_t* effect;
-    // gs_texture_t* tex;
-    // gs_vertbuffer_t* vertbuf;
-
-    // NSRect frame;
-    // bool hide_cursor;
-    // bool show_hidden_windows;
-    // bool show_empty_names;
-
-    SCStream* disp;
-    // SCStreamConfiguration* stream_properties;
-    // SCShareableContent* shareable_content;
-    // ScreenCaptureDelegate* capture_delegate;
-
-    // os_event_t* disp_finished;
-    // os_event_t* stream_start_completed;
-    // os_sem_t* shareable_content_available;
-    // IOSurfaceRef current, prev;
-
-    // pthread_mutex_t mutex;
-
-    // unsigned capture_type;
-    // CGDirectDisplayID display;
-    // CGWindowID window;
-    // NSString* application_id;
-};
-
 CaptureEngine::CaptureEngine(int width, int height) {
     stream_config = [[SCStreamConfiguration alloc] init];
 
@@ -58,17 +27,13 @@ CaptureEngine::CaptureEngine(int width, int height) {
         log_default(window.title, @"capture-engine");
     }
 
-    struct screen_capture* sc = (struct screen_capture*)malloc(sizeof(struct screen_capture));
-
-    sc->disp = [[SCStream alloc] initWithFilter:content_filter
+    capture_delegate = [[ScreenCaptureDelegate alloc] init];
+    dispatch = [[SCStream alloc] initWithFilter:content_filter
                                   configuration:stream_config
                                        delegate:nil];
 
-    capture_delegate = [[ScreenCaptureDelegate alloc] init];
-    capture_delegate.sc = sc;
-
     NSError* error = nil;
-    BOOL did_add_output = [sc->disp addStreamOutput:capture_delegate
+    BOOL did_add_output = [dispatch addStreamOutput:capture_delegate
                                                type:SCStreamOutputTypeScreen
                                  sampleHandlerQueue:nil
                                               error:&error];
@@ -79,16 +44,13 @@ CaptureEngine::CaptureEngine(int width, int height) {
 
     dispatch_semaphore_t stream_start_completed = dispatch_semaphore_create(0);
 
-    [sc->disp startCaptureWithCompletionHandler:^(NSError* _Nullable error) {
-      log_error(@"HEYO", @"capture-engine");
+    [dispatch startCaptureWithCompletionHandler:^(NSError* _Nullable error) {
       if (error != nil) {
           log_error([error localizedFailureReason], @"capture-engine");
       }
       dispatch_semaphore_signal(stream_start_completed);
     }];
     dispatch_semaphore_wait(stream_start_completed, DISPATCH_TIME_FOREVER);
-
-    log_default(@"reached the end", @"capture-engine");
 }
 
 void CaptureEngine::populate_windows() {
@@ -132,12 +94,9 @@ void CaptureEngine::filter_windows() {
 - (void)stream:(SCStream*)stream
     didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
                    ofType:(SCStreamOutputType)type {
-    // if (self.sc != NULL) {
     if (type == SCStreamOutputTypeScreen) {
         log_default(@"screen update", @"capture-engine");
-        // screen_stream_video_update(self.sc, sampleBuffer);
     }
-    // }
 }
 
 @end

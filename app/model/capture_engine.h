@@ -1,9 +1,6 @@
 #import <ScreenCaptureKit/ScreenCaptureKit.h>
 
 @interface ScreenCaptureDelegate : NSObject <SCStreamOutput>
-
-@property struct screen_capture* sc;
-
 @end
 
 class CaptureEngine {
@@ -12,6 +9,7 @@ public:
 
 private:
     ScreenCaptureDelegate* capture_delegate;
+    SCStream* dispatch;
 
     SCWindow* selected_window;
     NSArray<SCWindow*>* windows;
