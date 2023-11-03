@@ -2,12 +2,6 @@
 #import "util/log_util.h"
 #import <os/log.h>
 
-@interface ScreenCaptureDelegate : NSObject <SCStreamOutput>
-
-@property struct screen_capture* sc;
-
-@end
-
 struct screen_capture {
     // obs_source_t* source;
 
@@ -21,7 +15,7 @@ struct screen_capture {
     // bool show_hidden_windows;
     // bool show_empty_names;
 
-    // SCStream* disp;
+    SCStream* disp;
     // SCStreamConfiguration* stream_properties;
     // SCShareableContent* shareable_content;
     // ScreenCaptureDelegate* capture_delegate;
@@ -64,17 +58,20 @@ CaptureEngine::CaptureEngine(int width, int height) {
         log_default(window.title, @"capture-engine");
     }
 
-    SCStream* disp = [[SCStream alloc] initWithFilter:content_filter
-                                        configuration:stream_config
-                                             delegate:nil];
+    struct screen_capture* sc = (struct screen_capture*)malloc(sizeof(struct screen_capture));
 
-    ScreenCaptureDelegate* capture_delegate = [[ScreenCaptureDelegate alloc] init];
+    sc->disp = [[SCStream alloc] initWithFilter:content_filter
+                                  configuration:stream_config
+                                       delegate:nil];
+
+    capture_delegate = [[ScreenCaptureDelegate alloc] init];
+    capture_delegate.sc = sc;
 
     NSError* error = nil;
-    BOOL did_add_output = [disp addStreamOutput:capture_delegate
-                                           type:SCStreamOutputTypeScreen
-                             sampleHandlerQueue:nil
-                                          error:&error];
+    BOOL did_add_output = [sc->disp addStreamOutput:capture_delegate
+                                               type:SCStreamOutputTypeScreen
+                                 sampleHandlerQueue:nil
+                                              error:&error];
 
     if (!did_add_output) {
         if (error != nil) log_error([error localizedFailureReason], @"capture-engine");
@@ -82,12 +79,12 @@ CaptureEngine::CaptureEngine(int width, int height) {
 
     dispatch_semaphore_t stream_start_completed = dispatch_semaphore_create(0);
 
-    [disp startCaptureWithCompletionHandler:^(NSError* _Nullable error) {
+    [sc->disp startCaptureWithCompletionHandler:^(NSError* _Nullable error) {
       log_error(@"HEYO", @"capture-engine");
       if (error != nil) {
           log_error([error localizedFailureReason], @"capture-engine");
       }
-      // dispatch_semaphore_signal(stream_start_completed);
+      dispatch_semaphore_signal(stream_start_completed);
     }];
     dispatch_semaphore_wait(stream_start_completed, DISPATCH_TIME_FOREVER);
 
