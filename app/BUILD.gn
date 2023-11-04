@@ -24,6 +24,8 @@ macos_app_bundle("app") {
   frameworks = [
     "Cocoa.framework",
     "OpenGL.framework",
+    "CoreMedia.framework",
+    "IOSurface.framework",
     "QuartzCore.framework",
     "ScreenCaptureKit.framework",
   ]
