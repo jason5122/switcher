@@ -56,7 +56,7 @@ static bool init_screen_stream(struct screen_capture* sc) {
         NSString* app_name = window.owningApplication.applicationName;
         NSString* title = window.title;
         NSString* message = [NSString stringWithFormat:@"%@ \"%@\"", title, app_name];
-        log_default(message, @"capture-engine");
+        log_with_type(OS_LOG_TYPE_DEFAULT, message, @"capture-engine");
     }
 
     __block SCWindow* target_window = nil;
@@ -95,7 +95,7 @@ static bool init_screen_stream(struct screen_capture* sc) {
                                  sampleHandlerQueue:nil
                                               error:&error];
     if (!did_add_output) {
-        log_error([error localizedFailureReason], @"capture-engine");
+        log_with_type(OS_LOG_TYPE_ERROR, [error localizedFailureReason], @"capture-engine");
         return !did_add_output;
     }
 
@@ -105,7 +105,7 @@ static bool init_screen_stream(struct screen_capture* sc) {
     [sc->disp startCaptureWithCompletionHandler:^(NSError* _Nullable error) {
       did_stream_start = (BOOL)(error == nil);
       if (!did_stream_start) {
-          log_error([error localizedFailureReason], @"capture-engine");
+          log_with_type(OS_LOG_TYPE_ERROR, [error localizedFailureReason], @"capture-engine");
       }
       dispatch_semaphore_signal(stream_start_completed);
     }];
@@ -116,17 +116,19 @@ static bool init_screen_stream(struct screen_capture* sc) {
 
 static void screen_capture_build_content_list(struct screen_capture* sc) {
     typedef void (^shareable_content_callback)(SCShareableContent*, NSError*);
-    shareable_content_callback new_content_received = ^void(SCShareableContent* shareable_content,
-                                                            NSError* error) {
-      if (error == nil && sc->shareable_content_available != NULL) {
-          sc->shareable_content = shareable_content;
-      } else {
-          log_error(@"Unable to get list of available applications or windows. Please check if app"
-                    @"has necessary screen capture permissions.",
-                    @"capture-engine");
-      }
-      dispatch_semaphore_signal(sc->shareable_content_available);
-    };
+    shareable_content_callback new_content_received =
+        ^void(SCShareableContent* shareable_content, NSError* error) {
+          if (error == nil && sc->shareable_content_available != NULL) {
+              sc->shareable_content = shareable_content;
+          } else {
+              log_with_type(
+                  OS_LOG_TYPE_ERROR,
+                  @"Unable to get list of available applications or windows. Please check if app"
+                  @"has necessary screen capture permissions.",
+                  @"capture-engine");
+          }
+          dispatch_semaphore_signal(sc->shareable_content_available);
+        };
 
     dispatch_semaphore_wait(sc->shareable_content_available, DISPATCH_TIME_FOREVER);
     [SCShareableContent getShareableContentExcludingDesktopWindows:TRUE
@@ -144,13 +146,14 @@ CaptureEngine::CaptureEngine() {
     sc->capture_delegate.sc = sc;
 
     if (!init_screen_stream(sc)) {
-        log_default(@"initializing screen stream failed", @"capture-engine");
+        log_with_type(OS_LOG_TYPE_DEFAULT, @"initializing screen stream failed",
+                      @"capture-engine");
     }
 }
 
 static inline void screen_stream_video_update(struct screen_capture* sc,
                                               CMSampleBufferRef sample_buffer) {
-    log_default(@"screen update", @"capture-engine");
+    log_with_type(OS_LOG_TYPE_DEFAULT, @"screen update", @"capture-engine");
 
     bool frame_detail_errored = false;
     float scale_factor = 1.0f;
@@ -228,7 +231,8 @@ static inline void screen_stream_video_update(struct screen_capture* sc,
             [sc->disp updateConfiguration:sc->stream_config
                         completionHandler:^(NSError* _Nullable error) {
                           if (error) {
-                              log_error([error localizedFailureReason], @"capture-engine");
+                              log_with_type(OS_LOG_TYPE_ERROR, [error localizedFailureReason],
+                                            @"capture-engine");
                           }
                         }];
         }

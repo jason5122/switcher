@@ -1,4 +1,4 @@
 #import <Foundation/Foundation.h>
+#import <os/log.h>
 
-void log_default(NSString* message, NSString* category);
-void log_error(NSString* message, NSString* category);
+void log_with_type(os_log_type_t type, NSString* message, NSString* category);
