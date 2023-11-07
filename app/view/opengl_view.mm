@@ -3,8 +3,7 @@
 #import "util/log_util.h"
 #import "view/opengl_view.h"
 #import <Cocoa/Cocoa.h>
-#import <OpenGL/OpenGL.h>
-#import <OpenGL/gl3.h>
+#import <OpenGL/gl.h>
 
 struct CppMembers {
     Renderer* renderer;
@@ -60,20 +59,20 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
     self = [super initWithFrame:frame pixelFormat:pf];
     if (self) {
         _cppMembers = new CppMembers;
-        _cppMembers->capture_engine = new CaptureEngine();
+        _cppMembers->capture_engine = new CaptureEngine(self.openGLContext);
     }
     return self;
 }
 
 - (void)initGL {
-    [[self openGLContext] makeCurrentContext];
+    [self.openGLContext makeCurrentContext];
 
     // Synchronize buffer swaps with vertical refresh rate
     GLint one = 1;
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-    [[self openGLContext] setValues:&one forParameter:NSOpenGLCPSwapInterval];
+    [self.openGLContext setValues:&one forParameter:NSOpenGLCPSwapInterval];
 #pragma clang diagnostic pop
 
     glEnable(GL_MULTISAMPLE);
@@ -87,7 +86,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
     CVDisplayLinkSetOutputCallback(displayLink, &MyDisplayLinkCallback, (__bridge void*)self);
 
     // Set the display link for the current renderer
-    CGLContextObj cglContext = [[self openGLContext] CGLContextObj];
+    CGLContextObj cglContext = self.openGLContext.CGLContextObj;
     CGLPixelFormatObj cglPixelFormat = [[self pixelFormat] CGLPixelFormatObj];
     CVDisplayLinkSetCurrentCGDisplayFromOpenGLContext(displayLink, cglContext, cglPixelFormat);
 
@@ -98,7 +97,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 - (void)prepareOpenGL {
     [super prepareOpenGL];
     [self initGL];
-    // [self setupDisplayLink];
+    [self setupDisplayLink];
 
     _cppMembers->renderer = new Renderer();
 
@@ -107,25 +106,26 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 
 - (void)update {
     [super update];
-    [[self openGLContext] update];
+    [self.openGLContext update];
 }
 
 - (void)drawView {
-    [[self openGLContext] makeCurrentContext];
+    [self.openGLContext makeCurrentContext];
 
     // We draw on a secondary thread through the display link
     // lock to avoid the threads from accessing the context simultaneously
-    CGLLockContext([[self openGLContext] CGLContextObj]);
+    CGLLockContext(self.openGLContext.CGLContextObj);
 
     CGFloat width = self.bounds.size.width;
     CGFloat height = self.bounds.size.height;
     glViewport(0, 0, width * 2, height * 2);
 
-    _cppMembers->renderer->render(width, height);
+    // _cppMembers->renderer->render(width, height);
+    _cppMembers->capture_engine->screen_capture_video_tick();
 
-    [[self openGLContext] flushBuffer];
+    [self.openGLContext flushBuffer];
 
-    CGLUnlockContext([[self openGLContext] CGLContextObj]);
+    CGLUnlockContext(self.openGLContext.CGLContextObj);
 }
 
 - (void)dealloc {

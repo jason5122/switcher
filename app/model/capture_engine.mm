@@ -1,3 +1,4 @@
+#import "gl_helpers.h"
 #import "model/capture_engine.h"
 #import "util/log_util.h"
 #import <ScreenCaptureKit/ScreenCaptureKit.h>
@@ -10,6 +11,8 @@
 @end
 
 struct screen_capture {
+    gs_texture_t* tex;
+
     NSRect frame;
 
     SCStream* disp;
@@ -23,6 +26,8 @@ struct screen_capture {
     pthread_mutex_t mutex;
 
     CGWindowID window;
+
+    NSOpenGLContext* context;
 };
 
 static NSArray* filter_content_windows(NSArray* windows) {
@@ -136,7 +141,7 @@ static void screen_capture_build_content_list(struct screen_capture* sc) {
                                                  completionHandler:new_content_received];
 }
 
-CaptureEngine::CaptureEngine() {
+CaptureEngine::CaptureEngine(NSOpenGLContext* context) {
     sc = new screen_capture();
 
     sc->shareable_content_available = dispatch_semaphore_create(1);
@@ -145,10 +150,46 @@ CaptureEngine::CaptureEngine() {
     sc->capture_delegate = [[ScreenCaptureDelegate alloc] init];
     sc->capture_delegate.sc = sc;
 
+    sc->context = context;
+
+    pthread_mutex_init(&sc->mutex, NULL);
+
     if (!init_screen_stream(sc)) {
         log_with_type(OS_LOG_TYPE_DEFAULT, @"initializing screen stream failed",
                       @"capture-engine");
     }
+}
+
+void CaptureEngine::screen_capture_video_tick() {
+    if (!sc->current) return;
+
+    IOSurfaceRef prev_prev = sc->prev;
+    if (pthread_mutex_lock(&sc->mutex)) return;
+    sc->prev = sc->current;
+    sc->current = NULL;
+    pthread_mutex_unlock(&sc->mutex);
+
+    if (prev_prev == sc->prev) return;
+
+    CGLLockContext(sc->context.CGLContextObj);
+    [sc->context makeCurrentContext];
+
+    if (sc->tex) gs_texture_rebind_iosurface(sc->tex, sc->prev);
+    else sc->tex = gs_texture_create_from_iosurface(sc->prev);
+
+    [sc->context flushBuffer];
+    CGLUnlockContext(sc->context.CGLContextObj);
+
+    if (prev_prev) {
+        IOSurfaceDecrementUseCount(prev_prev);
+        CFRelease(prev_prev);
+    }
+}
+
+void CaptureEngine::screen_capture_video_render() {
+    if (!sc->tex) return;
+
+    gl_enable(GL_FRAMEBUFFER_SRGB);
 }
 
 static inline void screen_stream_video_update(struct screen_capture* sc,

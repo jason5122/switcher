@@ -1,7 +1,7 @@
 #pragma once
 
 #import "model/shader.h"
-#import <OpenGL/OpenGL.h>
+#import <OpenGL/gl.h>
 
 class Renderer {
     GLuint VBO, VAO;
