@@ -1,12 +1,11 @@
 #import "model/capture_engine.h"
+#import "util/file_util.h"
 #import "util/log_util.h"
-#import <ScreenCaptureKit/ScreenCaptureKit.h>
-#include <pthread.h>
-
-#include "util_temp/fileUtil.h"
-#include "util_temp/shaderUtil.h"
+#import "util/shader_util.h"
 #import <GLKit/GLKit.h>
 #import <OpenGL/gl3.h>
+#import <ScreenCaptureKit/ScreenCaptureKit.h>
+#import <pthread.h>
 
 @interface ScreenCaptureDelegate : NSObject <SCStreamOutput>
 
@@ -144,7 +143,7 @@ static void screen_capture_build_content_list(struct screen_capture* sc) {
                                                  completionHandler:new_content_received];
 }
 
-CaptureEngine::CaptureEngine(NSOpenGLContext* context, GLuint texture) {
+CaptureEngine::CaptureEngine(NSOpenGLContext* context) {
     sc = new screen_capture();
 
     sc->shareable_content_available = dispatch_semaphore_create(1);
@@ -162,45 +161,9 @@ CaptureEngine::CaptureEngine(NSOpenGLContext* context, GLuint texture) {
     }
 }
 
-enum { UNIFORM_MVP, UNIFORM_TEXTURE, NUM_UNIFORMS };
-
-enum { ATTRIB_VERTEX, ATTRIB_TEXCOORD, NUM_ATTRIBS };
-
-typedef struct {
-    char *vert, *frag;
-    GLint uniform[NUM_UNIFORMS];
-    GLuint id;
-} programInfo_t;
-
-programInfo_t program = {(char*)"shaders/texture.vsh", (char*)"shaders/textureRect.fsh"};
-
 void CaptureEngine::setup_shaders() {
-    proggy.attach_vertex_shader("shaders/texture.vsh");
-    proggy.attach_fragment_shader("shaders/textureRect.fsh");
-
-    proggy.link_program();
-
-    char* vsrc = readFile(pathForResource(program.vert));
-    char* fsrc = readFile(pathForResource(program.frag));
-    GLsizei attribCt = 0;
-    GLchar* attribUsed[NUM_ATTRIBS];
-    GLint attrib[NUM_ATTRIBS];
-    GLchar* attribName[NUM_ATTRIBS] = {
-        (char*)"inVertex",
-        (char*)"inTexCoord",
-    };
-    const GLchar* uniformName[NUM_UNIFORMS] = {
-        (char*)"MVP",
-        (char*)"tex",
-    };
-
-    // auto-assign known attribs
-    for (int j = 0; j < NUM_ATTRIBS; j++) {
-        if (strstr(vsrc, attribName[j])) {
-            attrib[attribCt] = j;
-            attribUsed[attribCt++] = attribName[j];
-        }
-    }
+    char* vsrc = read_file(resource_path("shaders/texture.vsh"));
+    char* fsrc = read_file(resource_path("shaders/textureRect.fsh"));
 
     GLuint prog = glCreateProgram();
 
@@ -212,8 +175,15 @@ void CaptureEngine::setup_shaders() {
     glAttachShader(prog, vertShader);
     glAttachShader(prog, fragShader);
 
-    glueCreateProgram(attribCt, (const GLchar**)&attribUsed[0], attrib, NUM_UNIFORMS,
-                      &uniformName[0], program.uniform, &program.id, prog);
+    // TODO: do we need this?
+    glBindAttribLocation(prog, 0, "inVertex");
+    glBindAttribLocation(prog, 1, "inTexCoord");
+
+    glueLinkProgram(prog);
+
+    program.uniform[0] = glGetUniformLocation(prog, "MVP");
+    program.uniform[1] = glGetUniformLocation(prog, "tex");
+    program.id = prog;
 
     if (vertShader) glDeleteShader(vertShader);
     if (fragShader) glDeleteShader(fragShader);

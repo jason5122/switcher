@@ -19,8 +19,7 @@ macos_app_bundle("app") {
     "model/shader.cc",
     "util/file_util.mm",
     "util/log_util.mm",
-    "util_temp/fileUtil.mm",
-    "util_temp/shaderUtil.cc",
+    "util/shader_util.cc",
     "view/opengl_view.mm",
   ]
 

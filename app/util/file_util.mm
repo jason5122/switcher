@@ -1,4 +1,3 @@
-#import "util/file_util.h"
 #import <Foundation/Foundation.h>
 #import <sys/stat.h>
 
@@ -8,7 +7,7 @@ const char* resource_path(const char* name) {
     return [path fileSystemRepresentation];
 }
 
-const char* read_file(const char* name) {
+char* read_file(const char* name) {
     struct stat statbuf;
     FILE* fh;
     char* source;
