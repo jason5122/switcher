@@ -11,13 +11,9 @@ class CaptureEngine {
 public:
     CaptureEngine(NSOpenGLContext* context, GLuint texture);
     void screen_capture_video_tick();
-    void screen_capture_video_render();
+    void screen_capture_video_render(CGRect bounds);
 
-    void draw1();
-    void draw2();
-    void draw3();
-    void setup1();
-    void draw4(CGRect bounds);
+    void setup_shaders();
 
 private:
     GLuint texture;

@@ -93,7 +93,8 @@ static bool init_screen_stream(struct screen_capture* sc) {
     [sc->stream_config setQueueDepth:8];
     [sc->stream_config setShowsCursor:FALSE];
     [sc->stream_config setPixelFormat:'BGRA'];
-    [sc->stream_config setColorSpaceName:kCGColorSpaceSRGB];
+    // [sc->stream_config setColorSpaceName:kCGColorSpaceSRGB];
+    [sc->stream_config setColorSpaceName:kCGColorSpaceDisplayP3];
 
     sc->disp = [[SCStream alloc] initWithFilter:content_filter
                                   configuration:sc->stream_config
@@ -171,124 +172,6 @@ CaptureEngine::CaptureEngine(NSOpenGLContext* context, GLuint texture) {
     }
 }
 
-void CaptureEngine::draw1() {
-    // 1. Create a texture from the IOSurface
-    GLuint texture;
-    IOSurfaceRef surface = (IOSurfaceRef)sc->prev;
-    GLsizei surface_w = (GLsizei)IOSurfaceGetWidth(surface);
-    GLsizei surface_h = (GLsizei)IOSurfaceGetHeight(surface);
-    {
-        CGLContextObj cgl_ctx = sc->context.CGLContextObj;
-
-        glGenTextures(1, &texture);
-
-        glBindTexture(GL_TEXTURE_RECTANGLE_EXT, texture);
-
-        CGLError err =
-            CGLTexImageIOSurface2D(cgl_ctx, GL_TEXTURE_RECTANGLE_EXT, GL_RGBA, surface_w,
-                                   surface_h, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, surface, 0);
-
-        if (err != kCGLNoError) {
-            log_with_type(OS_LOG_TYPE_ERROR, @"CGLTexImageIOSurface2D error", @"capture-engine");
-        }
-
-        glBindTexture(GL_TEXTURE_RECTANGLE_EXT, 0);
-    }
-
-    GLubyte* pixelData = (GLubyte*)calloc(TEXTURE_WIDTH * TEXTURE_HEIGHT * 4, sizeof(GLubyte));
-    glGetTexImage(GL_TEXTURE_RECTANGLE_EXT, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, pixelData);
-    NSData* data = [[NSData alloc] initWithBytes:pixelData length:50000];
-    log_with_type(OS_LOG_TYPE_DEFAULT, data.description, @"capture-engine");
-
-    // 2. Draw the texture to the current OpenGL context
-    // {
-    //     glBindTexture(GL_TEXTURE_RECTANGLE_EXT, texture);
-    //     glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    //     glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    //     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-
-    //     glBegin(GL_QUADS);
-
-    //     glColor4f(0.f, 0.f, 1.0f, 1.0f);
-    //     glTexCoord2f(0, 0);
-    //     glVertex2f(0, 0);
-
-    //     glTexCoord2f(1728, 0);
-    //     glVertex2f(1728, 0);
-
-    //     glTexCoord2f(1728, 1117);
-    //     glVertex2f(1728, 1117);
-
-    //     glTexCoord2f(0, 1117);
-    //     glVertex2f(0, 1117);
-
-    //     glDrawArrays(GL_QUADS, 0, 4);
-
-    //     glEnd();
-
-    //     glBindTexture(GL_TEXTURE_RECTANGLE_EXT, 0);
-    // }
-    // glDeleteTextures(1, &texture);
-
-    draw2();
-}
-
-void CaptureEngine::draw2() {
-    const GLfloat vertices[12] = {1, -1, -1, 1, 1, -1, -1, 1, -1, -1, -1, -1};
-
-    // Rectangle textures require non-normalized texture coordinates
-    const GLfloat texcoords[] = {
-        0, 0, 0, TEXTURE_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT, TEXTURE_WIDTH, 0,
-    };
-
-    CGLLockContext(sc->context.CGLContextObj);
-    [sc->context makeCurrentContext];
-
-    glTexCoordPointer(2, GL_FLOAT, 0, texcoords);
-    glBindTexture(GL_TEXTURE_RECTANGLE_EXT, texture);
-
-    glVertexPointer(3, GL_FLOAT, 0, vertices);
-    glDrawArrays(GL_QUADS, 0, 4);
-
-    glBindTexture(GL_TEXTURE_RECTANGLE_EXT, 0);
-}
-
-void CaptureEngine::draw3() {
-    if (!sc->prev) return;
-
-    glEnable(GL_TEXTURE_RECTANGLE_ARB);
-
-    GLuint texture;
-    IOSurfaceRef surface = (IOSurfaceRef)sc->prev;
-    GLsizei surface_w = (GLsizei)IOSurfaceGetWidth(surface);
-    GLsizei surface_h = (GLsizei)IOSurfaceGetHeight(surface);
-
-    CGLContextObj cgl_ctx = sc->context.CGLContextObj;
-
-    glGenTextures(1, &texture);
-
-    glBindTexture(GL_TEXTURE_RECTANGLE_ARB, texture);
-
-    CGLTexImageIOSurface2D(cgl_ctx, GL_TEXTURE_RECTANGLE_ARB, GL_RGBA, surface_w, surface_h,
-                           GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, surface, 0);
-
-    glTexParameteri(texture, GL_TEXTURE_MAX_LEVEL, 0);
-
-    glBindTexture(GL_TEXTURE_RECTANGLE_ARB, 0);
-
-    GLubyte* pixelData = (GLubyte*)calloc(TEXTURE_WIDTH * TEXTURE_HEIGHT * 4, sizeof(GLubyte));
-    glGetTexImage(GL_TEXTURE_RECTANGLE_ARB, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, pixelData);
-    NSData* data = [[NSData alloc] initWithBytes:pixelData length:50000];
-    log_with_type(OS_LOG_TYPE_DEFAULT, data.description, @"capture-engine");
-
-    // GLuint vao;
-    // glGenVertexArrays(1, &vao);
-    // glBindVertexArray(vao);
-
-    // shader.use();
-    // glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-}
-
 enum { PROGRAM_TEXTURE_RECT, NUM_PROGRAMS };
 
 enum { UNIFORM_MVP, UNIFORM_TEXTURE, NUM_UNIFORMS };
@@ -336,7 +219,7 @@ void setupShaders() {
     }
 }
 
-void CaptureEngine::setup1() {
+void CaptureEngine::setup_shaders() {
     glGenVertexArrays(1, &quadVAOId);
     glGenBuffers(1, &quadVBOId);
 
@@ -347,7 +230,24 @@ void CaptureEngine::setup1() {
     glBindVertexArray(0);
 }
 
-void CaptureEngine::draw4(CGRect bounds) {
+void CaptureEngine::screen_capture_video_tick() {
+    if (!sc->current) return;
+
+    IOSurfaceRef prev_prev = sc->prev;
+    if (pthread_mutex_lock(&sc->mutex)) return;
+    sc->prev = sc->current;
+    sc->current = NULL;
+    pthread_mutex_unlock(&sc->mutex);
+
+    if (prev_prev == sc->prev) return;
+
+    if (prev_prev) {
+        IOSurfaceDecrementUseCount(prev_prev);
+        CFRelease(prev_prev);
+    }
+}
+
+void CaptureEngine::screen_capture_video_render(CGRect bounds) {
     GLuint name;
     CGLContextObj cgl_ctx = sc->context.CGLContextObj;
     IOSurfaceRef surface = (IOSurfaceRef)sc->prev;
@@ -366,8 +266,8 @@ void CaptureEngine::draw4(CGRect bounds) {
     glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    GLfloat logoWidth = (GLfloat)IOSurfaceGetWidth(surface);
-    GLfloat logoHeight = (GLfloat)IOSurfaceGetHeight(surface);
+    GLfloat logoWidth = (GLfloat)IOSurfaceGetWidth(surface) * 2;
+    GLfloat logoHeight = (GLfloat)IOSurfaceGetHeight(surface) * 2;
     GLfloat quad[] = {// x, y            s, t
                       -1.0f, -1.0f, 0.0f, 0.0f,       1.0f, -1.0f, logoWidth, 0.0f,
                       -1.0f, 1.0f,  0.0f, logoHeight, 1.0f, 1.0f,  logoWidth, logoHeight};
@@ -387,15 +287,15 @@ void CaptureEngine::draw4(CGRect bounds) {
 
     glUseProgram(program[PROGRAM_TEXTURE_RECT].id);
 
-    // projection matrix
-    GLfloat aspectRatio = bounds.size.width / bounds.size.height;
-    GLKMatrix4 projection = GLKMatrix4MakeFrustum(-aspectRatio, aspectRatio, -1, 1, 2, 100);
-    // modelView matrix
-    GLKMatrix4 modelView = GLKMatrix4MakeTranslation(0, 0, -9.0);
-    modelView = GLKMatrix4Scale(modelView, 2.5, 2.5, 2.5);
-    modelView = GLKMatrix4Rotate(modelView, 30.0 * M_PI / 180.0, 0.0, 1.0, 0.0);
+    // const GLfloat mvp[] = {
+    //     1.0f, 0.0f, 0.0f, 0.0f,  //
+    //     0.0f, 1.0f, 0.0f, 0.0f,  //
+    //     0.0f, 0.0f, 1.0f, 0.0f,  //
+    //     0.0f, 0.0f, 0.0f, 1.0f,  //
+    // };
+    GLKMatrix4 mvp = GLKMatrix4Identity;
+    mvp = GLKMatrix4Rotate(mvp, M_PI, 1.0, 0.0, 0.0);
 
-    GLKMatrix4 mvp = GLKMatrix4Multiply(projection, modelView);
     glUniformMatrix4fv(program[PROGRAM_TEXTURE_RECT].uniform[UNIFORM_MVP], 1, GL_FALSE, mvp.m);
 
     glUniform1i(program[PROGRAM_TEXTURE_RECT].uniform[UNIFORM_TEXTURE], 0);
@@ -414,41 +314,8 @@ void CaptureEngine::draw4(CGRect bounds) {
     glDisable(GL_TEXTURE_RECTANGLE);
 }
 
-void CaptureEngine::screen_capture_video_tick() {
-    if (!sc->current) return;
-
-    IOSurfaceRef prev_prev = sc->prev;
-    if (pthread_mutex_lock(&sc->mutex)) return;
-    sc->prev = sc->current;
-    sc->current = NULL;
-    pthread_mutex_unlock(&sc->mutex);
-
-    if (prev_prev == sc->prev) return;
-
-    CGLLockContext(sc->context.CGLContextObj);
-    [sc->context makeCurrentContext];
-
-    // if (sc->tex) gs_texture_rebind_iosurface(sc->tex, sc->prev);
-    // else sc->tex = gs_texture_create_from_iosurface(sc->prev);
-
-    // [sc->context flushBuffer];
-    CGLUnlockContext(sc->context.CGLContextObj);
-
-    if (prev_prev) {
-        IOSurfaceDecrementUseCount(prev_prev);
-        CFRelease(prev_prev);
-    }
-}
-
-void CaptureEngine::screen_capture_video_render() {
-    draw1();
-    // draw2();
-}
-
 static inline void screen_stream_video_update(struct screen_capture* sc,
                                               CMSampleBufferRef sample_buffer) {
-    // log_with_type(OS_LOG_TYPE_DEFAULT, @"screen update", @"capture-engine");
-
     bool frame_detail_errored = false;
     float scale_factor = 1.0f;
     CGRect window_rect = {};

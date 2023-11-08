@@ -97,12 +97,6 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 - (void)initGL {
     [self.openGLContext makeCurrentContext];
 
-    // if ([self initImageData]) [self loadTexturesWithClientStorage];
-
-    // glEnableClientState(GL_VERTEX_ARRAY);
-    // glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    // glEnable(GL_TEXTURE_RECTANGLE_EXT);
-
     // Synchronize buffer swaps with vertical refresh rate
     GLint one = 1;
 
@@ -111,7 +105,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
     [self.openGLContext setValues:&one forParameter:NSOpenGLCPSwapInterval];
 #pragma clang diagnostic pop
 
-    // glEnable(GL_MULTISAMPLE);
+    glEnable(GL_MULTISAMPLE);
 }
 
 - (void)setupDisplayLink {
@@ -138,7 +132,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
     // _cppMembers->renderer = new Renderer();
     _cppMembers->capture_engine = new CaptureEngine(self.openGLContext, texture);
 
-    _cppMembers->capture_engine->setup1();
+    _cppMembers->capture_engine->setup_shaders();
 
     [self drawView];  // initial draw call
 }
@@ -158,16 +152,12 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
     CGFloat width = self.bounds.size.width;
     CGFloat height = self.bounds.size.height;
     glViewport(0, 0, width * 2, height * 2);
-    // glViewport(0, 0, width, height);
 
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // // _cppMembers->renderer->render(width, height);
     _cppMembers->capture_engine->screen_capture_video_tick();
-    // _cppMembers->capture_engine->screen_capture_video_render();
-    // _cppMembers->capture_engine->draw3();
-    _cppMembers->capture_engine->draw4(self.bounds);
+    _cppMembers->capture_engine->screen_capture_video_render(self.bounds);
 
     [self.openGLContext flushBuffer];
 
