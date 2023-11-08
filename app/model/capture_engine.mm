@@ -1,4 +1,3 @@
-#import "gl_helpers.h"
 #import "model/capture_engine.h"
 #import "util/log_util.h"
 #import <ScreenCaptureKit/ScreenCaptureKit.h>
@@ -16,8 +15,6 @@
 @end
 
 struct screen_capture {
-    gs_texture_t* tex;
-
     NSRect frame;
 
     SCStream* disp;
@@ -148,13 +145,6 @@ static void screen_capture_build_content_list(struct screen_capture* sc) {
 }
 
 CaptureEngine::CaptureEngine(NSOpenGLContext* context, GLuint texture) {
-    this->texture = texture;  // TODO: remove this
-
-    // shader.attach_vertex_shader("shaders/triangle.vs");
-    shader.attach_fragment_shader("shaders/simple.fs");
-
-    shader.link_program();
-
     sc = new screen_capture();
 
     sc->shareable_content_available = dispatch_semaphore_create(1);

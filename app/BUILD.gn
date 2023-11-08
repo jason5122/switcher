@@ -15,7 +15,6 @@ macos_app_bundle("app") {
     "controller/window_controller.m",
     "main.m",
     "model/capture_engine.mm",
-    "model/gl_cocoa.mm",
     "model/renderer.cc",
     "model/shader.cc",
     "util/file_util.mm",
@@ -41,7 +40,6 @@ macos_app_bundle("app") {
 
   deps = [
     ":icon",
-    ":images",
     ":shaders",
   ]
 }
@@ -52,16 +50,8 @@ icon("icon") {
 
 bundle_data("shaders") {
   sources = [
-    "resources/shaders/simple.fs",
     "resources/shaders/texture.vsh",
     "resources/shaders/textureRect.fsh",
-    "resources/shaders/triangle.fs",
-    "resources/shaders/triangle.vs",
   ]
   outputs = [ "{{bundle_resources_dir}}/shaders/{{source_file_part}}" ]
-}
-
-bundle_data("images") {
-  sources = [ "resources/images/image.jpg" ]
-  outputs = [ "{{bundle_resources_dir}}/{{source_file_part}}" ]
 }
