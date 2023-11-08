@@ -15,8 +15,6 @@ macos_app_bundle("app") {
     "controller/window_controller.m",
     "main.m",
     "model/capture_engine.mm",
-    "model/renderer.cc",
-    "model/shader.cc",
     "util/file_util.mm",
     "util/log_util.mm",
     "util/shader_util.cc",

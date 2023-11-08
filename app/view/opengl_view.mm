@@ -1,12 +1,10 @@
 #import "model/capture_engine.h"
-#import "model/renderer.h"
 #import "util/log_util.h"
 #import "view/opengl_view.h"
 #import <Cocoa/Cocoa.h>
 #import <OpenGL/gl3.h>
 
 struct CppMembers {
-    Renderer* renderer;
     CaptureEngine* capture_engine;
 };
 
@@ -88,9 +86,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
     [self initGL];
     [self setupDisplayLink];
 
-    // _cppMembers->renderer = new Renderer();
     _cppMembers->capture_engine = new CaptureEngine(self.openGLContext);
-
     _cppMembers->capture_engine->setup();
 
     [self drawView];  // initial draw call
