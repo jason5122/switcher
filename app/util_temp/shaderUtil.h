@@ -10,7 +10,7 @@ GLint glueValidateProgram(GLuint program);
 GLint glueGetUniformLocation(GLuint program, const GLchar* name);
 
 /* Shader Conveniences */
-GLint glueCreateProgram(const GLchar* vertSource, const GLchar* fragSource, GLsizei attribNameCt,
-                        const GLchar** attribNames, const GLint* attribLocations,
-                        GLsizei uniformNameCt, const GLchar** uniformNames,
-                        GLint* uniformLocations, GLuint* program);
+GLint glueCreateProgram(GLsizei attribNameCt, const GLchar** attribNames,
+                        const GLint* attribLocations, GLsizei uniformNameCt,
+                        const GLchar** uniformNames, GLint* uniformLocations, GLuint* program,
+                        GLuint prog);

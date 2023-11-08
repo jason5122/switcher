@@ -1,4 +1,3 @@
-#include "debug.h"
 #include "shaderUtil.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,7 +29,6 @@ GLint glueCompileShader(GLenum target, GLsizei count, const GLchar** sources, GL
 		LogError("Failed to compile shader:\n");
 		for (i = 0; i < count; i++) LogInfo("%s", sources[i]);
 	}
-	glError();
 
 	return status;
 }
@@ -50,7 +48,6 @@ GLint glueLinkProgram(GLuint program) {
 
 	glGetProgramiv(program, GL_LINK_STATUS, &status);
 	if (status == 0) LogError("Failed to link program %d", program);
-	glError();
 
 	return status;
 }
@@ -70,7 +67,6 @@ GLint glueValidateProgram(GLuint program) {
 
 	glGetProgramiv(program, GL_VALIDATE_STATUS, &status);
 	if (status == 0) LogError("Failed to validate program %d", program);
-	glError();
 
 	return status;
 }
@@ -85,25 +81,18 @@ GLint glueGetUniformLocation(GLuint program, const GLchar* uniformName) {
 }
 
 /* Convenience wrapper that compiles, links, enumerates uniforms and attribs */
-GLint glueCreateProgram(const GLchar* vertSource, const GLchar* fragSource, GLsizei attribNameCt,
-                        const GLchar** attribNames, const GLint* attribLocations,
-                        GLsizei uniformNameCt, const GLchar** uniformNames,
-                        GLint* uniformLocations, GLuint* program) {
-	GLuint vertShader = 0, fragShader = 0, prog = 0, status = 1, i;
-
-	prog = glCreateProgram();
-
-	status *= glueCompileShader(GL_VERTEX_SHADER, 1, &vertSource, &vertShader);
-	status *= glueCompileShader(GL_FRAGMENT_SHADER, 1, &fragSource, &fragShader);
-	glAttachShader(prog, vertShader);
-	glAttachShader(prog, fragShader);
+GLint glueCreateProgram(GLsizei attribNameCt, const GLchar** attribNames,
+                        const GLint* attribLocations, GLsizei uniformNameCt,
+                        const GLchar** uniformNames, GLint* uniformLocations, GLuint* program,
+                        GLuint prog) {
+	GLuint status = 1, i;
 
 	for (i = 0; i < attribNameCt; i++) {
 		if (strlen(attribNames[i])) glBindAttribLocation(prog, attribLocations[i], attribNames[i]);
 	}
 
-	status *= glueLinkProgram(prog);
-	status *= glueValidateProgram(prog);
+	glueLinkProgram(prog);
+	glueValidateProgram(prog);
 
 	if (status) {
 		for (i = 0; i < uniformNameCt; i++) {
@@ -112,9 +101,6 @@ GLint glueCreateProgram(const GLchar* vertSource, const GLchar* fragSource, GLsi
 		}
 		*program = prog;
 	}
-	if (vertShader) glDeleteShader(vertShader);
-	if (fragShader) glDeleteShader(fragShader);
-	glError();
 
 	return status;
 }

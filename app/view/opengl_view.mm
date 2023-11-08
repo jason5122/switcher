@@ -91,7 +91,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
     // _cppMembers->renderer = new Renderer();
     _cppMembers->capture_engine = new CaptureEngine(self.openGLContext, texture);
 
-    _cppMembers->capture_engine->setup_shaders();
+    _cppMembers->capture_engine->setup();
 
     [self drawView];  // initial draw call
 }

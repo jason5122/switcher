@@ -162,8 +162,6 @@ CaptureEngine::CaptureEngine(NSOpenGLContext* context, GLuint texture) {
     }
 }
 
-enum { PROGRAM_TEXTURE_RECT, NUM_PROGRAMS };
-
 enum { UNIFORM_MVP, UNIFORM_TEXTURE, NUM_UNIFORMS };
 
 enum { ATTRIB_VERTEX, ATTRIB_TEXCOORD, NUM_ATTRIBS };
@@ -174,48 +172,62 @@ typedef struct {
     GLuint id;
 } programInfo_t;
 
-programInfo_t program[NUM_PROGRAMS] = {
-    {(char*)"shaders/texture.vsh", (char*)"shaders/textureRect.fsh"},  // PROGRAM_TEXTURE_RECT
-};
-
-void setupShaders() {
-    for (int i = 0; i < NUM_PROGRAMS; i++) {
-        char* vsrc = readFile(pathForResource(program[i].vert));
-        char* fsrc = readFile(pathForResource(program[i].frag));
-        GLsizei attribCt = 0;
-        GLchar* attribUsed[NUM_ATTRIBS];
-        GLint attrib[NUM_ATTRIBS];
-        GLchar* attribName[NUM_ATTRIBS] = {
-            (char*)"inVertex",
-            (char*)"inTexCoord",
-        };
-        const GLchar* uniformName[NUM_UNIFORMS] = {
-            (char*)"MVP",
-            (char*)"tex",
-        };
-
-        // auto-assign known attribs
-        for (int j = 0; j < NUM_ATTRIBS; j++) {
-            if (strstr(vsrc, attribName[j])) {
-                attrib[attribCt] = j;
-                attribUsed[attribCt++] = attribName[j];
-            }
-        }
-
-        glueCreateProgram(vsrc, fsrc, attribCt, (const GLchar**)&attribUsed[0], attrib,
-                          NUM_UNIFORMS, &uniformName[0], program[i].uniform, &program[i].id);
-        free(vsrc);
-        free(fsrc);
-    }
-}
+programInfo_t program = {(char*)"shaders/texture.vsh", (char*)"shaders/textureRect.fsh"};
 
 void CaptureEngine::setup_shaders() {
+    proggy.attach_vertex_shader("shaders/texture.vsh");
+    proggy.attach_fragment_shader("shaders/textureRect.fsh");
+
+    proggy.link_program();
+
+    char* vsrc = readFile(pathForResource(program.vert));
+    char* fsrc = readFile(pathForResource(program.frag));
+    GLsizei attribCt = 0;
+    GLchar* attribUsed[NUM_ATTRIBS];
+    GLint attrib[NUM_ATTRIBS];
+    GLchar* attribName[NUM_ATTRIBS] = {
+        (char*)"inVertex",
+        (char*)"inTexCoord",
+    };
+    const GLchar* uniformName[NUM_UNIFORMS] = {
+        (char*)"MVP",
+        (char*)"tex",
+    };
+
+    // auto-assign known attribs
+    for (int j = 0; j < NUM_ATTRIBS; j++) {
+        if (strstr(vsrc, attribName[j])) {
+            attrib[attribCt] = j;
+            attribUsed[attribCt++] = attribName[j];
+        }
+    }
+
+    GLuint prog = glCreateProgram();
+
+    GLuint vertShader = 0, fragShader = 0;
+    const GLchar* vertSource = vsrc;
+    const GLchar* fragSource = fsrc;
+    glueCompileShader(GL_VERTEX_SHADER, 1, &vertSource, &vertShader);
+    glueCompileShader(GL_FRAGMENT_SHADER, 1, &fragSource, &fragShader);
+    glAttachShader(prog, vertShader);
+    glAttachShader(prog, fragShader);
+
+    glueCreateProgram(attribCt, (const GLchar**)&attribUsed[0], attrib, NUM_UNIFORMS,
+                      &uniformName[0], program.uniform, &program.id, prog);
+
+    if (vertShader) glDeleteShader(vertShader);
+    if (fragShader) glDeleteShader(fragShader);
+    free(vsrc);
+    free(fsrc);
+}
+
+void CaptureEngine::setup() {
     glGenVertexArrays(1, &quadVAOId);
     glGenBuffers(1, &quadVBOId);
 
     glBindVertexArray(quadVAOId);
 
-    setupShaders();
+    setup_shaders();
 
     glBindVertexArray(0);
 }
@@ -279,7 +291,7 @@ void CaptureEngine::screen_capture_video_render(CGRect bounds) {
         quadInit = YES;
     }
 
-    glUseProgram(program[PROGRAM_TEXTURE_RECT].id);
+    glUseProgram(program.id);
 
     // const GLfloat mvp[] = {
     //     1.0f, 0.0f, 0.0f, 0.0f,  //
@@ -290,9 +302,9 @@ void CaptureEngine::screen_capture_video_render(CGRect bounds) {
     GLKMatrix4 mvp = GLKMatrix4Identity;
     mvp = GLKMatrix4Rotate(mvp, M_PI, 1.0, 0.0, 0.0);
 
-    glUniformMatrix4fv(program[PROGRAM_TEXTURE_RECT].uniform[UNIFORM_MVP], 1, GL_FALSE, mvp.m);
+    glUniformMatrix4fv(program.uniform[UNIFORM_MVP], 1, GL_FALSE, mvp.m);
 
-    glUniform1i(program[PROGRAM_TEXTURE_RECT].uniform[UNIFORM_TEXTURE], 0);
+    glUniform1i(program.uniform[UNIFORM_TEXTURE], 0);
 
     glBindTexture(GL_TEXTURE_RECTANGLE, name);
     glEnable(GL_TEXTURE_RECTANGLE);
