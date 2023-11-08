@@ -20,6 +20,8 @@ macos_app_bundle("app") {
     "model/shader.cc",
     "util/file_util.mm",
     "util/log_util.mm",
+    "util_temp/fileUtil.mm",
+    "util_temp/shaderUtil.cc",
     "view/opengl_view.mm",
   ]
 
@@ -30,6 +32,7 @@ macos_app_bundle("app") {
     "IOSurface.framework",
     "QuartzCore.framework",
     "ScreenCaptureKit.framework",
+    "GLKit.framework",
   ]
 
   include_dirs = [ "//app" ]
@@ -49,6 +52,9 @@ icon("icon") {
 
 bundle_data("shaders") {
   sources = [
+    "resources/shaders/simple.fs",
+    "resources/shaders/texture.vsh",
+    "resources/shaders/textureRect.fsh",
     "resources/shaders/triangle.fs",
     "resources/shaders/triangle.vs",
   ]

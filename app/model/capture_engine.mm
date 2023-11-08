@@ -4,6 +4,11 @@
 #import <ScreenCaptureKit/ScreenCaptureKit.h>
 #include <pthread.h>
 
+#include "util_temp/fileUtil.h"
+#include "util_temp/shaderUtil.h"
+#import <GLKit/GLKit.h>
+#import <OpenGL/gl3.h>
+
 @interface ScreenCaptureDelegate : NSObject <SCStreamOutput>
 
 @property struct screen_capture* sc;
@@ -144,6 +149,11 @@ static void screen_capture_build_content_list(struct screen_capture* sc) {
 CaptureEngine::CaptureEngine(NSOpenGLContext* context, GLuint texture) {
     this->texture = texture;  // TODO: remove this
 
+    // shader.attach_vertex_shader("shaders/triangle.vs");
+    shader.attach_fragment_shader("shaders/simple.fs");
+
+    shader.link_program();
+
     sc = new screen_capture();
 
     sc->shareable_content_available = dispatch_semaphore_create(1);
@@ -184,6 +194,11 @@ void CaptureEngine::draw1() {
 
         glBindTexture(GL_TEXTURE_RECTANGLE_EXT, 0);
     }
+
+    GLubyte* pixelData = (GLubyte*)calloc(TEXTURE_WIDTH * TEXTURE_HEIGHT * 4, sizeof(GLubyte));
+    glGetTexImage(GL_TEXTURE_RECTANGLE_EXT, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, pixelData);
+    NSData* data = [[NSData alloc] initWithBytes:pixelData length:50000];
+    log_with_type(OS_LOG_TYPE_DEFAULT, data.description, @"capture-engine");
 
     // 2. Draw the texture to the current OpenGL context
     // {
@@ -238,6 +253,167 @@ void CaptureEngine::draw2() {
     glBindTexture(GL_TEXTURE_RECTANGLE_EXT, 0);
 }
 
+void CaptureEngine::draw3() {
+    if (!sc->prev) return;
+
+    glEnable(GL_TEXTURE_RECTANGLE_ARB);
+
+    GLuint texture;
+    IOSurfaceRef surface = (IOSurfaceRef)sc->prev;
+    GLsizei surface_w = (GLsizei)IOSurfaceGetWidth(surface);
+    GLsizei surface_h = (GLsizei)IOSurfaceGetHeight(surface);
+
+    CGLContextObj cgl_ctx = sc->context.CGLContextObj;
+
+    glGenTextures(1, &texture);
+
+    glBindTexture(GL_TEXTURE_RECTANGLE_ARB, texture);
+
+    CGLTexImageIOSurface2D(cgl_ctx, GL_TEXTURE_RECTANGLE_ARB, GL_RGBA, surface_w, surface_h,
+                           GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, surface, 0);
+
+    glTexParameteri(texture, GL_TEXTURE_MAX_LEVEL, 0);
+
+    glBindTexture(GL_TEXTURE_RECTANGLE_ARB, 0);
+
+    GLubyte* pixelData = (GLubyte*)calloc(TEXTURE_WIDTH * TEXTURE_HEIGHT * 4, sizeof(GLubyte));
+    glGetTexImage(GL_TEXTURE_RECTANGLE_ARB, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, pixelData);
+    NSData* data = [[NSData alloc] initWithBytes:pixelData length:50000];
+    log_with_type(OS_LOG_TYPE_DEFAULT, data.description, @"capture-engine");
+
+    // GLuint vao;
+    // glGenVertexArrays(1, &vao);
+    // glBindVertexArray(vao);
+
+    // shader.use();
+    // glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+}
+
+enum { PROGRAM_TEXTURE_RECT, NUM_PROGRAMS };
+
+enum { UNIFORM_MVP, UNIFORM_TEXTURE, NUM_UNIFORMS };
+
+enum { ATTRIB_VERTEX, ATTRIB_TEXCOORD, NUM_ATTRIBS };
+
+typedef struct {
+    char *vert, *frag;
+    GLint uniform[NUM_UNIFORMS];
+    GLuint id;
+} programInfo_t;
+
+programInfo_t program[NUM_PROGRAMS] = {
+    {(char*)"shaders/texture.vsh", (char*)"shaders/textureRect.fsh"},  // PROGRAM_TEXTURE_RECT
+};
+
+void setupShaders() {
+    for (int i = 0; i < NUM_PROGRAMS; i++) {
+        char* vsrc = readFile(pathForResource(program[i].vert));
+        char* fsrc = readFile(pathForResource(program[i].frag));
+        GLsizei attribCt = 0;
+        GLchar* attribUsed[NUM_ATTRIBS];
+        GLint attrib[NUM_ATTRIBS];
+        GLchar* attribName[NUM_ATTRIBS] = {
+            (char*)"inVertex",
+            (char*)"inTexCoord",
+        };
+        const GLchar* uniformName[NUM_UNIFORMS] = {
+            (char*)"MVP",
+            (char*)"tex",
+        };
+
+        // auto-assign known attribs
+        for (int j = 0; j < NUM_ATTRIBS; j++) {
+            if (strstr(vsrc, attribName[j])) {
+                attrib[attribCt] = j;
+                attribUsed[attribCt++] = attribName[j];
+            }
+        }
+
+        glueCreateProgram(vsrc, fsrc, attribCt, (const GLchar**)&attribUsed[0], attrib,
+                          NUM_UNIFORMS, &uniformName[0], program[i].uniform, &program[i].id);
+        free(vsrc);
+        free(fsrc);
+    }
+}
+
+void CaptureEngine::setup1() {
+    glGenVertexArrays(1, &quadVAOId);
+    glGenBuffers(1, &quadVBOId);
+
+    glBindVertexArray(quadVAOId);
+
+    setupShaders();
+
+    glBindVertexArray(0);
+}
+
+void CaptureEngine::draw4(CGRect bounds) {
+    GLuint name;
+    CGLContextObj cgl_ctx = sc->context.CGLContextObj;
+    IOSurfaceRef surface = (IOSurfaceRef)sc->prev;
+
+    GLsizei width = (GLsizei)IOSurfaceGetWidth(surface);
+    GLsizei height = (GLsizei)IOSurfaceGetHeight(surface);
+
+    glGenTextures(1, &name);
+
+    glBindTexture(GL_TEXTURE_RECTANGLE, name);
+    // At the moment, CGLTexImageIOSurface2D requires the GL_TEXTURE_RECTANGLE target
+    CGLTexImageIOSurface2D(cgl_ctx, GL_TEXTURE_RECTANGLE, GL_RGBA, width, height, GL_BGRA,
+                           GL_UNSIGNED_INT_8_8_8_8_REV, surface, 0);
+    glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    GLfloat logoWidth = (GLfloat)IOSurfaceGetWidth(surface);
+    GLfloat logoHeight = (GLfloat)IOSurfaceGetHeight(surface);
+    GLfloat quad[] = {// x, y            s, t
+                      -1.0f, -1.0f, 0.0f, 0.0f,       1.0f, -1.0f, logoWidth, 0.0f,
+                      -1.0f, 1.0f,  0.0f, logoHeight, 1.0f, 1.0f,  logoWidth, logoHeight};
+
+    if (!quadInit) {
+        glBindVertexArray(quadVAOId);
+        glBindBuffer(GL_ARRAY_BUFFER, quadVBOId);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(quad), quad, GL_STATIC_DRAW);
+        // positions
+        glVertexAttribPointer(ATTRIB_VERTEX, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), NULL);
+        // texture coordinates
+        glVertexAttribPointer(ATTRIB_TEXCOORD, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat),
+                              (const GLvoid*)(2 * sizeof(GLfloat)));
+
+        quadInit = YES;
+    }
+
+    glUseProgram(program[PROGRAM_TEXTURE_RECT].id);
+
+    // projection matrix
+    GLfloat aspectRatio = bounds.size.width / bounds.size.height;
+    GLKMatrix4 projection = GLKMatrix4MakeFrustum(-aspectRatio, aspectRatio, -1, 1, 2, 100);
+    // modelView matrix
+    GLKMatrix4 modelView = GLKMatrix4MakeTranslation(0, 0, -9.0);
+    modelView = GLKMatrix4Scale(modelView, 2.5, 2.5, 2.5);
+    modelView = GLKMatrix4Rotate(modelView, 30.0 * M_PI / 180.0, 0.0, 1.0, 0.0);
+
+    GLKMatrix4 mvp = GLKMatrix4Multiply(projection, modelView);
+    glUniformMatrix4fv(program[PROGRAM_TEXTURE_RECT].uniform[UNIFORM_MVP], 1, GL_FALSE, mvp.m);
+
+    glUniform1i(program[PROGRAM_TEXTURE_RECT].uniform[UNIFORM_TEXTURE], 0);
+
+    glBindTexture(GL_TEXTURE_RECTANGLE, name);
+    glEnable(GL_TEXTURE_RECTANGLE);
+
+    glBindVertexArray(quadVAOId);
+    glEnableVertexAttribArray(ATTRIB_VERTEX);
+    glEnableVertexAttribArray(ATTRIB_TEXCOORD);
+
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+    glDisableVertexAttribArray(ATTRIB_VERTEX);
+    glDisableVertexAttribArray(ATTRIB_TEXCOORD);
+    glDisable(GL_TEXTURE_RECTANGLE);
+}
+
 void CaptureEngine::screen_capture_video_tick() {
     if (!sc->current) return;
 
@@ -271,7 +447,7 @@ void CaptureEngine::screen_capture_video_render() {
 
 static inline void screen_stream_video_update(struct screen_capture* sc,
                                               CMSampleBufferRef sample_buffer) {
-    log_with_type(OS_LOG_TYPE_DEFAULT, @"screen update", @"capture-engine");
+    // log_with_type(OS_LOG_TYPE_DEFAULT, @"screen update", @"capture-engine");
 
     bool frame_detail_errored = false;
     float scale_factor = 1.0f;

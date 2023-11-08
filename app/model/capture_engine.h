@@ -1,4 +1,5 @@
 #import "gl_cocoa.h"
+#import "model/shader.h"
 #import <Cocoa/Cocoa.h>
 
 #define TEXTURE_WIDTH 1024
@@ -14,8 +15,15 @@ public:
 
     void draw1();
     void draw2();
+    void draw3();
+    void setup1();
+    void draw4(CGRect bounds);
 
 private:
     GLuint texture;
     screen_capture* sc;
+    Shader shader;
+
+    GLuint quadVAOId, quadVBOId;
+    BOOL quadInit = NO;
 };

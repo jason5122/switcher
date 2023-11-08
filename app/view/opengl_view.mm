@@ -52,12 +52,32 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
     //     0,
     // };
 
+    // NSOpenGLPixelFormatAttribute attribs[] = {
+    //     NSOpenGLPFAAccelerated,
+    //     NSOpenGLPFANoRecovery,
+    //     NSOpenGLPFADoubleBuffer,
+    //     NSOpenGLPFADepthSize,
+    //     24,
+    //     0,
+    // };
+
     NSOpenGLPixelFormatAttribute attribs[] = {
+        NSOpenGLPFAAllowOfflineRenderers,
         NSOpenGLPFAAccelerated,
-        NSOpenGLPFANoRecovery,
         NSOpenGLPFADoubleBuffer,
+        NSOpenGLPFAColorSize,
+        32,
         NSOpenGLPFADepthSize,
         24,
+        NSOpenGLPFAMultisample,
+        1,
+        NSOpenGLPFASampleBuffers,
+        1,
+        NSOpenGLPFASamples,
+        4,
+        NSOpenGLPFANoRecovery,
+        NSOpenGLPFAOpenGLProfile,
+        NSOpenGLProfileVersion3_2Core,  // Core Profile is the future
         0,
     };
 
@@ -77,11 +97,11 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 - (void)initGL {
     [self.openGLContext makeCurrentContext];
 
-    if ([self initImageData]) [self loadTexturesWithClientStorage];
+    // if ([self initImageData]) [self loadTexturesWithClientStorage];
 
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    glEnable(GL_TEXTURE_RECTANGLE_EXT);
+    // glEnableClientState(GL_VERTEX_ARRAY);
+    // glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    // glEnable(GL_TEXTURE_RECTANGLE_EXT);
 
     // Synchronize buffer swaps with vertical refresh rate
     GLint one = 1;
@@ -91,7 +111,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
     [self.openGLContext setValues:&one forParameter:NSOpenGLCPSwapInterval];
 #pragma clang diagnostic pop
 
-    glEnable(GL_MULTISAMPLE);
+    // glEnable(GL_MULTISAMPLE);
 }
 
 - (void)setupDisplayLink {
@@ -115,8 +135,10 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
     [self initGL];
     [self setupDisplayLink];
 
-    _cppMembers->renderer = new Renderer();
+    // _cppMembers->renderer = new Renderer();
     _cppMembers->capture_engine = new CaptureEngine(self.openGLContext, texture);
+
+    _cppMembers->capture_engine->setup1();
 
     [self drawView];  // initial draw call
 }
@@ -143,8 +165,9 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 
     // // _cppMembers->renderer->render(width, height);
     _cppMembers->capture_engine->screen_capture_video_tick();
-    _cppMembers->capture_engine->screen_capture_video_render();
-    // _cppMembers->capture_engine->draw2();
+    // _cppMembers->capture_engine->screen_capture_video_render();
+    // _cppMembers->capture_engine->draw3();
+    _cppMembers->capture_engine->draw4(self.bounds);
 
     [self.openGLContext flushBuffer];
 
