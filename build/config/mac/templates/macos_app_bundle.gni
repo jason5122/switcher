@@ -1,5 +1,9 @@
 import("//build/config/mac/templates/merge_plist.gni")
 
+declare_args() {
+  code_signing_identity = ""
+}
+
 template("macos_app_bundle") {
   _output_name = target_name
   if (defined(invoker.output_name)) {

@@ -174,8 +174,63 @@ void CaptureEngine::screen_capture_video_tick() {
     CGLLockContext(sc->context.CGLContextObj);
     [sc->context makeCurrentContext];
 
-    if (sc->tex) gs_texture_rebind_iosurface(sc->tex, sc->prev);
-    else sc->tex = gs_texture_create_from_iosurface(sc->prev);
+    // if (sc->tex) gs_texture_rebind_iosurface(sc->tex, sc->prev);
+    // else sc->tex = gs_texture_create_from_iosurface(sc->prev);
+
+    glEnable(GL_TEXTURE_RECTANGLE_EXT);
+
+    // 1. Create a texture from the IOSurface
+    GLuint name;
+    IOSurfaceRef surface = (IOSurfaceRef)sc->prev;
+    GLsizei surface_w = (GLsizei)IOSurfaceGetWidth(surface);
+    GLsizei surface_h = (GLsizei)IOSurfaceGetHeight(surface);
+    {
+        CGLContextObj cgl_ctx = sc->context.CGLContextObj;
+
+        glGenTextures(1, &name);
+        // GLsizei surface_w = (GLsizei)IOSurfaceGetWidth(surface);
+        // GLsizei surface_h = (GLsizei)IOSurfaceGetHeight(surface);
+
+        glBindTexture(GL_TEXTURE_RECTANGLE_EXT, name);
+
+        CGLError cglError =
+            CGLTexImageIOSurface2D(cgl_ctx, GL_TEXTURE_RECTANGLE_EXT, GL_RGBA, surface_w,
+                                   surface_h, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, surface, 0);
+
+        glBindTexture(GL_TEXTURE_RECTANGLE_EXT, 0);
+    }
+
+    // 2. Draw the texture to the current OpenGL context
+    {
+        glBindTexture(GL_TEXTURE_RECTANGLE_EXT, name);
+        glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+        glBegin(GL_QUADS);
+
+        glColor4f(0.f, 0.f, 1.0f, 1.0f);
+
+        CGRect fromRect = CGRectMake(0, 0, surface_w, surface_h);
+        CGRect inRect = CGRectMake(0, 0, surface_w, surface_h);
+
+        glTexCoord2f((float)NSMinX(fromRect), (float)(NSMinY(fromRect)));
+        glVertex2f((float)NSMinX(inRect), (float)(NSMinY(inRect)));
+
+        glTexCoord2f((float)NSMaxX(fromRect), (float)NSMinY(fromRect));
+        glVertex2f((float)NSMaxX(inRect), (float)NSMinY(inRect));
+
+        glTexCoord2f((float)NSMaxX(fromRect), (float)NSMaxY(fromRect));
+        glVertex2f((float)NSMaxX(inRect), (float)NSMaxY(inRect));
+
+        glTexCoord2f((float)NSMinX(fromRect), (float)NSMaxY(fromRect));
+        glVertex2f((float)NSMinX(inRect), (float)NSMaxY(inRect));
+
+        glEnd();
+
+        glBindTexture(GL_TEXTURE_RECTANGLE_EXT, 0);
+    }
+    glDeleteTextures(1, &name);
 
     [sc->context flushBuffer];
     CGLUnlockContext(sc->context.CGLContextObj);

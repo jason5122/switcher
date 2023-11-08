@@ -5,7 +5,8 @@ macos_app_bundle("app") {
   output_name = "Switcher"
   bundle_identifier = "com.jason.switcher"
   info_plist = "resources/Info.plist"
-  code_signing_identity = "34C6CC573389B86AB2388388E5091CBD104B8FF2"
+
+  # define `code_signing_identity` in args.gn
 
   sources = [
     "AppDelegate.m",
