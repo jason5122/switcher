@@ -245,6 +245,10 @@ void CaptureEngine::screen_capture_video_render(CGRect bounds) {
     GLsizei width = (GLsizei)IOSurfaceGetWidth(surface);
     GLsizei height = (GLsizei)IOSurfaceGetHeight(surface);
 
+    glViewport(0, 0, width, height);
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
     glGenTextures(1, &name);
 
     glBindTexture(GL_TEXTURE_RECTANGLE, name);

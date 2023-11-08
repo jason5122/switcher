@@ -119,13 +119,6 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
     // lock to avoid the threads from accessing the context simultaneously
     CGLLockContext(self.openGLContext.CGLContextObj);
 
-    CGFloat width = self.bounds.size.width;
-    CGFloat height = self.bounds.size.height;
-    glViewport(0, 0, width * 2, height * 2);
-
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-
     _cppMembers->capture_engine->screen_capture_video_tick();
     _cppMembers->capture_engine->screen_capture_video_render(self.bounds);
 
@@ -140,10 +133,6 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
     // when it encounters something that has been released
     CVDisplayLinkStop(displayLink);
     CVDisplayLinkRelease(displayLink);
-}
-
-- (BOOL)acceptsFirstResponder {
-    return YES;
 }
 
 @end
