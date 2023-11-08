@@ -141,7 +141,9 @@ static void screen_capture_build_content_list(struct screen_capture* sc) {
                                                  completionHandler:new_content_received];
 }
 
-CaptureEngine::CaptureEngine(NSOpenGLContext* context) {
+CaptureEngine::CaptureEngine(NSOpenGLContext* context, GLuint texture) {
+    this->texture = texture;  // TODO: remove this
+
     sc = new screen_capture();
 
     sc->shareable_content_available = dispatch_semaphore_create(1);
@@ -155,9 +157,85 @@ CaptureEngine::CaptureEngine(NSOpenGLContext* context) {
     pthread_mutex_init(&sc->mutex, NULL);
 
     if (!init_screen_stream(sc)) {
-        log_with_type(OS_LOG_TYPE_DEFAULT, @"initializing screen stream failed",
-                      @"capture-engine");
+        log_with_type(OS_LOG_TYPE_ERROR, @"initializing screen stream failed", @"capture-engine");
     }
+}
+
+void CaptureEngine::draw1() {
+    // 1. Create a texture from the IOSurface
+    GLuint texture;
+    IOSurfaceRef surface = (IOSurfaceRef)sc->prev;
+    GLsizei surface_w = (GLsizei)IOSurfaceGetWidth(surface);
+    GLsizei surface_h = (GLsizei)IOSurfaceGetHeight(surface);
+    {
+        CGLContextObj cgl_ctx = sc->context.CGLContextObj;
+
+        glGenTextures(1, &texture);
+
+        glBindTexture(GL_TEXTURE_RECTANGLE_EXT, texture);
+
+        CGLError err =
+            CGLTexImageIOSurface2D(cgl_ctx, GL_TEXTURE_RECTANGLE_EXT, GL_RGBA, surface_w,
+                                   surface_h, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, surface, 0);
+
+        if (err != kCGLNoError) {
+            log_with_type(OS_LOG_TYPE_ERROR, @"CGLTexImageIOSurface2D error", @"capture-engine");
+        }
+
+        glBindTexture(GL_TEXTURE_RECTANGLE_EXT, 0);
+    }
+
+    // 2. Draw the texture to the current OpenGL context
+    // {
+    //     glBindTexture(GL_TEXTURE_RECTANGLE_EXT, texture);
+    //     glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    //     glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    //     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+    //     glBegin(GL_QUADS);
+
+    //     glColor4f(0.f, 0.f, 1.0f, 1.0f);
+    //     glTexCoord2f(0, 0);
+    //     glVertex2f(0, 0);
+
+    //     glTexCoord2f(1728, 0);
+    //     glVertex2f(1728, 0);
+
+    //     glTexCoord2f(1728, 1117);
+    //     glVertex2f(1728, 1117);
+
+    //     glTexCoord2f(0, 1117);
+    //     glVertex2f(0, 1117);
+
+    //     glDrawArrays(GL_QUADS, 0, 4);
+
+    //     glEnd();
+
+    //     glBindTexture(GL_TEXTURE_RECTANGLE_EXT, 0);
+    // }
+    // glDeleteTextures(1, &texture);
+
+    draw2();
+}
+
+void CaptureEngine::draw2() {
+    const GLfloat vertices[12] = {1, -1, -1, 1, 1, -1, -1, 1, -1, -1, -1, -1};
+
+    // Rectangle textures require non-normalized texture coordinates
+    const GLfloat texcoords[] = {
+        0, 0, 0, TEXTURE_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT, TEXTURE_WIDTH, 0,
+    };
+
+    CGLLockContext(sc->context.CGLContextObj);
+    [sc->context makeCurrentContext];
+
+    glTexCoordPointer(2, GL_FLOAT, 0, texcoords);
+    glBindTexture(GL_TEXTURE_RECTANGLE_EXT, texture);
+
+    glVertexPointer(3, GL_FLOAT, 0, vertices);
+    glDrawArrays(GL_QUADS, 0, 4);
+
+    glBindTexture(GL_TEXTURE_RECTANGLE_EXT, 0);
 }
 
 void CaptureEngine::screen_capture_video_tick() {
@@ -177,62 +255,7 @@ void CaptureEngine::screen_capture_video_tick() {
     // if (sc->tex) gs_texture_rebind_iosurface(sc->tex, sc->prev);
     // else sc->tex = gs_texture_create_from_iosurface(sc->prev);
 
-    glEnable(GL_TEXTURE_RECTANGLE_EXT);
-
-    // 1. Create a texture from the IOSurface
-    GLuint name;
-    IOSurfaceRef surface = (IOSurfaceRef)sc->prev;
-    GLsizei surface_w = (GLsizei)IOSurfaceGetWidth(surface);
-    GLsizei surface_h = (GLsizei)IOSurfaceGetHeight(surface);
-    {
-        CGLContextObj cgl_ctx = sc->context.CGLContextObj;
-
-        glGenTextures(1, &name);
-        // GLsizei surface_w = (GLsizei)IOSurfaceGetWidth(surface);
-        // GLsizei surface_h = (GLsizei)IOSurfaceGetHeight(surface);
-
-        glBindTexture(GL_TEXTURE_RECTANGLE_EXT, name);
-
-        CGLError cglError =
-            CGLTexImageIOSurface2D(cgl_ctx, GL_TEXTURE_RECTANGLE_EXT, GL_RGBA, surface_w,
-                                   surface_h, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, surface, 0);
-
-        glBindTexture(GL_TEXTURE_RECTANGLE_EXT, 0);
-    }
-
-    // 2. Draw the texture to the current OpenGL context
-    {
-        glBindTexture(GL_TEXTURE_RECTANGLE_EXT, name);
-        glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-
-        glBegin(GL_QUADS);
-
-        glColor4f(0.f, 0.f, 1.0f, 1.0f);
-
-        CGRect fromRect = CGRectMake(0, 0, surface_w, surface_h);
-        CGRect inRect = CGRectMake(0, 0, surface_w, surface_h);
-
-        glTexCoord2f((float)NSMinX(fromRect), (float)(NSMinY(fromRect)));
-        glVertex2f((float)NSMinX(inRect), (float)(NSMinY(inRect)));
-
-        glTexCoord2f((float)NSMaxX(fromRect), (float)NSMinY(fromRect));
-        glVertex2f((float)NSMaxX(inRect), (float)NSMinY(inRect));
-
-        glTexCoord2f((float)NSMaxX(fromRect), (float)NSMaxY(fromRect));
-        glVertex2f((float)NSMaxX(inRect), (float)NSMaxY(inRect));
-
-        glTexCoord2f((float)NSMinX(fromRect), (float)NSMaxY(fromRect));
-        glVertex2f((float)NSMinX(inRect), (float)NSMaxY(inRect));
-
-        glEnd();
-
-        glBindTexture(GL_TEXTURE_RECTANGLE_EXT, 0);
-    }
-    glDeleteTextures(1, &name);
-
-    [sc->context flushBuffer];
+    // [sc->context flushBuffer];
     CGLUnlockContext(sc->context.CGLContextObj);
 
     if (prev_prev) {
@@ -242,9 +265,8 @@ void CaptureEngine::screen_capture_video_tick() {
 }
 
 void CaptureEngine::screen_capture_video_render() {
-    if (!sc->tex) return;
-
-    gl_enable(GL_FRAMEBUFFER_SRGB);
+    draw1();
+    // draw2();
 }
 
 static inline void screen_stream_video_update(struct screen_capture* sc,

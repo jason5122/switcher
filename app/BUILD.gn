@@ -38,6 +38,7 @@ macos_app_bundle("app") {
 
   deps = [
     ":icon",
+    ":images",
     ":shaders",
   ]
 }
@@ -52,4 +53,9 @@ bundle_data("shaders") {
     "resources/shaders/triangle.vs",
   ]
   outputs = [ "{{bundle_resources_dir}}/shaders/{{source_file_part}}" ]
+}
+
+bundle_data("images") {
+  sources = [ "resources/images/image.jpg" ]
+  outputs = [ "{{bundle_resources_dir}}/{{source_file_part}}" ]
 }

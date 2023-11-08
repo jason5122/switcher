@@ -34,21 +34,32 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
     // NOTE: to use integrated GPU:
     // 1. NSOpenGLPFAAllowOfflineRenderers when using NSOpenGL
     // 2. kCGLPFAAllowOfflineRenderers when using CGL
-    NSOpenGLPixelFormatAttribute attribs[] = {NSOpenGLPFADoubleBuffer,
-                                              NSOpenGLPFAAllowOfflineRenderers,
-                                              NSOpenGLPFAMultisample,
-                                              1,
-                                              NSOpenGLPFASampleBuffers,
-                                              1,
-                                              NSOpenGLPFASamples,
-                                              4,
-                                              NSOpenGLPFAColorSize,
-                                              32,
-                                              NSOpenGLPFADepthSize,
-                                              32,
-                                              NSOpenGLPFAOpenGLProfile,
-                                              NSOpenGLProfileVersion3_2Core,
-                                              0};
+    // NSOpenGLPixelFormatAttribute attribs[] = {
+    //     NSOpenGLPFADoubleBuffer,
+    //     NSOpenGLPFAAllowOfflineRenderers,
+    //     NSOpenGLPFAMultisample,
+    //     1,
+    //     NSOpenGLPFASampleBuffers,
+    //     1,
+    //     NSOpenGLPFASamples,
+    //     4,
+    //     NSOpenGLPFAColorSize,
+    //     32,
+    //     NSOpenGLPFADepthSize,
+    //     32,
+    //     NSOpenGLPFAOpenGLProfile,
+    //     NSOpenGLProfileVersion3_2Core,
+    //     0,
+    // };
+
+    NSOpenGLPixelFormatAttribute attribs[] = {
+        NSOpenGLPFAAccelerated,
+        NSOpenGLPFANoRecovery,
+        NSOpenGLPFADoubleBuffer,
+        NSOpenGLPFADepthSize,
+        24,
+        0,
+    };
 
     NSOpenGLPixelFormat* pf = [[NSOpenGLPixelFormat alloc] initWithAttributes:attribs];
     if (!pf) {
@@ -59,13 +70,18 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
     self = [super initWithFrame:frame pixelFormat:pf];
     if (self) {
         _cppMembers = new CppMembers;
-        _cppMembers->capture_engine = new CaptureEngine(self.openGLContext);
     }
     return self;
 }
 
 - (void)initGL {
     [self.openGLContext makeCurrentContext];
+
+    if ([self initImageData]) [self loadTexturesWithClientStorage];
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    glEnable(GL_TEXTURE_RECTANGLE_EXT);
 
     // Synchronize buffer swaps with vertical refresh rate
     GLint one = 1;
@@ -100,6 +116,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
     [self setupDisplayLink];
 
     _cppMembers->renderer = new Renderer();
+    _cppMembers->capture_engine = new CaptureEngine(self.openGLContext, texture);
 
     [self drawView];  // initial draw call
 }
@@ -119,13 +136,94 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
     CGFloat width = self.bounds.size.width;
     CGFloat height = self.bounds.size.height;
     glViewport(0, 0, width * 2, height * 2);
+    // glViewport(0, 0, width, height);
 
-    // _cppMembers->renderer->render(width, height);
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    // // _cppMembers->renderer->render(width, height);
     _cppMembers->capture_engine->screen_capture_video_tick();
+    _cppMembers->capture_engine->screen_capture_video_render();
+    // _cppMembers->capture_engine->draw2();
 
     [self.openGLContext flushBuffer];
 
     CGLUnlockContext(self.openGLContext.CGLContextObj);
+}
+
+- (void)loadTexturesWithClientStorage {
+    glGenTextures(1, &texture);
+
+    glBindTexture(GL_TEXTURE_RECTANGLE_EXT, texture);
+
+    glTexImage2D(GL_TEXTURE_RECTANGLE_EXT, 0, GL_RGBA, TEXTURE_WIDTH, TEXTURE_HEIGHT, 0, GL_BGRA,
+                 GL_UNSIGNED_INT_8_8_8_8_REV, data);
+
+    glBindTexture(GL_TEXTURE_RECTANGLE_EXT, 0);
+}
+
+- (BOOL)getImageData:(GLubyte*)imageData fromPath:(NSString*)path {
+    NSUInteger width, height;
+    NSURL* url = nil;
+    CGImageSourceRef src;
+    CGImageRef image;
+    CGContextRef context = nil;
+    CGColorSpaceRef colorSpace;
+
+    url = [NSURL fileURLWithPath:path];
+    src = CGImageSourceCreateWithURL((CFURLRef)url, NULL);
+
+    if (!src) {
+        log_with_type(OS_LOG_TYPE_ERROR, @"No image", @"opengl-view");
+        return NO;
+    }
+
+    image = CGImageSourceCreateImageAtIndex(src, 0, NULL);
+    CFRelease(src);
+
+    width = CGImageGetWidth(image);
+    height = CGImageGetHeight(image);
+
+    colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceDisplayP3);
+    context = CGBitmapContextCreate(imageData, width, height, 8, 4 * width, colorSpace,
+                                    kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Host);
+    CGColorSpaceRelease(colorSpace);
+
+    // Core Graphics referential is flipped on the x- and y-axis compared to OpenGL referential
+    // Flip the Core Graphics context here
+    // An alternative is to use flipped OpenGL texture coordinates when drawing textures
+    CGContextTranslateCTM(context, width, height);
+    CGContextScaleCTM(context, -1.0, -1.0);
+
+    // Set the blend mode to copy before drawing since the previous contents of memory aren't used.
+    // This avoids unnecessary blending.
+    CGContextSetBlendMode(context, kCGBlendModeCopy);
+
+    CGContextDrawImage(context, CGRectMake(0, 0, width, height), image);
+
+    CGContextRelease(context);
+    CGImageRelease(image);
+
+    return YES;
+}
+
+- (BOOL)initImageData {
+    // This holds the data of all textures
+    data = (GLubyte*)calloc(TEXTURE_WIDTH * TEXTURE_HEIGHT * 4, sizeof(GLubyte));
+
+    NSString* path = [[NSBundle mainBundle] pathForResource:@"image" ofType:@"jpg"];
+
+    if (!path) {
+        log_with_type(OS_LOG_TYPE_ERROR, @"No valid path", @"opengl-view");
+        return NO;
+    }
+
+    // Point to the current texture
+    GLubyte* imageData = data;
+
+    if (![self getImageData:imageData fromPath:path]) return NO;
+
+    return YES;
 }
 
 - (void)dealloc {
