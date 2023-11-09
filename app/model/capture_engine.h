@@ -16,9 +16,7 @@ public:
     CaptureEngine(NSOpenGLContext* context);
     void screen_capture_video_tick();
     void screen_capture_video_render(CGRect bounds);
-
     void setup();
-    void setup_shaders();
 
 private:
     screen_capture* sc;
@@ -27,4 +25,7 @@ private:
 
     GLuint quadVAOId, quadVBOId;
     BOOL quadInit = NO;
+
+    void setup_shaders();
+    void init_quad(IOSurfaceRef surface);
 };

@@ -202,6 +202,28 @@ void CaptureEngine::setup() {
     glBindVertexArray(0);
 }
 
+void CaptureEngine::init_quad(IOSurfaceRef surface) {
+    GLfloat logoWidth = (GLfloat)IOSurfaceGetWidth(surface);
+    GLfloat logoHeight = (GLfloat)IOSurfaceGetHeight(surface);
+    GLfloat quad[] = {// x, y            s, t
+                      -1.0f, -1.0f, 0.0f, 0.0f,       1.0f, -1.0f, logoWidth, 0.0f,
+                      -1.0f, 1.0f,  0.0f, logoHeight, 1.0f, 1.0f,  logoWidth, logoHeight};
+
+    NSString* msg = [NSString stringWithFormat:@"%fx%f", logoWidth, logoHeight];
+    log_with_type(OS_LOG_TYPE_DEFAULT, msg, @"capture-engine");
+
+    glBindVertexArray(quadVAOId);
+    glBindBuffer(GL_ARRAY_BUFFER, quadVBOId);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quad), quad, GL_STATIC_DRAW);
+    // positions
+    glVertexAttribPointer(ATTRIB_VERTEX, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), NULL);
+    // texture coordinates
+    glVertexAttribPointer(ATTRIB_TEXCOORD, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat),
+                          (const GLvoid*)(2 * sizeof(GLfloat)));
+
+    quadInit = YES;
+}
+
 void CaptureEngine::screen_capture_video_tick() {
     if (!sc->current) return;
 
@@ -244,24 +266,7 @@ void CaptureEngine::screen_capture_video_render(CGRect bounds) {
     glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    GLfloat logoWidth = (GLfloat)IOSurfaceGetWidth(surface);
-    GLfloat logoHeight = (GLfloat)IOSurfaceGetHeight(surface);
-    GLfloat quad[] = {// x, y            s, t
-                      -1.0f, -1.0f, 0.0f, 0.0f,       1.0f, -1.0f, logoWidth, 0.0f,
-                      -1.0f, 1.0f,  0.0f, logoHeight, 1.0f, 1.0f,  logoWidth, logoHeight};
-
-    if (!quadInit) {
-        glBindVertexArray(quadVAOId);
-        glBindBuffer(GL_ARRAY_BUFFER, quadVBOId);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(quad), quad, GL_STATIC_DRAW);
-        // positions
-        glVertexAttribPointer(ATTRIB_VERTEX, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), NULL);
-        // texture coordinates
-        glVertexAttribPointer(ATTRIB_TEXCOORD, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat),
-                              (const GLvoid*)(2 * sizeof(GLfloat)));
-
-        quadInit = YES;
-    }
+    if (!quadInit) init_quad(surface);
 
     glUseProgram(program.id);
 
