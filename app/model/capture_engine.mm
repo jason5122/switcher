@@ -220,6 +220,8 @@ void CaptureEngine::screen_capture_video_tick() {
 }
 
 void CaptureEngine::screen_capture_video_render(CGRect bounds) {
+    if (!sc->prev) return;
+
     GLuint name;
     CGLContextObj cgl_ctx = sc->context.CGLContextObj;
     IOSurfaceRef surface = (IOSurfaceRef)sc->prev;
@@ -242,8 +244,8 @@ void CaptureEngine::screen_capture_video_render(CGRect bounds) {
     glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    GLfloat logoWidth = (GLfloat)IOSurfaceGetWidth(surface) * 2;
-    GLfloat logoHeight = (GLfloat)IOSurfaceGetHeight(surface) * 2;
+    GLfloat logoWidth = (GLfloat)IOSurfaceGetWidth(surface);
+    GLfloat logoHeight = (GLfloat)IOSurfaceGetHeight(surface);
     GLfloat quad[] = {// x, y            s, t
                       -1.0f, -1.0f, 0.0f, 0.0f,       1.0f, -1.0f, logoWidth, 0.0f,
                       -1.0f, 1.0f,  0.0f, logoHeight, 1.0f, 1.0f,  logoWidth, logoHeight};
