@@ -176,13 +176,13 @@ void CaptureEngine::setup_shaders() {
     glAttachShader(prog, fragShader);
 
     // TODO: do we need this?
-    glBindAttribLocation(prog, 0, "inVertex");
-    glBindAttribLocation(prog, 1, "inTexCoord");
+    glBindAttribLocation(prog, ATTRIB_VERTEX, "inVertex");
+    glBindAttribLocation(prog, ATTRIB_TEXCOORD, "inTexCoord");
 
     glueLinkProgram(prog);
 
-    program.uniform[0] = glGetUniformLocation(prog, "MVP");
-    program.uniform[1] = glGetUniformLocation(prog, "tex");
+    program.uniform[UNIFORM_MVP] = glGetUniformLocation(prog, "MVP");
+    program.uniform[UNIFORM_TEXTURE] = glGetUniformLocation(prog, "tex");
     program.id = prog;
 
     if (vertShader) glDeleteShader(vertShader);
