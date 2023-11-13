@@ -15,7 +15,7 @@ class CaptureEngine {
 public:
     CaptureEngine(NSOpenGLContext* context);
     void screen_capture_video_tick();
-    void screen_capture_video_render(CGRect bounds);
+    void screen_capture_video_render();
     void setup();
 
 private:

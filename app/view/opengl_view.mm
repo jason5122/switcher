@@ -84,12 +84,12 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 - (void)prepareOpenGL {
     [super prepareOpenGL];
     [self initGL];
-    [self setupDisplayLink];
+    // [self setupDisplayLink];
 
     _cppMembers->capture_engine = new CaptureEngine(self.openGLContext);
     _cppMembers->capture_engine->setup();
 
-    [self drawView];  // initial draw call
+    // [self drawView];  // initial draw call
 }
 
 - (void)update {
@@ -102,7 +102,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
     CGLLockContext(self.openGLContext.CGLContextObj);
 
     _cppMembers->capture_engine->screen_capture_video_tick();
-    _cppMembers->capture_engine->screen_capture_video_render(self.bounds);
+    _cppMembers->capture_engine->screen_capture_video_render();
 
     [self.openGLContext flushBuffer];
 

@@ -29,6 +29,8 @@ struct screen_capture {
     CGWindowID window;
 
     NSOpenGLContext* context;
+
+    CaptureEngine* capture_engine;
 };
 
 static NSArray* filter_content_windows(NSArray* windows) {
@@ -154,6 +156,8 @@ CaptureEngine::CaptureEngine(NSOpenGLContext* context) {
 
     sc->context = context;
 
+    sc->capture_engine = this;
+
     pthread_mutex_init(&sc->mutex, NULL);
 
     if (!init_screen_stream(sc)) {
@@ -203,8 +207,8 @@ void CaptureEngine::setup() {
 }
 
 void CaptureEngine::init_quad(IOSurfaceRef surface) {
-    GLfloat logoWidth = (GLfloat)IOSurfaceGetWidth(surface);
-    GLfloat logoHeight = (GLfloat)IOSurfaceGetHeight(surface);
+    GLfloat logoWidth = (GLfloat)IOSurfaceGetWidth(surface) * 2;
+    GLfloat logoHeight = (GLfloat)IOSurfaceGetHeight(surface) * 2;
     GLfloat quad[] = {// x, y            s, t
                       -1.0f, -1.0f, 0.0f, 0.0f,       1.0f, -1.0f, logoWidth, 0.0f,
                       -1.0f, 1.0f,  0.0f, logoHeight, 1.0f, 1.0f,  logoWidth, logoHeight};
@@ -241,7 +245,7 @@ void CaptureEngine::screen_capture_video_tick() {
     }
 }
 
-void CaptureEngine::screen_capture_video_render(CGRect bounds) {
+void CaptureEngine::screen_capture_video_render() {
     if (!sc->prev) return;
 
     GLuint name;
@@ -395,6 +399,20 @@ static inline void screen_stream_video_update(struct screen_capture* sc,
     }
 }
 
+void draw_view(struct screen_capture* sc) {
+    CGLContextObj cgl_ctx = sc->context.CGLContextObj;
+
+    [sc->context makeCurrentContext];
+    CGLLockContext(cgl_ctx);
+
+    sc->capture_engine->screen_capture_video_tick();
+    sc->capture_engine->screen_capture_video_render();
+
+    [sc->context flushBuffer];
+
+    CGLUnlockContext(cgl_ctx);
+}
+
 @implementation ScreenCaptureDelegate
 
 - (void)stream:(SCStream*)stream
@@ -402,6 +420,7 @@ static inline void screen_stream_video_update(struct screen_capture* sc,
                    ofType:(SCStreamOutputType)type {
     if (type == SCStreamOutputTypeScreen) {
         screen_stream_video_update(self.sc, sampleBuffer);
+        draw_view(self.sc);
     }
 }
 
