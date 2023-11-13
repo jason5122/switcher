@@ -1,15 +1,23 @@
 #import <Cocoa/Cocoa.h>
+#import <ScreenCaptureKit/ScreenCaptureKit.h>
 
 struct screen_capture;
 struct program_info_t;
 
+@interface ScreenCaptureDelegate : NSObject <SCStreamOutput>
+@property struct screen_capture* sc;
+@end
+
 class CaptureEngine {
 public:
     CaptureEngine(NSOpenGLContext* context);
-    void screen_capture_video_tick();
-    void screen_capture_video_render();
+    bool start_capture();
+    void tick();
+    void render();
 
 private:
+    ScreenCaptureDelegate* capture_delegate;
+
     screen_capture* sc;
     program_info_t* program;
 

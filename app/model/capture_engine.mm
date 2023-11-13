@@ -4,14 +4,7 @@
 #import "util/shader_util.h"
 #import <GLKit/GLKit.h>
 #import <OpenGL/gl3.h>
-#import <ScreenCaptureKit/ScreenCaptureKit.h>
 #import <pthread.h>
-
-@interface ScreenCaptureDelegate : NSObject <SCStreamOutput>
-
-@property struct screen_capture* sc;
-
-@end
 
 struct screen_capture {
     NSRect frame;
@@ -19,7 +12,6 @@ struct screen_capture {
     SCStream* disp;
     SCStreamConfiguration* stream_config;
     SCShareableContent* shareable_content;
-    ScreenCaptureDelegate* capture_delegate;
 
     dispatch_semaphore_t shareable_content_available;
     IOSurfaceRef current, prev;
@@ -60,7 +52,7 @@ static NSArray* filter_content_windows(NSArray* windows) {
         }]];
 }
 
-static bool init_screen_stream(struct screen_capture* sc) {
+bool CaptureEngine::start_capture() {
     SCContentFilter* content_filter;
 
     sc->frame = CGRectZero;
@@ -108,7 +100,7 @@ static bool init_screen_stream(struct screen_capture* sc) {
                                        delegate:nil];
 
     NSError* error = nil;
-    BOOL did_add_output = [sc->disp addStreamOutput:sc->capture_delegate
+    BOOL did_add_output = [sc->disp addStreamOutput:capture_delegate
                                                type:SCStreamOutputTypeScreen
                                  sampleHandlerQueue:nil
                                               error:&error];
@@ -155,26 +147,22 @@ static void screen_capture_build_content_list(struct screen_capture* sc) {
 }
 
 CaptureEngine::CaptureEngine(NSOpenGLContext* context) {
-    program = new program_info_t();
-    setup_shaders();
-
+    capture_delegate = [[ScreenCaptureDelegate alloc] init];
     sc = new screen_capture();
+    program = new program_info_t();
+
+    capture_delegate.sc = sc;
+
+    setup_shaders();
 
     sc->shareable_content_available = dispatch_semaphore_create(1);
     screen_capture_build_content_list(sc);
-
-    sc->capture_delegate = [[ScreenCaptureDelegate alloc] init];
-    sc->capture_delegate.sc = sc;
 
     sc->context = context;
 
     sc->capture_engine = this;
 
     pthread_mutex_init(&sc->mutex, NULL);
-
-    if (!init_screen_stream(sc)) {
-        log_with_type(OS_LOG_TYPE_ERROR, @"initializing screen stream failed", @"capture-engine");
-    }
 }
 
 void CaptureEngine::setup_shaders() {
@@ -236,7 +224,7 @@ void CaptureEngine::init_quad(IOSurfaceRef surface) {
     quadInit = YES;
 }
 
-void CaptureEngine::screen_capture_video_tick() {
+void CaptureEngine::tick() {
     if (!sc->current) return;
 
     IOSurfaceRef prev_prev = sc->prev;
@@ -253,7 +241,7 @@ void CaptureEngine::screen_capture_video_tick() {
     }
 }
 
-void CaptureEngine::screen_capture_video_render() {
+void CaptureEngine::render() {
     if (!sc->prev) return;
 
     GLuint name;
@@ -413,8 +401,8 @@ void draw_view(struct screen_capture* sc) {
     [sc->context makeCurrentContext];
     CGLLockContext(cgl_ctx);
 
-    sc->capture_engine->screen_capture_video_tick();
-    sc->capture_engine->screen_capture_video_render();
+    sc->capture_engine->tick();
+    sc->capture_engine->render();
 
     [sc->context flushBuffer];
 
