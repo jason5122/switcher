@@ -33,9 +33,18 @@ struct screen_capture {
     CaptureEngine* capture_engine;
 };
 
+enum { UNIFORM_MVP, UNIFORM_TEXTURE, NUM_UNIFORMS };
+enum { ATTRIB_VERTEX, ATTRIB_TEXCOORD, NUM_ATTRIBS };
+
+struct program_info_t {
+    GLuint id;
+    GLint uniform[NUM_UNIFORMS];
+};
+
 static NSArray* filter_content_windows(NSArray* windows) {
     NSSet* excluded_window_titles = [NSSet setWithObjects:@"Menubar", @"Item-0", nil];
-    NSSet* excluded_application_names = [NSSet setWithObjects:@"Control Center", @"Dock", nil];
+    NSSet* excluded_application_names =
+        [NSSet setWithObjects:@"Notification Center", @"Control Center", @"Dock", nil];
 
     return [windows
         filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(SCWindow* window,
@@ -146,6 +155,9 @@ static void screen_capture_build_content_list(struct screen_capture* sc) {
 }
 
 CaptureEngine::CaptureEngine(NSOpenGLContext* context) {
+    program = new program_info_t();
+    setup_shaders();
+
     sc = new screen_capture();
 
     sc->shareable_content_available = dispatch_semaphore_create(1);
@@ -166,6 +178,11 @@ CaptureEngine::CaptureEngine(NSOpenGLContext* context) {
 }
 
 void CaptureEngine::setup_shaders() {
+    glGenVertexArrays(1, &quadVAOId);
+    glGenBuffers(1, &quadVBOId);
+
+    glBindVertexArray(quadVAOId);
+
     char* vsrc = read_file(resource_path("shaders/texture.vsh"));
     char* fsrc = read_file(resource_path("shaders/textureRect.fsh"));
 
@@ -185,23 +202,14 @@ void CaptureEngine::setup_shaders() {
 
     glueLinkProgram(prog);
 
-    program.uniform[UNIFORM_MVP] = glGetUniformLocation(prog, "MVP");
-    program.uniform[UNIFORM_TEXTURE] = glGetUniformLocation(prog, "tex");
-    program.id = prog;
+    program->uniform[UNIFORM_MVP] = glGetUniformLocation(prog, "MVP");
+    program->uniform[UNIFORM_TEXTURE] = glGetUniformLocation(prog, "tex");
+    program->id = prog;
 
     if (vertShader) glDeleteShader(vertShader);
     if (fragShader) glDeleteShader(fragShader);
     free(vsrc);
     free(fsrc);
-}
-
-void CaptureEngine::setup() {
-    glGenVertexArrays(1, &quadVAOId);
-    glGenBuffers(1, &quadVBOId);
-
-    glBindVertexArray(quadVAOId);
-
-    setup_shaders();
 
     glBindVertexArray(0);
 }
@@ -272,7 +280,7 @@ void CaptureEngine::screen_capture_video_render() {
 
     if (!quadInit) init_quad(surface);
 
-    glUseProgram(program.id);
+    glUseProgram(program->id);
 
     // const GLfloat mvp[] = {
     //     1.0f, 0.0f, 0.0f, 0.0f,  //
@@ -283,9 +291,9 @@ void CaptureEngine::screen_capture_video_render() {
     GLKMatrix4 mvp = GLKMatrix4Identity;
     mvp = GLKMatrix4Rotate(mvp, M_PI, 1.0, 0.0, 0.0);
 
-    glUniformMatrix4fv(program.uniform[UNIFORM_MVP], 1, GL_FALSE, mvp.m);
+    glUniformMatrix4fv(program->uniform[UNIFORM_MVP], 1, GL_FALSE, mvp.m);
 
-    glUniform1i(program.uniform[UNIFORM_TEXTURE], 0);
+    glUniform1i(program->uniform[UNIFORM_TEXTURE], 0);
 
     glBindTexture(GL_TEXTURE_RECTANGLE, name);
     glEnable(GL_TEXTURE_RECTANGLE);
