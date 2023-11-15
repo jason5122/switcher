@@ -8,9 +8,9 @@ struct program_info_t;
 @property struct screen_capture* sc;
 @end
 
-class CaptureEngine {
+class capture_engine {
 public:
-    CaptureEngine(NSOpenGLContext* context);
+    capture_engine(NSOpenGLContext* context);
     bool start_capture();
     void tick();
     void render();

@@ -1,4 +1,4 @@
-#import "controller/window_controller.h"
+#import "controller/WindowController.h"
 #import <Cocoa/Cocoa.h>
 
 @interface AppDelegate : NSObject <NSApplicationDelegate> {

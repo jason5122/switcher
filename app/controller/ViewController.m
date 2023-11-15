@@ -1,5 +1,5 @@
-#import "controller/view_controller.h"
-#import "view/opengl_view.h"
+#import "controller/ViewController.h"
+#import "view/OpenGLView.h"
 
 @implementation ViewController
 

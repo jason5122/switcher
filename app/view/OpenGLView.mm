@@ -1,11 +1,11 @@
 #import "model/capture_engine.h"
 #import "util/log_util.h"
-#import "view/opengl_view.h"
+#import "view/OpenGLView.h"
 #import <Cocoa/Cocoa.h>
 #import <OpenGL/gl3.h>
 
 struct CppMembers {
-    CaptureEngine* capture_engine;
+    capture_engine* capture_engine;
 };
 
 @implementation OpenGLView
@@ -50,7 +50,7 @@ struct CppMembers {
     [self.openGLContext makeCurrentContext];
     glEnable(GL_MULTISAMPLE);
 
-    _cppMembers->capture_engine = new CaptureEngine(self.openGLContext);
+    _cppMembers->capture_engine = new capture_engine(self.openGLContext);
 
     if (!_cppMembers->capture_engine->start_capture()) {
         log_with_type(OS_LOG_TYPE_ERROR, @"start capture failed", @"opengl-view");

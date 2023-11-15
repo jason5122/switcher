@@ -22,7 +22,7 @@ struct screen_capture {
 
     NSOpenGLContext* context;
 
-    CaptureEngine* capture_engine;
+    capture_engine* capture_engine;
 };
 
 enum { UNIFORM_MVP, UNIFORM_TEXTURE, NUM_UNIFORMS };
@@ -52,7 +52,7 @@ static NSArray* filter_content_windows(NSArray* windows) {
         }]];
 }
 
-bool CaptureEngine::start_capture() {
+bool capture_engine::start_capture() {
     SCContentFilter* content_filter;
 
     sc->frame = CGRectZero;
@@ -146,7 +146,7 @@ static void screen_capture_build_content_list(struct screen_capture* sc) {
                                                  completionHandler:new_content_received];
 }
 
-CaptureEngine::CaptureEngine(NSOpenGLContext* context) {
+capture_engine::capture_engine(NSOpenGLContext* context) {
     capture_delegate = [[ScreenCaptureDelegate alloc] init];
     sc = new screen_capture();
     program = new program_info_t();
@@ -165,7 +165,7 @@ CaptureEngine::CaptureEngine(NSOpenGLContext* context) {
     pthread_mutex_init(&sc->mutex, NULL);
 }
 
-void CaptureEngine::setup_shaders() {
+void capture_engine::setup_shaders() {
     glGenVertexArrays(1, &quadVAOId);
     glGenBuffers(1, &quadVBOId);
 
@@ -202,7 +202,7 @@ void CaptureEngine::setup_shaders() {
     glBindVertexArray(0);
 }
 
-void CaptureEngine::init_quad(IOSurfaceRef surface) {
+void capture_engine::init_quad(IOSurfaceRef surface) {
     GLfloat logoWidth = (GLfloat)IOSurfaceGetWidth(surface) * 2;
     GLfloat logoHeight = (GLfloat)IOSurfaceGetHeight(surface) * 2;
     GLfloat quad[] = {// x, y            s, t
@@ -224,7 +224,7 @@ void CaptureEngine::init_quad(IOSurfaceRef surface) {
     quadInit = YES;
 }
 
-void CaptureEngine::tick() {
+void capture_engine::tick() {
     if (!sc->current) return;
 
     IOSurfaceRef prev_prev = sc->prev;
@@ -241,7 +241,7 @@ void CaptureEngine::tick() {
     }
 }
 
-void CaptureEngine::render() {
+void capture_engine::render() {
     if (!sc->prev) return;
 
     GLuint name;
