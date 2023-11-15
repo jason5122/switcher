@@ -1,5 +1,5 @@
 #import <Cocoa/Cocoa.h>
 
 @interface Menu : NSMenu
-- (NSMenu*)createMenu;
+- (instancetype)init;
 @end

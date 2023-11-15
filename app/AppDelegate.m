@@ -1,39 +1,46 @@
 #import "AppDelegate.h"
-#import "Menu.h"
-#import "controller/ViewController.h"
+#import "view/OpenGLView.h"
 
 @implementation AppDelegate
 
-- (IBAction)newDocument:(id)sender {
-    if (windowController == nil) {
-        NSSize size = [[NSScreen mainScreen] frame].size;
-        CGRect contentSize = CGRectMake(0, 0, size.width, size.height);
-        windowController = [[WindowController alloc] initWithBounds:contentSize];
-        ViewController* viewController = [[ViewController alloc] initWithBounds:contentSize];
-        windowController.contentViewController = viewController;
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        space = [[CGSSpace alloc] initWithLevel:1];
+
+        int mask = NSWindowStyleMaskFullSizeContentView;
+        window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 425, 182)
+                                             styleMask:mask
+                                               backing:NSBackingStoreBuffered
+                                                 defer:false];
+        window.hasShadow = false;
+        window.backgroundColor = NSColor.clearColor;
+
+        NSVisualEffectView* visualEffect = [[NSVisualEffectView alloc] init];
+        visualEffect.blendingMode = NSVisualEffectBlendingModeBehindWindow;
+        visualEffect.material = NSVisualEffectMaterialHUDWindow;
+        visualEffect.state = NSVisualEffectStateActive;
+
+        visualEffect.wantsLayer = true;
+        visualEffect.layer.cornerRadius = 9.0;
+
+        // window.contentView = visualEffect;
+
+        window.contentView = [[OpenGLView alloc] initWithFrame:NSMakeRect(0, 0, 425, 182)];
     }
-    [windowController showWindow:nil];
+    return self;
 }
 
 - (void)applicationWillFinishLaunching:(NSNotification*)notification {
-    NSMenu* mainMenu = [[Menu alloc] createMenu];
-    [NSApp setMainMenu:mainMenu];
+    [window center];
+    [window setFrameAutosaveName:@"switcher"];
+    [window makeKeyAndOrderFront:nil];
+
+    [space addWindow:window];
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification*)notification {
-    [self newDocument:self];
-}
-
-- (BOOL)validateMenuItem:(NSMenuItem*)theMenuItem {
-    BOOL enable = [self respondsToSelector:[theMenuItem action]];
-
-    // disable "New" if the window is already up
-    if ([theMenuItem action] == @selector(newDocument:)) {
-        if ([[windowController window] isKeyWindow]) {
-            enable = NO;
-        }
-    }
-    return enable;
+    [NSApp activateIgnoringOtherApps:false];
 }
 
 @end

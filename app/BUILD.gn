@@ -11,13 +11,12 @@ macos_app_bundle("app") {
   sources = [
     "AppDelegate.m",
     "Menu.m",
-    "controller/ViewController.m",
-    "controller/WindowController.m",
     "main.m",
     "model/capture_engine.mm",
     "util/file_util.mm",
     "util/log_util.mm",
     "util/shader_util.cc",
+    "view/CGSSpace.m",
     "view/OpenGLView.mm",
   ]
 
