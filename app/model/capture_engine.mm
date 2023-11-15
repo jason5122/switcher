@@ -85,15 +85,17 @@ bool capture_engine::start_capture() {
     content_filter = [[SCContentFilter alloc] initWithDesktopIndependentWindow:target_window];
 
     if (target_window) {
-        [sc->stream_config setWidth:target_window.frame.size.width];
-        [sc->stream_config setHeight:target_window.frame.size.height];
+        // sc->stream_config.width = target_window.frame.size.width;
+        // sc->stream_config.height = target_window.frame.size.height;
+        sc->stream_config.width = 200 * 2;
+        sc->stream_config.height = 125 * 2;
     }
 
-    [sc->stream_config setQueueDepth:8];
-    [sc->stream_config setShowsCursor:FALSE];
-    [sc->stream_config setPixelFormat:'BGRA'];
-    // [sc->stream_config setColorSpaceName:kCGColorSpaceSRGB];
-    [sc->stream_config setColorSpaceName:kCGColorSpaceDisplayP3];
+    sc->stream_config.queueDepth = 8;
+    sc->stream_config.showsCursor = false;
+    sc->stream_config.pixelFormat = 'BGRA';
+    sc->stream_config.colorSpaceName = kCGColorSpaceDisplayP3;
+    sc->stream_config.scalesToFit = true;
 
     sc->disp = [[SCStream alloc] initWithFilter:content_filter
                                   configuration:sc->stream_config
@@ -203,8 +205,8 @@ void capture_engine::setup_shaders() {
 }
 
 void capture_engine::init_quad(IOSurfaceRef surface) {
-    GLfloat logoWidth = (GLfloat)IOSurfaceGetWidth(surface) * 2;
-    GLfloat logoHeight = (GLfloat)IOSurfaceGetHeight(surface) * 2;
+    GLfloat logoWidth = (GLfloat)IOSurfaceGetWidth(surface);
+    GLfloat logoHeight = (GLfloat)IOSurfaceGetHeight(surface);
     GLfloat quad[] = {// x, y            s, t
                       -1.0f, -1.0f, 0.0f, 0.0f,       1.0f, -1.0f, logoWidth, 0.0f,
                       -1.0f, 1.0f,  0.0f, logoHeight, 1.0f, 1.0f,  logoWidth, logoHeight};
@@ -340,10 +342,10 @@ static inline void screen_stream_video_update(struct screen_capture* sc,
                     frame_detail_errored = true;
                 }
 
-                window_rect.origin = content_rect.origin;
-                window_rect.size.width = content_rect.size.width / points_to_pixels * scale_factor;
-                window_rect.size.height =
-                    content_rect.size.height / points_to_pixels * scale_factor;
+                // window_rect.origin = content_rect.origin;
+                // window_rect.size.width = content_rect.size.width / points_to_pixels *
+                // scale_factor; window_rect.size.height =
+                //     content_rect.size.height / points_to_pixels * scale_factor;
             }
         }
     }
