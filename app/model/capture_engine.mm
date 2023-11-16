@@ -208,9 +208,6 @@ void capture_engine::init_quad(IOSurfaceRef surface) {
                       -1.0f, -1.0f, 0.0f, 0.0f,       1.0f, -1.0f, logoWidth, 0.0f,
                       -1.0f, 1.0f,  0.0f, logoHeight, 1.0f, 1.0f,  logoWidth, logoHeight};
 
-    NSString* msg = [NSString stringWithFormat:@"%fx%f", logoWidth, logoHeight];
-    log_with_type(OS_LOG_TYPE_DEFAULT, msg, @"capture-engine");
-
     glBindVertexArray(quadVAOId);
     glBindBuffer(GL_ARRAY_BUFFER, quadVBOId);
     glBufferData(GL_ARRAY_BUFFER, sizeof(quad), quad, GL_STATIC_DRAW);
@@ -298,55 +295,6 @@ void capture_engine::render() {
 
 static inline void screen_stream_video_update(struct screen_capture* sc,
                                               CMSampleBufferRef sample_buffer) {
-    bool frame_detail_errored = false;
-    float scale_factor = 1.0f;
-    CGRect window_rect = {};
-
-    CFArrayRef attachments_array = CMSampleBufferGetSampleAttachmentsArray(sample_buffer, false);
-    if (attachments_array != NULL && CFArrayGetCount(attachments_array) > 0) {
-        CFDictionaryRef attachments_dict =
-            (CFDictionaryRef)CFArrayGetValueAtIndex(attachments_array, 0);
-        if (attachments_dict != NULL) {
-            CFTypeRef frame_scale_factor = CFDictionaryGetValue(
-                attachments_dict, (__bridge void*)SCStreamFrameInfoScaleFactor);
-            if (frame_scale_factor != NULL) {
-                Boolean result = CFNumberGetValue((CFNumberRef)frame_scale_factor,
-                                                  kCFNumberFloatType, &scale_factor);
-                if (result == false) {
-                    scale_factor = 1.0f;
-                    frame_detail_errored = true;
-                }
-            }
-
-            CFDictionaryRef content_rect_dict = (CFDictionaryRef)CFDictionaryGetValue(
-                attachments_dict, (__bridge void*)SCStreamFrameInfoContentRect);
-            CFNumberRef content_scale_factor = (CFNumberRef)CFDictionaryGetValue(
-                attachments_dict, (__bridge void*)SCStreamFrameInfoContentScale);
-            if (content_rect_dict != NULL && content_scale_factor != NULL) {
-                CGRect content_rect = {};
-                float points_to_pixels = 0.0f;
-
-                Boolean result =
-                    CGRectMakeWithDictionaryRepresentation(content_rect_dict, &content_rect);
-                if (result == false) {
-                    content_rect = CGRectZero;
-                    frame_detail_errored = true;
-                }
-                result =
-                    CFNumberGetValue(content_scale_factor, kCFNumberFloatType, &points_to_pixels);
-                if (result == false) {
-                    points_to_pixels = 1.0f;
-                    frame_detail_errored = true;
-                }
-
-                // window_rect.origin = content_rect.origin;
-                // window_rect.size.width = content_rect.size.width / points_to_pixels *
-                // scale_factor; window_rect.size.height =
-                //     content_rect.size.height / points_to_pixels * scale_factor;
-            }
-        }
-    }
-
     CVImageBufferRef image_buffer = CMSampleBufferGetImageBuffer(sample_buffer);
 
     CVPixelBufferLockBaseAddress(image_buffer, 0);
@@ -356,31 +304,6 @@ static inline void screen_stream_video_update(struct screen_capture* sc,
     IOSurfaceRef prev_current = NULL;
 
     if (frame_surface && !pthread_mutex_lock(&sc->mutex)) {
-        CGRect new_frame = CGRectZero;
-        bool needs_to_update_properties = false;
-
-        if (!frame_detail_errored) {
-            if ((new_frame.size.width != window_rect.size.width) ||
-                (new_frame.size.height != window_rect.size.height)) {
-                new_frame.size.width = window_rect.size.width;
-                new_frame.size.height = window_rect.size.height;
-                needs_to_update_properties = true;
-            }
-        }
-
-        if (needs_to_update_properties) {
-            [sc->stream_config setWidth:new_frame.size.width];
-            [sc->stream_config setHeight:new_frame.size.height];
-
-            [sc->disp updateConfiguration:sc->stream_config
-                        completionHandler:^(NSError* _Nullable error) {
-                          if (error) {
-                              log_with_type(OS_LOG_TYPE_ERROR, [error localizedFailureReason],
-                                            @"capture-engine");
-                          }
-                        }];
-        }
-
         prev_current = sc->current;
         sc->current = frame_surface;
         CFRetain(sc->current);
