@@ -9,7 +9,7 @@
         CGFloat width = 400;
         CGFloat height = 250;
         CGFloat padding = 60;
-        NSRect windowRect = NSMakeRect(0, 0, width + padding, height + padding);
+        NSRect windowRect = NSMakeRect(0, 0, (width + padding) * 2, height + padding);
         NSRect screenCaptureRect = NSMakeRect(0, 0, width, height);
 
         space = [[CGSSpace alloc] initWithLevel:1];
@@ -32,9 +32,15 @@
 
         window.contentView = visualEffect;
 
-        OpenGLView* screenCapture = [[OpenGLView alloc] initWithFrame:screenCaptureRect];
-        [visualEffect addSubview:screenCapture];
-        screenCapture.frameOrigin = CGPointMake(padding / 2, padding / 2);
+        for (int i = 0; i < 2; i++) {
+            OpenGLView* screenCapture = [[OpenGLView alloc] initWithFrame:screenCaptureRect
+                                                                    index:i];
+            CGFloat x = padding / 2;
+            CGFloat y = padding / 2;
+            x += (width + padding) * i;
+            screenCapture.frameOrigin = CGPointMake(x, y);
+            [visualEffect addSubview:screenCapture];
+        }
 
         // TODO: experimental; consider adding/removing
         // window.ignoresMouseEvents = true;

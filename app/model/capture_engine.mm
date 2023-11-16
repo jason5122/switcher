@@ -50,7 +50,7 @@ static NSArray* filter_content_windows(NSArray* windows) {
         }]];
 }
 
-bool capture_engine::start_capture(NSRect frame) {
+bool capture_engine::start_capture(NSRect frame, int idx) {
     SCContentFilter* content_filter;
 
     sc->stream_config = [[SCStreamConfiguration alloc] init];
@@ -76,8 +76,12 @@ bool capture_engine::start_capture(NSRect frame) {
           return *stop;
         }];
     } else {
-        target_window = [filtered_windows objectAtIndex:0];
+        target_window = [filtered_windows objectAtIndex:idx];
         sc->window = target_window.windowID;
+        NSString* app_name = target_window.owningApplication.applicationName;
+        NSString* title = target_window.title;
+        NSString* message = [NSString stringWithFormat:@"target: %@ \"%@\"", title, app_name];
+        log_with_type(OS_LOG_TYPE_DEFAULT, message, @"capture-engine");
     }
     content_filter = [[SCContentFilter alloc] initWithDesktopIndependentWindow:target_window];
 

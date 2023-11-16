@@ -10,7 +10,7 @@ struct CppMembers {
 
 @implementation OpenGLView
 
-- (id)initWithFrame:(NSRect)frame {
+- (id)initWithFrame:(NSRect)frame index:(int)index {
     NSOpenGLPixelFormatAttribute attribs[] = {
         NSOpenGLPFAAllowOfflineRenderers,
         NSOpenGLPFAAccelerated,
@@ -40,6 +40,7 @@ struct CppMembers {
     self = [super initWithFrame:frame pixelFormat:pf];
     if (self) {
         _cppMembers = new CppMembers;
+        self->idx = index;
     }
     return self;
 }
@@ -58,7 +59,7 @@ struct CppMembers {
 
     _cppMembers->capture_engine = new capture_engine(self.openGLContext);
 
-    if (!_cppMembers->capture_engine->start_capture(self.frame)) {
+    if (!_cppMembers->capture_engine->start_capture(self.frame, self->idx)) {
         log_with_type(OS_LOG_TYPE_ERROR, @"start capture failed", @"opengl-view");
     }
 }
