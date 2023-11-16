@@ -50,6 +50,12 @@ struct CppMembers {
     [self.openGLContext makeCurrentContext];
     glEnable(GL_MULTISAMPLE);
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    GLint opacity = 0;
+    [self.openGLContext setValues:&opacity forParameter:NSOpenGLCPSurfaceOpacity];
+#pragma clang diagnostic pop
+
     _cppMembers->capture_engine = new capture_engine(self.openGLContext);
 
     if (!_cppMembers->capture_engine->start_capture()) {

@@ -33,13 +33,15 @@
 
         window.contentView = visualEffect;
 
-        NSView* screenCapture = [[OpenGLView alloc] initWithFrame:screenCaptureRect];
+        OpenGLView* screenCapture = [[OpenGLView alloc] initWithFrame:screenCaptureRect];
         [visualEffect addSubview:screenCapture];
         screenCapture.frameOrigin = CGPointMake(padding / 2, padding / 2);
 
         // TODO: experimental; double check this
         window.contentMinSize = NSMakeSize(400, 250);
         window.contentMaxSize = NSMakeSize(400, 250);
+
+        // window.ignoresMouseEvents = true;
     }
     return self;
 }

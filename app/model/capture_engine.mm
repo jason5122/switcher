@@ -95,7 +95,9 @@ bool capture_engine::start_capture() {
     sc->stream_config.showsCursor = false;
     sc->stream_config.pixelFormat = 'BGRA';
     sc->stream_config.colorSpaceName = kCGColorSpaceDisplayP3;
-    sc->stream_config.scalesToFit = true;
+    // TODO: do these have any effect?
+    // sc->stream_config.scalesToFit = true;
+    // sc->stream_config.backgroundColor = CGColorGetConstantColor(kCGColorClear);
 
     sc->disp = [[SCStream alloc] initWithFilter:content_filter
                                   configuration:sc->stream_config
@@ -254,7 +256,7 @@ void capture_engine::render() {
     GLsizei height = (GLsizei)IOSurfaceGetHeight(surface);
 
     glViewport(0, 0, width, height);
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glClearColor(0, 0, 0, 0);
     glClear(GL_COLOR_BUFFER_BIT);
 
     glGenTextures(1, &name);
