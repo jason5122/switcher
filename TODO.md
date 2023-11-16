@@ -41,3 +41,5 @@
 
 - Application-level switching?
 - Minimal CPU/GPU mode (static thumbnails)?
+- HDR support
+  - [OpenGL/Metal pixel formats](https://developer.apple.com/forums/thread/698050)
