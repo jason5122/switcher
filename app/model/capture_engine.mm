@@ -87,8 +87,8 @@ bool capture_engine::start_capture() {
     if (target_window) {
         // sc->stream_config.width = target_window.frame.size.width;
         // sc->stream_config.height = target_window.frame.size.height;
-        sc->stream_config.width = 200 * 2;
-        sc->stream_config.height = 125 * 2;
+        sc->stream_config.width = 400 * 2;
+        sc->stream_config.height = 250 * 2;
     }
 
     sc->stream_config.queueDepth = 8;

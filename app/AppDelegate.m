@@ -8,8 +8,8 @@
     if (self) {
         // NSRect windowRect = NSMakeRect(0, 0, 425, 182);
         int padding = 60;
-        NSRect windowRect = NSMakeRect(0, 0, 200 + padding, 125 + padding);
-        NSRect screenCaptureRect = NSMakeRect(0, 0, 200, 125);
+        NSRect windowRect = NSMakeRect(0, 0, 400 + padding, 250 + padding);
+        NSRect screenCaptureRect = NSMakeRect(0, 0, 400, 250);
         // NSRect windowRect = [[NSScreen mainScreen] frame];
         // NSRect screenCaptureRect = [[NSScreen mainScreen] frame];
 
@@ -38,8 +38,8 @@
         screenCapture.frameOrigin = CGPointMake(padding / 2, padding / 2);
 
         // TODO: experimental; double check this
-        window.contentMinSize = NSMakeSize(200, 125);
-        window.contentMaxSize = NSMakeSize(200, 125);
+        window.contentMinSize = NSMakeSize(400, 250);
+        window.contentMaxSize = NSMakeSize(400, 250);
     }
     return self;
 }
