@@ -7,8 +7,6 @@
 #import <pthread.h>
 
 struct screen_capture {
-    NSRect frame;
-
     SCStream* disp;
     SCStreamConfiguration* stream_config;
     SCShareableContent* shareable_content;
@@ -52,10 +50,9 @@ static NSArray* filter_content_windows(NSArray* windows) {
         }]];
 }
 
-bool capture_engine::start_capture() {
+bool capture_engine::start_capture(NSRect frame) {
     SCContentFilter* content_filter;
 
-    sc->frame = CGRectZero;
     sc->stream_config = [[SCStreamConfiguration alloc] init];
     dispatch_semaphore_wait(sc->shareable_content_available, DISPATCH_TIME_FOREVER);
 
@@ -85,10 +82,8 @@ bool capture_engine::start_capture() {
     content_filter = [[SCContentFilter alloc] initWithDesktopIndependentWindow:target_window];
 
     if (target_window) {
-        // sc->stream_config.width = target_window.frame.size.width;
-        // sc->stream_config.height = target_window.frame.size.height;
-        sc->stream_config.width = 400 * 2;
-        sc->stream_config.height = 250 * 2;
+        sc->stream_config.width = frame.size.width * 2;
+        sc->stream_config.height = frame.size.height * 2;
     }
 
     sc->stream_config.queueDepth = 8;
@@ -361,20 +356,21 @@ static inline void screen_stream_video_update(struct screen_capture* sc,
     IOSurfaceRef prev_current = NULL;
 
     if (frame_surface && !pthread_mutex_lock(&sc->mutex)) {
+        CGRect new_frame = CGRectZero;
         bool needs_to_update_properties = false;
 
         if (!frame_detail_errored) {
-            if ((sc->frame.size.width != window_rect.size.width) ||
-                (sc->frame.size.height != window_rect.size.height)) {
-                sc->frame.size.width = window_rect.size.width;
-                sc->frame.size.height = window_rect.size.height;
+            if ((new_frame.size.width != window_rect.size.width) ||
+                (new_frame.size.height != window_rect.size.height)) {
+                new_frame.size.width = window_rect.size.width;
+                new_frame.size.height = window_rect.size.height;
                 needs_to_update_properties = true;
             }
         }
 
         if (needs_to_update_properties) {
-            [sc->stream_config setWidth:sc->frame.size.width];
-            [sc->stream_config setHeight:sc->frame.size.height];
+            [sc->stream_config setWidth:new_frame.size.width];
+            [sc->stream_config setHeight:new_frame.size.height];
 
             [sc->disp updateConfiguration:sc->stream_config
                         completionHandler:^(NSError* _Nullable error) {
