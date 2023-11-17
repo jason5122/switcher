@@ -1,4 +1,4 @@
-#import "util/log_util.h"
+#import "log_util.h"
 
 void log_with_type(os_log_type_t type, NSString* message, NSString* category) {
     NSString* bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];

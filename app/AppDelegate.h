@@ -1,11 +1,11 @@
-#import "private_apis/CGSSpace.h"
+#import "controller/WindowController.h"
 #import <Cocoa/Cocoa.h>
 
-@interface AppDelegate : NSObject <NSApplicationDelegate> {
-    NSWindow* window;
+struct CppMembers;
 
-@private
-    CGSSpace* space;
+@interface AppDelegate : NSObject <NSApplicationDelegate> {
+    struct CppMembers* _cppMembers;
+    WindowController* windowController;
 }
 
 @end

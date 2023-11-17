@@ -1,6 +1,6 @@
+#import "OpenGLView.h"
 #import "model/capture_engine.h"
 #import "util/log_util.h"
-#import "view/OpenGLView.h"
 #import <Cocoa/Cocoa.h>
 #import <OpenGL/gl3.h>
 
