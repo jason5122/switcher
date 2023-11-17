@@ -62,7 +62,7 @@ bool capture_engine::start_capture(NSRect frame, int idx) {
         NSString* app_name = window.owningApplication.applicationName;
         NSString* title = window.title;
         NSString* message = [NSString stringWithFormat:@"%@ \"%@\"", title, app_name];
-        log_with_type(OS_LOG_TYPE_DEFAULT, message, @"capture-engine");
+        // log_with_type(OS_LOG_TYPE_DEFAULT, message, @"capture-engine");
     }
 
     __block SCWindow* target_window = nil;
@@ -81,7 +81,7 @@ bool capture_engine::start_capture(NSRect frame, int idx) {
         NSString* app_name = target_window.owningApplication.applicationName;
         NSString* title = target_window.title;
         NSString* message = [NSString stringWithFormat:@"target: %@ \"%@\"", title, app_name];
-        log_with_type(OS_LOG_TYPE_DEFAULT, message, @"capture-engine");
+        // log_with_type(OS_LOG_TYPE_DEFAULT, message, @"capture-engine");
     }
     content_filter = [[SCContentFilter alloc] initWithDesktopIndependentWindow:target_window];
 

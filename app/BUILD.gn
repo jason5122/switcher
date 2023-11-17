@@ -9,14 +9,14 @@ macos_app_bundle("app") {
   # define `code_signing_identity` in args.gn
 
   sources = [
-    "AppDelegate.m",
+    "AppDelegate.mm",
     "Menu.m",
     "main.m",
     "model/capture_engine.mm",
+    "private_apis/CGSSpace.m",
     "util/file_util.mm",
     "util/log_util.mm",
     "util/shader_util.cc",
-    "view/CGSSpace.m",
     "view/OpenGLView.mm",
   ]
 
@@ -28,6 +28,7 @@ macos_app_bundle("app") {
     "QuartzCore.framework",
     "ScreenCaptureKit.framework",
     "GLKit.framework",
+    "Carbon.framework",
     "ShortcutRecorder.framework",
   ]
 
