@@ -1,5 +1,4 @@
 #import "global_switcher_shortcut.h"
-#import "private_apis/CGSHotKeys.h"
 #import "util/log_util.h"
 #import <Carbon/Carbon.h>
 
@@ -16,7 +15,9 @@ static NSString* shortcut_to_string(SRShortcut* shortcut) {
     if (shortcut.modifierFlags & NSEventModifierFlagShift) [result appendString:@"⇧"];
     if (shortcut.modifierFlags & NSEventModifierFlagCommand) [result appendString:@"⌘"];
 
-    [result appendString:shortcut.charactersIgnoringModifiers];
+    if (shortcut.keyCode == kVK_Tab) [result appendString:@"⇥"];
+    else [result appendString:shortcut.charactersIgnoringModifiers];
+
     return [NSString stringWithString:result];
 }
 
@@ -40,9 +41,6 @@ static OSStatus EventHandler(EventHandlerCallRef inHandler, EventRef inEvent, vo
 global_switcher_shortcut::global_switcher_shortcut(SRShortcut* shortcut) {
     sh = new shortcut_info_t;
     sh->shortcut = shortcut;
-
-    // TODO: figure out how to bind to command+tab
-    // CGSSetSymbolicHotKeyEnabled(commandTab, false);
 }
 
 void global_switcher_shortcut::register_hotkey() {

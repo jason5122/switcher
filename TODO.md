@@ -16,6 +16,7 @@
   - Still allow click actions
 - Remove Sonoma recording icon?
 - `CGSSpace` does not play nicely with notifications
+- Disabling command+tab doesn't work in `.mm` files
 
 ## Repo/Project Tasks
 

@@ -16,7 +16,7 @@ struct CppMembers {
 
         windowController = [[WindowController alloc] init];
 
-        SRShortcut* shortcut = [SRShortcut shortcutWithKeyEquivalent:@"⇧⌘B"];
+        SRShortcut* shortcut = [SRShortcut shortcutWithKeyEquivalent:@"⌘⇥"];
         _cppMembers->switcher_shortcut = new global_switcher_shortcut(shortcut);
     }
     return self;
