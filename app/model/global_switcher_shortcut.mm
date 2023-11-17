@@ -1,4 +1,5 @@
 #import "global_switcher_shortcut.h"
+#import "private_apis/CGSHotKeys.h"
 #import "util/log_util.h"
 #import <Carbon/Carbon.h>
 
@@ -76,4 +77,8 @@ void global_switcher_shortcut::unregister_for_getting_hotkey_events() {
     const EventTypeSpec kHotKeysEvent[] = {{kEventClassKeyboard, kEventHotKeyPressed}};
     RemoveEventTypesFromHandler(sh->hotkey_pressed_handler, GetEventTypeCount(kHotKeysEvent),
                                 kHotKeysEvent);
+}
+
+void global_switcher_shortcut::set_command_tab_enabled(bool is_enabled) {
+    CGSSetSymbolicHotKeyEnabled(commandTab, is_enabled);
 }

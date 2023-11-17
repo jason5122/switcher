@@ -4,4 +4,4 @@ typedef enum {
     commandKeyAboveTab = 6,
 } CGSSymbolicHotKey;
 
-extern CGError CGSSetSymbolicHotKeyEnabled(CGSSymbolicHotKey hotKey, bool isEnabled);
+extern "C" CGError CGSSetSymbolicHotKeyEnabled(CGSSymbolicHotKey hotKey, bool isEnabled);

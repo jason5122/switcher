@@ -24,19 +24,19 @@ struct CppMembers {
 
 - (void)applicationWillFinishLaunching:(NSNotification*)notification {
     [windowController setupWindowAndSpace];
+    _cppMembers->switcher_shortcut->set_command_tab_enabled(false);
     _cppMembers->switcher_shortcut->register_hotkey();
     _cppMembers->switcher_shortcut->add_global_handler();
     _cppMembers->switcher_shortcut->register_for_getting_hotkey_events();
-    // TODO: disable command-tab
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification*)notification {
     [NSApp activateIgnoringOtherApps:false];
 }
 
-- (void)windowWillClose:(NSNotification*)notification {
+- (void)applicationWillTerminate:(NSNotification*)notification {
     _cppMembers->switcher_shortcut->unregister_for_getting_hotkey_events();
-    // TODO: re-enable command-tab
+    _cppMembers->switcher_shortcut->set_command_tab_enabled(true);
 }
 
 @end
