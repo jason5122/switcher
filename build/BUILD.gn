@@ -75,11 +75,11 @@ if (current_os == "ios" || current_os == "mac") {
       "-Xlinker",
       "-rpath",
       "-Xlinker",
-      "@executable_path/Frameworks",
+      "@executable_path/../Frameworks",
       "-Xlinker",
       "-rpath",
       "-Xlinker",
-      "@loader_path/Frameworks",
+      "@loader_path/../Frameworks",
     ]
   }
 }

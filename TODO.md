@@ -15,6 +15,7 @@
 - Prevent window from ever gaining focus on click
   - Still allow click actions
 - Remove Sonoma recording icon?
+- `CGSSpace` does not play nicely with notifications
 
 ## Repo/Project Tasks
 

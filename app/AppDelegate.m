@@ -1,5 +1,6 @@
 #import "AppDelegate.h"
 #import "view/OpenGLView.h"
+#import <ShortcutRecorder/ShortcutRecorder.h>
 
 @implementation AppDelegate
 
@@ -47,6 +48,27 @@
 
         // TODO: debug; remove
         // window.movableByWindowBackground = true;
+
+        // ShortcutRecorder test
+        NSUserDefaultsController* defaults = NSUserDefaultsController.sharedUserDefaultsController;
+        NSString* keyPath = @"values.shortcut";
+        NSDictionary* options =
+            @{NSValueTransformerNameBindingOption : NSKeyedUnarchiveFromDataTransformerName};
+
+        SRShortcutAction* beepAction =
+            [SRShortcutAction shortcutActionWithKeyPath:keyPath
+                                               ofObject:defaults
+                                          actionHandler:^BOOL(SRShortcutAction* anAction) {
+                                            NSBeep();
+                                            return YES;
+                                          }];
+        [[SRGlobalShortcutMonitor sharedMonitor] addAction:beepAction
+                                               forKeyEvent:SRKeyEventTypeDown];
+
+        SRRecorderControl* recorder = [SRRecorderControl new];
+        [recorder bind:NSValueBinding toObject:defaults withKeyPath:keyPath options:options];
+
+        recorder.objectValue = [SRShortcut shortcutWithKeyEquivalent:@"⇧⌘A"];
     }
     return self;
 }

@@ -28,7 +28,10 @@ macos_app_bundle("app") {
     "QuartzCore.framework",
     "ScreenCaptureKit.framework",
     "GLKit.framework",
+    "ShortcutRecorder.framework",
   ]
+
+  framework_dirs = [ "third_party" ]
 
   include_dirs = [ "//app" ]
 
@@ -37,6 +40,7 @@ macos_app_bundle("app") {
   deps = [
     ":icon",
     ":shaders",
+    ":shortcut_recorder_bundle_data",
   ]
 }
 
@@ -50,4 +54,9 @@ bundle_data("shaders") {
     "resources/shaders/textureRect.fsh",
   ]
   outputs = [ "{{bundle_resources_dir}}/shaders/{{source_file_part}}" ]
+}
+
+bundle_data("shortcut_recorder_bundle_data") {
+  sources = [ "third_party/ShortcutRecorder.framework" ]
+  outputs = [ "{{bundle_contents_dir}}/Frameworks/{{source_file_part}}" ]
 }
