@@ -1,3 +1,4 @@
+#import "controller/WindowController.h"
 #import <ShortcutRecorder/ShortcutRecorder.h>
 
 struct shortcut_info_t;
@@ -5,8 +6,9 @@ struct shortcut_info_t;
 class global_switcher_shortcut {
 public:
     shortcut_info_t* sh;
+    WindowController* windowController;
 
-    global_switcher_shortcut(SRShortcut* shortcut);
+    global_switcher_shortcut(SRShortcut* shortcut, WindowController* windowController);
     void register_hotkey();
     void add_global_handler();
     void register_for_getting_hotkey_events();

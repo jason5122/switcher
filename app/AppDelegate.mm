@@ -17,13 +17,13 @@ struct CppMembers {
         windowController = [[WindowController alloc] init];
 
         SRShortcut* shortcut = [SRShortcut shortcutWithKeyEquivalent:@"⌘⇥"];
-        _cppMembers->switcher_shortcut = new global_switcher_shortcut(shortcut);
+        _cppMembers->switcher_shortcut = new global_switcher_shortcut(shortcut, windowController);
     }
     return self;
 }
 
 - (void)applicationWillFinishLaunching:(NSNotification*)notification {
-    [windowController setupWindowAndSpace];
+    // [windowController setupWindowAndSpace];
     _cppMembers->switcher_shortcut->set_command_tab_enabled(false);
     _cppMembers->switcher_shortcut->register_hotkey();
     _cppMembers->switcher_shortcut->add_global_handler();
@@ -31,7 +31,7 @@ struct CppMembers {
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification*)notification {
-    [NSApp activateIgnoringOtherApps:false];
+    // [NSApp activateIgnoringOtherApps:false];
 }
 
 - (void)applicationWillTerminate:(NSNotification*)notification {

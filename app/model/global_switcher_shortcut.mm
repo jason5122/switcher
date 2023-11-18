@@ -6,6 +6,7 @@
 struct shortcut_info_t {
     SRShortcut* shortcut;
     EventHandlerRef hotkey_pressed_handler;
+    NSWindow* window;
 };
 
 static NSString* shortcut_to_string(SRShortcut* shortcut) {
@@ -35,13 +36,17 @@ static OSStatus EventHandler(EventHandlerCallRef inHandler, EventRef inEvent, vo
     log_with_type(OS_LOG_TYPE_DEFAULT, shortcut_to_string(handler->sh->shortcut),
                   @"global-switcher-shortcut");
 
+    [handler->windowController setupWindowAndSpace];
+
     // return this error for other handlers to handle this event as well
     return eventNotHandledErr;
 }
 
-global_switcher_shortcut::global_switcher_shortcut(SRShortcut* shortcut) {
+global_switcher_shortcut::global_switcher_shortcut(SRShortcut* shortcut,
+                                                   WindowController* windowController) {
     sh = new shortcut_info_t;
     sh->shortcut = shortcut;
+    this->windowController = windowController;
 }
 
 void global_switcher_shortcut::register_hotkey() {
