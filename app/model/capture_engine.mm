@@ -95,7 +95,7 @@ bool capture_engine::start_capture(NSRect frame, int idx) {
     sc->stream_config.pixelFormat = 'BGRA';
     sc->stream_config.colorSpaceName = kCGColorSpaceDisplayP3;
     // TODO: do these have any effect?
-    // sc->stream_config.scalesToFit = true;
+    sc->stream_config.scalesToFit = true;
     // sc->stream_config.backgroundColor = CGColorGetConstantColor(kCGColorClear);
 
     sc->disp = [[SCStream alloc] initWithFilter:content_filter

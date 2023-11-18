@@ -6,10 +6,13 @@
 - (instancetype)init {
     self = [super init];
     if (self) {
-        CGFloat width = 400;
-        CGFloat height = 250;
-        CGFloat padding = 60;
-        NSRect windowRect = NSMakeRect(0, 0, (width + padding) * 2, height + padding);
+        // CGFloat width = 400, height = 250;
+        // CGFloat width = 320, height = 200;
+        CGFloat width = 200, height = 125;
+        // TODO: separate into left- and right-padding
+        CGFloat padding = 20;
+        NSRect windowRect =
+            NSMakeRect(0, 0, (width + padding) * 2 + padding, height + padding * 2);
         NSRect screenCaptureRect = NSMakeRect(0, 0, width, height);
 
         space = [[CGSSpace alloc] initWithLevel:1];
@@ -35,8 +38,8 @@
         for (int i = 0; i < 2; i++) {
             OpenGLView* screenCapture = [[OpenGLView alloc] initWithFrame:screenCaptureRect
                                                                     index:i];
-            CGFloat x = padding / 2;
-            CGFloat y = padding / 2;
+            CGFloat x = padding;
+            CGFloat y = padding;
             x += (width + padding) * i;
             screenCapture.frameOrigin = CGPointMake(x, y);
             [visualEffect addSubview:screenCapture];
