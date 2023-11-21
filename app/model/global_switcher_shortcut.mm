@@ -6,6 +6,7 @@
 struct shortcut_info_t {
     SRShortcut* shortcut;
     EventHandlerRef hotkey_pressed_handler;
+    EventHandlerRef hotkey_released_handler;
     NSWindow* window;
 };
 
