@@ -40,6 +40,8 @@
 
 ## Reach Goals
 
+- Multithreading throughout app
+  - `BackgroundWork.swift` in AltTab
 - Application-level switching?
 - Minimal CPU/GPU mode (static thumbnails)?
 - HDR support

@@ -66,7 +66,9 @@ struct CppMembers {
 
 - (void)setupWindowAndSpace {
     for (OpenGLView* screenCapture : _cppMembers->screen_captures) {
-        [screenCapture startCapture];
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
+                       ^{ [screenCapture startCapture]; });
+        // [screenCapture startCapture];
     }
 
     // actually center window
