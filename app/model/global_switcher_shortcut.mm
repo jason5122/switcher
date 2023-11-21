@@ -87,3 +87,7 @@ void global_switcher_shortcut::unregister_for_getting_hotkey_events() {
 void global_switcher_shortcut::set_command_tab_enabled(bool is_enabled) {
     CGSSetSymbolicHotKeyEnabled(commandTab, is_enabled);
 }
+
+global_switcher_shortcut::~global_switcher_shortcut() {
+    RemoveEventHandler(sh->hotkey_pressed_handler);
+}

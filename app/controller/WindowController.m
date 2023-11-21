@@ -7,8 +7,8 @@
     self = [super init];
     if (self) {
         // CGFloat width = 400, height = 250;
-        // CGFloat width = 320, height = 200;
-        CGFloat width = 200, height = 125;
+        CGFloat width = 320, height = 200;
+        // CGFloat width = 200, height = 125;
         // TODO: separate into left- and right-padding
         CGFloat padding = 20;
         NSRect windowRect =
@@ -55,8 +55,15 @@
 }
 
 - (void)setupWindowAndSpace {
-    [window center];
-    [window setFrameAutosaveName:@"switcher"];
+    // actually center window
+    NSSize screenSize = NSScreen.mainScreen.frame.size;
+    NSSize panelSize = window.frame.size;
+    CGFloat x = fmax(screenSize.width - panelSize.width, 0) * 0.5;
+    CGFloat y = fmax(screenSize.height - panelSize.height, 0) * 0.5;
+    window.frameOrigin = NSMakePoint(x, y);
+
+    // [window center];
+    // [window setFrameAutosaveName:@"switcher"];
     [window makeKeyAndOrderFront:nil];
 
     [space addWindow:window];

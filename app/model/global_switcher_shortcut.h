@@ -9,6 +9,7 @@ public:
     WindowController* windowController;
 
     global_switcher_shortcut(SRShortcut* shortcut, WindowController* windowController);
+    ~global_switcher_shortcut();
     void register_hotkey();
     void add_global_handler();
     void register_for_getting_hotkey_events();
