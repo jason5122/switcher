@@ -40,9 +40,11 @@
 
 ## Reach Goals
 
+- Add _subtle_ shadows
 - Multithreading throughout app
   - `BackgroundWork.swift` in AltTab
 - Application-level switching?
 - Minimal CPU/GPU mode (static thumbnails)?
 - HDR support
   - [OpenGL/Metal pixel formats](https://developer.apple.com/forums/thread/698050)
+- Auto-updater (Sparkle)

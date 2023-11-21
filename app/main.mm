@@ -1,11 +1,11 @@
 #import "AppDelegate.h"
 #import "Menu.h"
-#import "private_apis/CGSHotKeys.h"
+#import "model/global_switcher_shortcut.h"
 #import <Cocoa/Cocoa.h>
 
 int main() {
     signal(SIGTERM, [](int sig) {
-        CGSSetSymbolicHotKeyEnabled(commandTab, true);
+        global_switcher_shortcut::set_native_command_tab_enabled(true);
         exit(0);
     });
 
