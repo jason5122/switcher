@@ -24,6 +24,7 @@ struct CppMembers {
     _cppMembers->switcher_shortcut->register_hotkey(@"⌘⇥", "nextWindowShortcut");
     _cppMembers->switcher_shortcut->register_hotkey(@"⌘", "holdShortcut");
     _cppMembers->switcher_shortcut->add_global_handler();
+    _cppMembers->switcher_shortcut->add_modifier_event_tap();
 }
 
 - (void)applicationWillTerminate:(NSNotification*)notification {

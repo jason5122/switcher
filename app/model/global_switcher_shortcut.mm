@@ -62,6 +62,28 @@ void global_switcher_shortcut::add_global_handler() {
         event_types_released.size(), &event_types_released[0], this, &hotkey_released_handler);
 }
 
+CGEventRef modifier_callback(CGEventTapProxy proxy, CGEventType type, CGEventRef cgEvent,
+                             void* refcon) {
+    if (type == kCGEventFlagsChanged) {
+        NSUInteger flags = CGEventGetFlags(cgEvent);
+        if (flags & NSEventModifierFlagCommand) {
+            log_with_type(OS_LOG_TYPE_DEFAULT, @"⌘ pressed", @"global-switcher-shortcut");
+        } else {
+            log_with_type(OS_LOG_TYPE_DEFAULT, @"⌘ released", @"global-switcher-shortcut");
+        }
+    }
+    return cgEvent;
+}
+
+void global_switcher_shortcut::add_modifier_event_tap() {
+    CGEventMask eventMask = (1 << kCGEventFlagsChanged);
+    CFMachPortRef eventTap =
+        CGEventTapCreate(kCGSessionEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault,
+                         eventMask, modifier_callback, nil);
+    CFRunLoopSourceRef runLoopSource = CFMachPortCreateRunLoopSource(nil, eventTap, 0);
+    CFRunLoopAddSource(CFRunLoopGetMain(), runLoopSource, kCFRunLoopCommonModes);
+}
+
 void global_switcher_shortcut::set_native_command_tab_enabled(bool is_enabled) {
     CGSSetSymbolicHotKeyEnabled(commandTab, is_enabled);
 }

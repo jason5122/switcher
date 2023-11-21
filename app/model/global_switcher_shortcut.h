@@ -11,6 +11,7 @@ public:
     ~global_switcher_shortcut();
     void register_hotkey(NSString* shortcutString, std::string action);
     void add_global_handler();
+    void add_modifier_event_tap();
     static void set_native_command_tab_enabled(bool is_enabled);
 
 private:
