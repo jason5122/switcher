@@ -50,6 +50,47 @@ static NSArray* filter_content_windows(NSArray* windows) {
         }]];
 }
 
+static void screen_capture_build_content_list(struct screen_capture* sc) {
+    typedef void (^shareable_content_callback)(SCShareableContent*, NSError*);
+    shareable_content_callback new_content_received =
+        ^void(SCShareableContent* shareable_content, NSError* error) {
+          if (error == nil && sc->shareable_content_available != NULL) {
+              sc->shareable_content = shareable_content;
+          } else {
+              log_with_type(
+                  OS_LOG_TYPE_ERROR,
+                  @"Unable to get list of available applications or windows. Please check if app"
+                  @"has necessary screen capture permissions.",
+                  @"capture-engine");
+          }
+          dispatch_semaphore_signal(sc->shareable_content_available);
+        };
+
+    dispatch_semaphore_wait(sc->shareable_content_available, DISPATCH_TIME_FOREVER);
+    [SCShareableContent getShareableContentExcludingDesktopWindows:TRUE
+                                               onScreenWindowsOnly:TRUE
+                                                 completionHandler:new_content_received];
+}
+
+capture_engine::capture_engine(NSOpenGLContext* context) {
+    capture_delegate = [[ScreenCaptureDelegate alloc] init];
+    sc = new screen_capture();
+    program = new program_info_t();
+
+    capture_delegate.sc = sc;
+
+    setup_shaders();
+
+    sc->shareable_content_available = dispatch_semaphore_create(1);
+    screen_capture_build_content_list(sc);
+
+    sc->context = context;
+
+    sc->capture_engine = this;
+
+    pthread_mutex_init(&sc->mutex, NULL);
+}
+
 bool capture_engine::start_capture(NSRect frame, int idx) {
     SCContentFilter* content_filter;
 
@@ -125,47 +166,6 @@ bool capture_engine::start_capture(NSRect frame, int idx) {
     dispatch_semaphore_wait(stream_start_completed, DISPATCH_TIME_FOREVER);
 
     return did_stream_start;
-}
-
-static void screen_capture_build_content_list(struct screen_capture* sc) {
-    typedef void (^shareable_content_callback)(SCShareableContent*, NSError*);
-    shareable_content_callback new_content_received =
-        ^void(SCShareableContent* shareable_content, NSError* error) {
-          if (error == nil && sc->shareable_content_available != NULL) {
-              sc->shareable_content = shareable_content;
-          } else {
-              log_with_type(
-                  OS_LOG_TYPE_ERROR,
-                  @"Unable to get list of available applications or windows. Please check if app"
-                  @"has necessary screen capture permissions.",
-                  @"capture-engine");
-          }
-          dispatch_semaphore_signal(sc->shareable_content_available);
-        };
-
-    dispatch_semaphore_wait(sc->shareable_content_available, DISPATCH_TIME_FOREVER);
-    [SCShareableContent getShareableContentExcludingDesktopWindows:TRUE
-                                               onScreenWindowsOnly:TRUE
-                                                 completionHandler:new_content_received];
-}
-
-capture_engine::capture_engine(NSOpenGLContext* context) {
-    capture_delegate = [[ScreenCaptureDelegate alloc] init];
-    sc = new screen_capture();
-    program = new program_info_t();
-
-    capture_delegate.sc = sc;
-
-    setup_shaders();
-
-    sc->shareable_content_available = dispatch_semaphore_create(1);
-    screen_capture_build_content_list(sc);
-
-    sc->context = context;
-
-    sc->capture_engine = this;
-
-    pthread_mutex_init(&sc->mutex, NULL);
 }
 
 void capture_engine::setup_shaders() {

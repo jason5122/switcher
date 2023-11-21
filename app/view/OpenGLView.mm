@@ -58,7 +58,9 @@ struct CppMembers {
 #pragma clang diagnostic pop
 
     _cppMembers->capture_engine = new capture_engine(self.openGLContext);
+}
 
+- (void)startCapture {
     if (!_cppMembers->capture_engine->start_capture(self.frame, self->idx)) {
         log_with_type(OS_LOG_TYPE_ERROR, @"start capture failed", @"opengl-view");
     }

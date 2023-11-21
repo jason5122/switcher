@@ -1,11 +1,19 @@
 #import "WindowController.h"
+#import "util/log_util.h"
 #import "view/OpenGLView.h"
+#import <vector>
+
+struct CppMembers {
+    std::vector<OpenGLView*> screen_captures;
+};
 
 @implementation WindowController
 
 - (instancetype)init {
     self = [super init];
     if (self) {
+        _cppMembers = new CppMembers;
+
         // CGFloat width = 400, height = 250;
         CGFloat width = 320, height = 200;
         // CGFloat width = 200, height = 125;
@@ -43,6 +51,8 @@
             x += (width + padding) * i;
             screenCapture.frameOrigin = CGPointMake(x, y);
             [visualEffect addSubview:screenCapture];
+
+            _cppMembers->screen_captures.push_back(screenCapture);
         }
 
         // TODO: experimental; consider adding/removing
@@ -55,6 +65,10 @@
 }
 
 - (void)setupWindowAndSpace {
+    for (OpenGLView* screenCapture : _cppMembers->screen_captures) {
+        [screenCapture startCapture];
+    }
+
     // actually center window
     NSSize screenSize = NSScreen.mainScreen.frame.size;
     NSSize panelSize = window.frame.size;

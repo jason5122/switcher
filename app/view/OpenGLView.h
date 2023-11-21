@@ -8,5 +8,6 @@ struct CppMembers;
 }
 
 - (id)initWithFrame:(NSRect)frame index:(int)idx;
+- (void)startCapture;
 
 @end

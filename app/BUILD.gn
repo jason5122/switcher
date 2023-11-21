@@ -11,7 +11,7 @@ macos_app_bundle("app") {
   sources = [
     "AppDelegate.mm",
     "Menu.m",
-    "controller/WindowController.m",
+    "controller/WindowController.mm",
     "main.m",
     "model/capture_engine.mm",
     "model/global_switcher_shortcut.mm",
