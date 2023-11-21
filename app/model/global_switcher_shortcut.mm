@@ -10,7 +10,7 @@ global_switcher_shortcut::global_switcher_shortcut(WindowController* windowContr
 
 void global_switcher_shortcut::register_hotkey(NSString* shortcutString, std::string action) {
     SRShortcut* shortcut = [SRShortcut shortcutWithKeyEquivalent:shortcutString];
-    EventHotKeyID hotKeyId = {signature, hotkeyid_map[action]};
+    EventHotKeyID hotKeyId = {signature, global_hotkey_map[action]};
     EventHotKeyRef hotKey;
     OSStatus status =
         RegisterEventHotKey(shortcut.carbonKeyCode, shortcut.carbonModifierFlags, hotKeyId,
@@ -22,11 +22,14 @@ void global_switcher_shortcut::register_hotkey(NSString* shortcutString, std::st
 }
 
 void handle_event(EventHotKeyID hotKeyId, global_switcher_shortcut* handler, bool is_pressed) {
+    std::string state = is_pressed ? "pressed" : "released";
+
     if (hotKeyId.id == 0) {
-        log_with_type(OS_LOG_TYPE_DEFAULT, @"nextWindowShortcut", @"global-switcher-shortcut");
+        log_with_type(OS_LOG_TYPE_DEFAULT, "nextWindowShortcut " + state,
+                      @"global-switcher-shortcut");
         [handler->windowController setupWindowAndSpace];
     } else if (hotKeyId.id == 2) {
-        log_with_type(OS_LOG_TYPE_DEFAULT, @"cancelShortcut", @"global-switcher-shortcut");
+        log_with_type(OS_LOG_TYPE_DEFAULT, "cancelShortcut " + state, @"global-switcher-shortcut");
     }
 }
 
