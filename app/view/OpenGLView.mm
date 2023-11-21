@@ -40,7 +40,8 @@ struct CppMembers {
     self = [super initWithFrame:frame pixelFormat:pf];
     if (self) {
         _cppMembers = new CppMembers;
-        self->idx = index;
+        idx = index;
+        hasStarted = false;
     }
     return self;
 }
@@ -61,8 +62,12 @@ struct CppMembers {
 }
 
 - (void)startCapture {
+    if (hasStarted) return;
+
     if (!_cppMembers->capture_engine->start_capture(self.frame, self->idx)) {
         log_with_type(OS_LOG_TYPE_ERROR, @"start capture failed", @"opengl-view");
+    } else {
+        hasStarted = true;
     }
 }
 
