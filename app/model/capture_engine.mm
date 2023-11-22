@@ -45,35 +45,16 @@ capture_engine::capture_engine(NSOpenGLContext* context) {
     pthread_mutex_init(&sc->mutex, NULL);
 }
 
-bool capture_engine::start_capture(NSRect frame, int idx, NSArray* filtered_windows) {
+bool capture_engine::start_capture(NSRect frame, SCWindow* target_window) {
     SCContentFilter* content_filter;
 
     sc->stream_config = [[SCStreamConfiguration alloc] init];
 
-    __block SCWindow* target_window = nil;
-    if (sc->window != 0) {
-        [filtered_windows indexOfObjectPassingTest:^BOOL(SCWindow* _Nonnull window, NSUInteger idx,
-                                                         BOOL* _Nonnull stop) {
-          if (window.windowID == sc->window) {
-              target_window = filtered_windows[idx];
-              *stop = TRUE;
-          }
-          return *stop;
-        }];
-    } else {
-        target_window = [filtered_windows objectAtIndex:idx];
-        sc->window = target_window.windowID;
-        NSString* app_name = target_window.owningApplication.applicationName;
-        NSString* title = target_window.title;
-        NSString* message = [NSString stringWithFormat:@"target: %@ \"%@\"", title, app_name];
-        // log_with_type(OS_LOG_TYPE_DEFAULT, message, @"capture-engine");
-    }
+    sc->window = target_window.windowID;
     content_filter = [[SCContentFilter alloc] initWithDesktopIndependentWindow:target_window];
 
-    if (target_window) {
-        sc->stream_config.width = frame.size.width * 2;
-        sc->stream_config.height = frame.size.height * 2;
-    }
+    sc->stream_config.width = frame.size.width * 2;
+    sc->stream_config.height = frame.size.height * 2;
 
     sc->stream_config.queueDepth = 8;
     sc->stream_config.showsCursor = false;

@@ -26,7 +26,7 @@ void capture_content::build_content_list() {
                                                  completionHandler:new_content_received];
 }
 
-NSArray* capture_content::get_filtered_windows() {
+NSArray<SCWindow*>* capture_content::get_filtered_windows() {
     dispatch_semaphore_wait(shareable_content_available, DISPATCH_TIME_FOREVER);
 
     NSSet* excluded_window_titles = [NSSet setWithObjects:@"Menubar", @"Item-0", nil];

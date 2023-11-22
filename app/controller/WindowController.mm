@@ -18,7 +18,7 @@ struct CppMembers {
 
         _cppMembers->content_engine = capture_content();
         _cppMembers->content_engine.build_content_list();
-        filtered_windows = _cppMembers->content_engine.get_filtered_windows();
+        NSArray<SCWindow*>* filtered_windows = _cppMembers->content_engine.get_filtered_windows();
         for (SCWindow* w in filtered_windows) {
             NSString* app_name = w.owningApplication.applicationName;
             NSString* title = w.title;
@@ -34,7 +34,7 @@ struct CppMembers {
         // TODO: separate into left- and right-padding
         CGFloat padding = 20;
         NSRect windowRect =
-            NSMakeRect(0, 0, (width + padding) * 2 + padding, height + padding * 2);
+            NSMakeRect(0, 0, (width + padding) * 3 + padding, height + padding * 2);
         NSRect screenCaptureRect = NSMakeRect(0, 0, width, height);
 
         int mask = NSWindowStyleMaskFullSizeContentView;
@@ -55,15 +55,15 @@ struct CppMembers {
 
         window.contentView = visualEffect;
 
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < filtered_windows.count; i++) {
+            SCWindow* capture_window = [filtered_windows objectAtIndex:i];
             OpenGLView* screenCapture = [[OpenGLView alloc] initWithFrame:screenCaptureRect
-                                                                    index:i];
+                                                             targetWindow:capture_window];
             CGFloat x = padding;
             CGFloat y = padding;
             x += (width + padding) * i;
             screenCapture.frameOrigin = CGPointMake(x, y);
             [visualEffect addSubview:screenCapture];
-
             _cppMembers->screen_captures.push_back(screenCapture);
         }
 
@@ -78,9 +78,9 @@ struct CppMembers {
 
 - (void)setupWindowAndSpace {
     for (OpenGLView* screenCapture : _cppMembers->screen_captures) {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
-                       ^{ [screenCapture startCapture:filtered_windows]; });
-        // [screenCapture startCapture];
+        // dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
+        //                ^{ [screenCapture startCapture]; });
+        [screenCapture startCapture];
     }
 
     // actually center window

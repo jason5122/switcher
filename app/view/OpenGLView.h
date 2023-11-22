@@ -1,14 +1,15 @@
 #import <Cocoa/Cocoa.h>
+#import <ScreenCaptureKit/ScreenCaptureKit.h>
 
 struct CppMembers;
 
 @interface OpenGLView : NSOpenGLView {
     struct CppMembers* _cppMembers;
-    int idx;
+    SCWindow* targetWindow;
     bool hasStarted;
 }
 
-- (id)initWithFrame:(NSRect)frame index:(int)idx;
-- (void)startCapture:(NSArray*)filtered_windows;
+- (id)initWithFrame:(NSRect)frame targetWindow:(SCWindow*)window;
+- (void)startCapture;
 
 @end
