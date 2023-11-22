@@ -33,7 +33,7 @@ struct CppMembers {
 
     NSOpenGLPixelFormat* pf = [[NSOpenGLPixelFormat alloc] initWithAttributes:attribs];
     if (!pf) {
-        log_with_type(OS_LOG_TYPE_ERROR, @"failed to create pixel format", @"opengl-view");
+        log_with_type(OS_LOG_TYPE_ERROR, @"failed to create pixel format", @"capture-view");
         return nil;
     }
 
@@ -58,14 +58,16 @@ struct CppMembers {
     [self.openGLContext setValues:&opacity forParameter:NSOpenGLCPSurfaceOpacity];
 #pragma clang diagnostic pop
 
-    cpp->capture_engine = new capture_engine(self.openGLContext);
+    cpp->capture_engine = new capture_engine(self.openGLContext, self.frame, targetWindow);
 }
 
 - (void)startCapture {
     if (hasStarted) return;
 
-    if (!cpp->capture_engine->start_capture(self.frame, targetWindow)) {
-        log_with_type(OS_LOG_TYPE_ERROR, @"start capture failed", @"opengl-view");
+    log_with_type(OS_LOG_TYPE_DEFAULT, @"hey there", @"capture-view");
+
+    if (!cpp->capture_engine->start_capture()) {
+        log_with_type(OS_LOG_TYPE_ERROR, @"start capture failed", @"capture-view");
     } else {
         hasStarted = true;
     }
@@ -75,7 +77,9 @@ struct CppMembers {
     if (!hasStarted) return;
 
     if (!cpp->capture_engine->stop_capture()) {
-        log_with_type(OS_LOG_TYPE_ERROR, @"stop capture failed", @"opengl-view");
+        log_with_type(OS_LOG_TYPE_ERROR, @"stop capture failed", @"capture-view");
+    } else {
+        hasStarted = false;
     }
 }
 

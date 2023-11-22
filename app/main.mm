@@ -13,7 +13,8 @@ int main() {
         NSApplication* app = [NSApplication sharedApplication];
         AppDelegate* appDelegate = [[AppDelegate alloc] init];
 
-        app.activationPolicy = NSApplicationActivationPolicyAccessory;
+        app.activationPolicy = NSApplicationActivationPolicyRegular;
+        // app.activationPolicy = NSApplicationActivationPolicyAccessory;
         app.mainMenu = [[Menu alloc] init];
         app.delegate = appDelegate;
 

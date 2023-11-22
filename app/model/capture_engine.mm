@@ -29,7 +29,7 @@ struct program_info_t {
     GLint uniform[NUM_UNIFORMS];
 };
 
-capture_engine::capture_engine(NSOpenGLContext* context) {
+capture_engine::capture_engine(NSOpenGLContext* context, NSRect frame, SCWindow* target_window) {
     capture_delegate = [[ScreenCaptureDelegate alloc] init];
     sc = new screen_capture();
     program = new program_info_t();
@@ -43,9 +43,8 @@ capture_engine::capture_engine(NSOpenGLContext* context) {
     sc->capture_engine = this;
 
     pthread_mutex_init(&sc->mutex, NULL);
-}
 
-bool capture_engine::start_capture(NSRect frame, SCWindow* target_window) {
+    // TODO: from start_capture(); clean this up
     SCContentFilter* content_filter;
 
     sc->stream_config = [[SCStreamConfiguration alloc] init];
@@ -75,9 +74,11 @@ bool capture_engine::start_capture(NSRect frame, SCWindow* target_window) {
                                               error:&error];
     if (!did_add_output) {
         log_with_type(OS_LOG_TYPE_ERROR, [error localizedFailureReason], @"capture-engine");
-        return !did_add_output;
+        // return !did_add_output;
     }
+}
 
+bool capture_engine::start_capture() {
     dispatch_semaphore_t stream_start_completed = dispatch_semaphore_create(0);
 
     __block BOOL is_success = false;
@@ -93,13 +94,17 @@ bool capture_engine::start_capture(NSRect frame, SCWindow* target_window) {
 }
 
 bool capture_engine::stop_capture() {
+    dispatch_semaphore_t stream_stop_completed = dispatch_semaphore_create(0);
+
     __block BOOL is_success = false;
     [sc->disp stopCaptureWithCompletionHandler:^(NSError* _Nullable error) {
       is_success = (BOOL)(error == nil);
       if (!is_success) {
           log_with_type(OS_LOG_TYPE_ERROR, [error localizedFailureReason], @"capture-engine");
       }
+      dispatch_semaphore_signal(stream_stop_completed);
     }];
+    dispatch_semaphore_wait(stream_stop_completed, DISPATCH_TIME_FOREVER);
     return is_success;
 }
 

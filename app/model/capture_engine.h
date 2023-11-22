@@ -10,8 +10,8 @@ struct program_info_t;
 
 class capture_engine {
 public:
-    capture_engine(NSOpenGLContext* context);
-    bool start_capture(NSRect frame, SCWindow* target_window);
+    capture_engine(NSOpenGLContext* context, NSRect frame, SCWindow* target_window);
+    bool start_capture();
     bool stop_capture();
     void tick();
     void render();

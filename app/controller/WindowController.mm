@@ -63,6 +63,7 @@ struct CppMembers {
         }
 
         space = [[CGSSpace alloc] initWithLevel:1];
+        [space addWindow:window];
 
         // TODO: experimental; consider adding/removing
         // window.ignoresMouseEvents = true;
@@ -72,9 +73,9 @@ struct CppMembers {
 
 - (void)showWindow {
     for (CaptureView* screenCapture : cpp->screen_captures) {
-        // dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
-        //                ^{ [screenCapture startCapture]; });
-        [screenCapture startCapture];
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
+                       ^{ [screenCapture startCapture]; });
+        // [screenCapture startCapture];
     }
 
     // actually center window
@@ -85,11 +86,11 @@ struct CppMembers {
     window.frameOrigin = NSMakePoint(x, y);
 
     [window makeKeyAndOrderFront:nil];
-
-    [space addWindow:window];
 }
 
 - (void)hideWindow {
+    [window orderOut:nil];
+
     for (CaptureView* screenCapture : cpp->screen_captures) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
                        ^{ [screenCapture stopCapture]; });

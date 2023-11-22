@@ -16,7 +16,7 @@ void capture_content::get_content() {
                   OS_LOG_TYPE_ERROR,
                   @"Unable to get list of available applications or windows. Please check if app"
                   @"has necessary screen capture permissions.",
-                  @"capture-engine");
+                  @"capture-content");
           }
           dispatch_semaphore_signal(shareable_content_available);
         };
