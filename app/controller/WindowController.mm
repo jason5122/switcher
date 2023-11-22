@@ -1,10 +1,12 @@
 #import "WindowController.h"
+#import "model/capture_content.h"
 #import "util/log_util.h"
 #import "view/OpenGLView.h"
 #import <vector>
 
 struct CppMembers {
     std::vector<OpenGLView*> screen_captures;
+    capture_content content_engine;
 };
 
 @implementation WindowController
@@ -14,6 +16,18 @@ struct CppMembers {
     if (self) {
         _cppMembers = new CppMembers;
 
+        _cppMembers->content_engine = capture_content();
+        _cppMembers->content_engine.build_content_list();
+        filtered_windows = _cppMembers->content_engine.get_filtered_windows();
+        for (SCWindow* w in filtered_windows) {
+            NSString* app_name = w.owningApplication.applicationName;
+            NSString* title = w.title;
+            NSString* message = [NSString stringWithFormat:@"%@ \"%@\"", title, app_name];
+            log_with_type(OS_LOG_TYPE_DEFAULT, message, @"window-controller");
+        }
+
+        space = [[CGSSpace alloc] initWithLevel:1];
+
         // CGFloat width = 400, height = 250;
         CGFloat width = 320, height = 200;
         // CGFloat width = 200, height = 125;
@@ -22,8 +36,6 @@ struct CppMembers {
         NSRect windowRect =
             NSMakeRect(0, 0, (width + padding) * 2 + padding, height + padding * 2);
         NSRect screenCaptureRect = NSMakeRect(0, 0, width, height);
-
-        space = [[CGSSpace alloc] initWithLevel:1];
 
         int mask = NSWindowStyleMaskFullSizeContentView;
         window = [[NSWindow alloc] initWithContentRect:windowRect
@@ -67,7 +79,7 @@ struct CppMembers {
 - (void)setupWindowAndSpace {
     for (OpenGLView* screenCapture : _cppMembers->screen_captures) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
-                       ^{ [screenCapture startCapture]; });
+                       ^{ [screenCapture startCapture:filtered_windows]; });
         // [screenCapture startCapture];
     }
 

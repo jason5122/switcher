@@ -22,6 +22,8 @@ void global_switcher_shortcut::register_hotkey(NSString* shortcutString, std::st
 }
 
 void handle_event(EventHotKeyID hotKeyId, global_switcher_shortcut* handler, bool is_pressed) {
+    if (!is_pressed) return;
+
     std::string state = is_pressed ? "pressed" : "released";
 
     if (hotKeyId.id == 0) {
@@ -67,7 +69,7 @@ CGEventRef modifier_callback(CGEventTapProxy proxy, CGEventType type, CGEventRef
     if (type == kCGEventFlagsChanged) {
         NSUInteger flags = CGEventGetFlags(cgEvent);
         if (flags & NSEventModifierFlagCommand) {
-            log_with_type(OS_LOG_TYPE_DEFAULT, @"⌘ pressed", @"global-switcher-shortcut");
+            // log_with_type(OS_LOG_TYPE_DEFAULT, @"⌘ pressed", @"global-switcher-shortcut");
         } else {
             log_with_type(OS_LOG_TYPE_DEFAULT, @"⌘ released", @"global-switcher-shortcut");
         }

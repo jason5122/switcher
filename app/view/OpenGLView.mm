@@ -61,13 +61,13 @@ struct CppMembers {
     _cppMembers->capture_engine = new capture_engine(self.openGLContext);
 }
 
-- (void)startCapture {
+- (void)startCapture:(NSArray*)filtered_windows {
     if (hasStarted) return;
 
     // TODO: debug; remove
     if (idx == 1) [NSThread sleepForTimeInterval:1.0f];
 
-    if (!_cppMembers->capture_engine->start_capture(self.frame, self->idx)) {
+    if (!_cppMembers->capture_engine->start_capture(self.frame, self->idx, filtered_windows)) {
         log_with_type(OS_LOG_TYPE_ERROR, @"start capture failed", @"opengl-view");
     } else {
         hasStarted = true;

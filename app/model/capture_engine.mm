@@ -9,9 +9,7 @@
 struct screen_capture {
     SCStream* disp;
     SCStreamConfiguration* stream_config;
-    SCShareableContent* shareable_content;
 
-    dispatch_semaphore_t shareable_content_available;
     IOSurfaceRef current, prev;
 
     pthread_mutex_t mutex;
@@ -31,47 +29,6 @@ struct program_info_t {
     GLint uniform[NUM_UNIFORMS];
 };
 
-static NSArray* filter_content_windows(NSArray* windows) {
-    NSSet* excluded_window_titles = [NSSet setWithObjects:@"Menubar", @"Item-0", nil];
-    NSSet* excluded_application_names =
-        [NSSet setWithObjects:@"Notification Center", @"Control Center", @"Dock", nil];
-
-    return [windows
-        filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(SCWindow* window,
-                                                                          NSDictionary* bindings) {
-          NSString* app_name = window.owningApplication.applicationName;
-          NSString* title = window.title;
-
-          if (app_name == NULL || title == NULL) return FALSE;
-          if ([app_name isEqualToString:@""] || [title isEqualToString:@""]) return FALSE;
-
-          return ![excluded_window_titles containsObject:title] &&
-                 ![excluded_application_names containsObject:app_name];
-        }]];
-}
-
-static void screen_capture_build_content_list(struct screen_capture* sc) {
-    typedef void (^shareable_content_callback)(SCShareableContent*, NSError*);
-    shareable_content_callback new_content_received =
-        ^void(SCShareableContent* shareable_content, NSError* error) {
-          if (error == nil && sc->shareable_content_available != NULL) {
-              sc->shareable_content = shareable_content;
-          } else {
-              log_with_type(
-                  OS_LOG_TYPE_ERROR,
-                  @"Unable to get list of available applications or windows. Please check if app"
-                  @"has necessary screen capture permissions.",
-                  @"capture-engine");
-          }
-          dispatch_semaphore_signal(sc->shareable_content_available);
-        };
-
-    dispatch_semaphore_wait(sc->shareable_content_available, DISPATCH_TIME_FOREVER);
-    [SCShareableContent getShareableContentExcludingDesktopWindows:TRUE
-                                               onScreenWindowsOnly:TRUE
-                                                 completionHandler:new_content_received];
-}
-
 capture_engine::capture_engine(NSOpenGLContext* context) {
     capture_delegate = [[ScreenCaptureDelegate alloc] init];
     sc = new screen_capture();
@@ -81,9 +38,6 @@ capture_engine::capture_engine(NSOpenGLContext* context) {
 
     setup_shaders();
 
-    sc->shareable_content_available = dispatch_semaphore_create(1);
-    screen_capture_build_content_list(sc);
-
     sc->context = context;
 
     sc->capture_engine = this;
@@ -91,20 +45,10 @@ capture_engine::capture_engine(NSOpenGLContext* context) {
     pthread_mutex_init(&sc->mutex, NULL);
 }
 
-bool capture_engine::start_capture(NSRect frame, int idx) {
+bool capture_engine::start_capture(NSRect frame, int idx, NSArray* filtered_windows) {
     SCContentFilter* content_filter;
 
     sc->stream_config = [[SCStreamConfiguration alloc] init];
-    dispatch_semaphore_wait(sc->shareable_content_available, DISPATCH_TIME_FOREVER);
-
-    NSArray* filtered_windows = filter_content_windows(sc->shareable_content.windows);
-
-    for (SCWindow* window in filtered_windows) {
-        NSString* app_name = window.owningApplication.applicationName;
-        NSString* title = window.title;
-        NSString* message = [NSString stringWithFormat:@"%@ \"%@\"", title, app_name];
-        // log_with_type(OS_LOG_TYPE_DEFAULT, message, @"capture-engine");
-    }
 
     __block SCWindow* target_window = nil;
     if (sc->window != 0) {

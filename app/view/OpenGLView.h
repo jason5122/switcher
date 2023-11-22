@@ -9,6 +9,6 @@ struct CppMembers;
 }
 
 - (id)initWithFrame:(NSRect)frame index:(int)idx;
-- (void)startCapture;
+- (void)startCapture:(NSArray*)filtered_windows;
 
 @end

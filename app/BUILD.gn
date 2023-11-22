@@ -13,6 +13,7 @@ macos_app_bundle("app") {
     "Menu.m",
     "controller/WindowController.mm",
     "main.mm",
+    "model/capture_content.mm",
     "model/capture_engine.mm",
     "model/global_switcher_shortcut.mm",
     "private_apis/CGSSpace.m",

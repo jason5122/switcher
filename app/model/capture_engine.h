@@ -11,7 +11,7 @@ struct program_info_t;
 class capture_engine {
 public:
     capture_engine(NSOpenGLContext* context);
-    bool start_capture(NSRect frame, int idx);
+    bool start_capture(NSRect frame, int idx, NSArray* filtered_windows);
     void tick();
     void render();
 
