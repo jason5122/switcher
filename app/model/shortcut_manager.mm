@@ -29,7 +29,7 @@ void handle_event(EventHotKeyID hotKeyId, shortcut_manager* handler, bool is_pre
     if (hotKeyId.id == 0) {
         log_with_type(OS_LOG_TYPE_DEFAULT, "nextWindowShortcut " + state,
                       @"global-switcher-shortcut");
-        [handler->windowController setupWindowAndSpace];
+        [handler->windowController showWindow];
     } else if (hotKeyId.id == 2) {
         log_with_type(OS_LOG_TYPE_DEFAULT, "cancelShortcut " + state, @"global-switcher-shortcut");
     }
@@ -65,13 +65,15 @@ void shortcut_manager::add_global_handler() {
 }
 
 CGEventRef modifier_callback(CGEventTapProxy proxy, CGEventType type, CGEventRef cgEvent,
-                             void* refcon) {
+                             void* inUserData) {
+    shortcut_manager* handler = (shortcut_manager*)inUserData;
     if (type == kCGEventFlagsChanged) {
         NSUInteger flags = CGEventGetFlags(cgEvent);
         if (flags & NSEventModifierFlagCommand) {
             // log_with_type(OS_LOG_TYPE_DEFAULT, @"⌘ pressed", @"global-switcher-shortcut");
         } else {
             log_with_type(OS_LOG_TYPE_DEFAULT, @"⌘ released", @"global-switcher-shortcut");
+            [handler->windowController hideWindow];
         }
     }
     return cgEvent;
@@ -81,7 +83,7 @@ void shortcut_manager::add_modifier_event_tap() {
     CGEventMask eventMask = (1 << kCGEventFlagsChanged);
     CFMachPortRef eventTap =
         CGEventTapCreate(kCGSessionEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault,
-                         eventMask, modifier_callback, nil);
+                         eventMask, modifier_callback, this);
     CFRunLoopSourceRef runLoopSource = CFMachPortCreateRunLoopSource(nil, eventTap, 0);
     CFRunLoopAddSource(CFRunLoopGetMain(), runLoopSource, kCFRunLoopCommonModes);
 }

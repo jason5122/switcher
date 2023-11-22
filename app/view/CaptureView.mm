@@ -71,6 +71,14 @@ struct CppMembers {
     }
 }
 
+- (void)stopCapture {
+    if (!hasStarted) return;
+
+    if (!cpp->capture_engine->stop_capture()) {
+        log_with_type(OS_LOG_TYPE_ERROR, @"stop capture failed", @"opengl-view");
+    }
+}
+
 - (void)update {
     [super update];
     [self.openGLContext update];

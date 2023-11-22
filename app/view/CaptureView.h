@@ -11,5 +11,6 @@ struct CppMembers;
 
 - (id)initWithFrame:(NSRect)frame targetWindow:(SCWindow*)window;
 - (void)startCapture;
+- (void)stopCapture;
 
 @end

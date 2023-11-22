@@ -12,6 +12,7 @@ class capture_engine {
 public:
     capture_engine(NSOpenGLContext* context);
     bool start_capture(NSRect frame, SCWindow* target_window);
+    bool stop_capture();
     void tick();
     void render();
 

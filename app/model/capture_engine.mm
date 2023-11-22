@@ -80,17 +80,27 @@ bool capture_engine::start_capture(NSRect frame, SCWindow* target_window) {
 
     dispatch_semaphore_t stream_start_completed = dispatch_semaphore_create(0);
 
-    __block BOOL did_stream_start = false;
+    __block BOOL is_success = false;
     [sc->disp startCaptureWithCompletionHandler:^(NSError* _Nullable error) {
-      did_stream_start = (BOOL)(error == nil);
-      if (!did_stream_start) {
+      is_success = (BOOL)(error == nil);
+      if (!is_success) {
           log_with_type(OS_LOG_TYPE_ERROR, [error localizedFailureReason], @"capture-engine");
       }
       dispatch_semaphore_signal(stream_start_completed);
     }];
     dispatch_semaphore_wait(stream_start_completed, DISPATCH_TIME_FOREVER);
+    return is_success;
+}
 
-    return did_stream_start;
+bool capture_engine::stop_capture() {
+    __block BOOL is_success = false;
+    [sc->disp stopCaptureWithCompletionHandler:^(NSError* _Nullable error) {
+      is_success = (BOOL)(error == nil);
+      if (!is_success) {
+          log_with_type(OS_LOG_TYPE_ERROR, [error localizedFailureReason], @"capture-engine");
+      }
+    }];
+    return is_success;
 }
 
 void capture_engine::setup_shaders() {

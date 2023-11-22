@@ -48,7 +48,7 @@ struct CppMembers {
         for (int i = 0; i < count; i++) {
             SCWindow* capture_window = [cpp->content_engine.windows objectAtIndex:i];
             CaptureView* screenCapture = [[CaptureView alloc] initWithFrame:screenCaptureRect
-                                                             targetWindow:capture_window];
+                                                               targetWindow:capture_window];
             CGFloat x = padding;
             CGFloat y = padding;
             x += (width + padding) * i;
@@ -70,7 +70,7 @@ struct CppMembers {
     return self;
 }
 
-- (void)setupWindowAndSpace {
+- (void)showWindow {
     for (CaptureView* screenCapture : cpp->screen_captures) {
         // dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
         //                ^{ [screenCapture startCapture]; });
@@ -87,6 +87,13 @@ struct CppMembers {
     [window makeKeyAndOrderFront:nil];
 
     [space addWindow:window];
+}
+
+- (void)hideWindow {
+    for (CaptureView* screenCapture : cpp->screen_captures) {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
+                       ^{ [screenCapture stopCapture]; });
+    }
 }
 
 @end

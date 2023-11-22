@@ -12,6 +12,7 @@ struct CppMembers;
     CGSSpace* space;
 }
 
-- (void)setupWindowAndSpace;
+- (void)showWindow;
+- (void)hideWindow;
 
 @end
