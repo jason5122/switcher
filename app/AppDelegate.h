@@ -4,7 +4,7 @@
 struct CppMembers;
 
 @interface AppDelegate : NSObject <NSApplicationDelegate> {
-    struct CppMembers* _cppMembers;
+    struct CppMembers* cpp;
     WindowController* windowController;
 }
 

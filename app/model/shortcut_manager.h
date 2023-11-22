@@ -3,12 +3,12 @@
 #import <string>
 #import <unordered_map>
 
-class global_switcher_shortcut {
+class shortcut_manager {
 public:
     WindowController* windowController;
 
-    global_switcher_shortcut(WindowController* windowController);
-    ~global_switcher_shortcut();
+    shortcut_manager(WindowController* windowController);
+    ~shortcut_manager();
     void register_hotkey(NSString* shortcutString, std::string action);
     void add_global_handler();
     void add_modifier_event_tap();

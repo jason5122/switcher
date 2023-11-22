@@ -15,12 +15,12 @@ macos_app_bundle("app") {
     "main.mm",
     "model/capture_content.mm",
     "model/capture_engine.mm",
-    "model/global_switcher_shortcut.mm",
+    "model/shortcut_manager.mm",
     "private_apis/CGSSpace.m",
     "util/file_util.mm",
     "util/log_util.mm",
     "util/shader_util.cc",
-    "view/OpenGLView.mm",
+    "view/CaptureView.mm",
   ]
 
   frameworks = [

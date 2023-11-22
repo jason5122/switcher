@@ -1,4 +1,4 @@
-#import "OpenGLView.h"
+#import "CaptureView.h"
 #import "model/capture_engine.h"
 #import "util/log_util.h"
 #import <Cocoa/Cocoa.h>
@@ -8,7 +8,7 @@ struct CppMembers {
     capture_engine* capture_engine;
 };
 
-@implementation OpenGLView
+@implementation CaptureView
 
 - (id)initWithFrame:(NSRect)frame targetWindow:(SCWindow*)window {
     NSOpenGLPixelFormatAttribute attribs[] = {
@@ -39,7 +39,7 @@ struct CppMembers {
 
     self = [super initWithFrame:frame pixelFormat:pf];
     if (self) {
-        _cppMembers = new CppMembers;
+        cpp = new CppMembers;
         targetWindow = window;
         hasStarted = false;
     }
@@ -58,13 +58,13 @@ struct CppMembers {
     [self.openGLContext setValues:&opacity forParameter:NSOpenGLCPSurfaceOpacity];
 #pragma clang diagnostic pop
 
-    _cppMembers->capture_engine = new capture_engine(self.openGLContext);
+    cpp->capture_engine = new capture_engine(self.openGLContext);
 }
 
 - (void)startCapture {
     if (hasStarted) return;
 
-    if (!_cppMembers->capture_engine->start_capture(self.frame, targetWindow)) {
+    if (!cpp->capture_engine->start_capture(self.frame, targetWindow)) {
         log_with_type(OS_LOG_TYPE_ERROR, @"start capture failed", @"opengl-view");
     } else {
         hasStarted = true;

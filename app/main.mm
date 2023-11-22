@@ -1,11 +1,11 @@
 #import "AppDelegate.h"
 #import "Menu.h"
-#import "model/global_switcher_shortcut.h"
+#import "model/shortcut_manager.h"
 #import <Cocoa/Cocoa.h>
 
 int main() {
     signal(SIGTERM, [](int sig) {
-        global_switcher_shortcut::set_native_command_tab_enabled(true);
+        shortcut_manager::set_native_command_tab_enabled(true);
         exit(0);
     });
 

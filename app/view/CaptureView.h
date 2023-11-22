@@ -3,8 +3,8 @@
 
 struct CppMembers;
 
-@interface OpenGLView : NSOpenGLView {
-    struct CppMembers* _cppMembers;
+@interface CaptureView : NSOpenGLView {
+    struct CppMembers* cpp;
     SCWindow* targetWindow;
     bool hasStarted;
 }

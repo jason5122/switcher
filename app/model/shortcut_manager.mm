@@ -1,14 +1,14 @@
-#import "global_switcher_shortcut.h"
 #import "private_apis/CGSHotKeys.h"
+#import "shortcut_manager.h"
 #import "util/log_util.h"
 #import <ShortcutRecorder/ShortcutRecorder.h>
 #import <vector>
 
-global_switcher_shortcut::global_switcher_shortcut(WindowController* windowController) {
+shortcut_manager::shortcut_manager(WindowController* windowController) {
     this->windowController = windowController;
 }
 
-void global_switcher_shortcut::register_hotkey(NSString* shortcutString, std::string action) {
+void shortcut_manager::register_hotkey(NSString* shortcutString, std::string action) {
     SRShortcut* shortcut = [SRShortcut shortcutWithKeyEquivalent:shortcutString];
     EventHotKeyID hotKeyId = {signature, global_hotkey_map[action]};
     EventHotKeyRef hotKey;
@@ -21,7 +21,7 @@ void global_switcher_shortcut::register_hotkey(NSString* shortcutString, std::st
     }
 }
 
-void handle_event(EventHotKeyID hotKeyId, global_switcher_shortcut* handler, bool is_pressed) {
+void handle_event(EventHotKeyID hotKeyId, shortcut_manager* handler, bool is_pressed) {
     if (!is_pressed) return;
 
     std::string state = is_pressed ? "pressed" : "released";
@@ -35,7 +35,7 @@ void handle_event(EventHotKeyID hotKeyId, global_switcher_shortcut* handler, boo
     }
 }
 
-void global_switcher_shortcut::add_global_handler() {
+void shortcut_manager::add_global_handler() {
     std::vector<EventTypeSpec> event_types_pressed = {{kEventClassKeyboard, kEventHotKeyPressed}};
     InstallEventHandler(
         GetEventDispatcherTarget(),
@@ -43,7 +43,7 @@ void global_switcher_shortcut::add_global_handler() {
             EventHotKeyID hotKeyId;
             GetEventParameter(inEvent, kEventParamDirectObject, typeEventHotKeyID, nil,
                               sizeof(EventHotKeyID), nil, &hotKeyId);
-            global_switcher_shortcut* handler = (global_switcher_shortcut*)inUserData;
+            shortcut_manager* handler = (shortcut_manager*)inUserData;
             handle_event(hotKeyId, handler, true);
             return noErr;
         },
@@ -57,7 +57,7 @@ void global_switcher_shortcut::add_global_handler() {
             EventHotKeyID hotKeyId;
             GetEventParameter(inEvent, kEventParamDirectObject, typeEventHotKeyID, nil,
                               sizeof(EventHotKeyID), nil, &hotKeyId);
-            global_switcher_shortcut* handler = (global_switcher_shortcut*)inUserData;
+            shortcut_manager* handler = (shortcut_manager*)inUserData;
             handle_event(hotKeyId, handler, false);
             return noErr;
         },
@@ -77,7 +77,7 @@ CGEventRef modifier_callback(CGEventTapProxy proxy, CGEventType type, CGEventRef
     return cgEvent;
 }
 
-void global_switcher_shortcut::add_modifier_event_tap() {
+void shortcut_manager::add_modifier_event_tap() {
     CGEventMask eventMask = (1 << kCGEventFlagsChanged);
     CFMachPortRef eventTap =
         CGEventTapCreate(kCGSessionEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault,
@@ -86,11 +86,11 @@ void global_switcher_shortcut::add_modifier_event_tap() {
     CFRunLoopAddSource(CFRunLoopGetMain(), runLoopSource, kCFRunLoopCommonModes);
 }
 
-void global_switcher_shortcut::set_native_command_tab_enabled(bool is_enabled) {
+void shortcut_manager::set_native_command_tab_enabled(bool is_enabled) {
     CGSSetSymbolicHotKeyEnabled(commandTab, is_enabled);
 }
 
-global_switcher_shortcut::~global_switcher_shortcut() {
+shortcut_manager::~shortcut_manager() {
     RemoveEventHandler(hotkey_pressed_handler);
     RemoveEventHandler(hotkey_released_handler);
 }

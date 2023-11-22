@@ -1,11 +1,11 @@
 #import "WindowController.h"
 #import "model/capture_content.h"
 #import "util/log_util.h"
-#import "view/OpenGLView.h"
+#import "view/CaptureView.h"
 #import <vector>
 
 struct CppMembers {
-    std::vector<OpenGLView*> screen_captures;
+    std::vector<CaptureView*> screen_captures;
     capture_content content_engine;
 };
 
@@ -47,7 +47,7 @@ struct CppMembers {
 
         for (int i = 0; i < count; i++) {
             SCWindow* capture_window = [cpp->content_engine.windows objectAtIndex:i];
-            OpenGLView* screenCapture = [[OpenGLView alloc] initWithFrame:screenCaptureRect
+            CaptureView* screenCapture = [[CaptureView alloc] initWithFrame:screenCaptureRect
                                                              targetWindow:capture_window];
             CGFloat x = padding;
             CGFloat y = padding;
@@ -71,7 +71,7 @@ struct CppMembers {
 }
 
 - (void)setupWindowAndSpace {
-    for (OpenGLView* screenCapture : cpp->screen_captures) {
+    for (CaptureView* screenCapture : cpp->screen_captures) {
         // dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
         //                ^{ [screenCapture startCapture]; });
         [screenCapture startCapture];
