@@ -5,7 +5,7 @@
 struct CppMembers;
 
 @interface WindowController : NSWindowController <NSWindowDelegate> {
-    struct CppMembers* _cppMembers;
+    struct CppMembers* cpp;
     NSWindow* window;
 
 @private

@@ -5,7 +5,7 @@ capture_content::capture_content() {
     shareable_content_available = dispatch_semaphore_create(0);
 }
 
-void capture_content::build_content_list() {
+void capture_content::get_content() {
     typedef void (^shareable_content_callback)(SCShareableContent*, NSError*);
     shareable_content_callback new_content_received =
         ^void(SCShareableContent* shareable_content, NSError* error) {
@@ -26,14 +26,14 @@ void capture_content::build_content_list() {
                                                  completionHandler:new_content_received];
 }
 
-NSArray<SCWindow*>* capture_content::get_filtered_windows() {
+void capture_content::build_window_list() {
     dispatch_semaphore_wait(shareable_content_available, DISPATCH_TIME_FOREVER);
 
     NSSet* excluded_window_titles = [NSSet setWithObjects:@"Menubar", @"Item-0", nil];
     NSSet* excluded_application_names =
         [NSSet setWithObjects:@"Notification Center", @"Control Center", @"Dock", nil];
 
-    return [shareable_content.windows
+    windows = [shareable_content.windows
         filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(SCWindow* window,
                                                                           NSDictionary* bindings) {
           NSString* app_name = window.owningApplication.applicationName;

@@ -14,27 +14,17 @@ struct CppMembers {
 - (instancetype)init {
     self = [super init];
     if (self) {
-        _cppMembers = new CppMembers;
+        cpp = new CppMembers;
+        cpp->content_engine = capture_content();
+        cpp->content_engine.get_content();
+        cpp->content_engine.build_window_list();
 
-        _cppMembers->content_engine = capture_content();
-        _cppMembers->content_engine.build_content_list();
-        NSArray<SCWindow*>* filtered_windows = _cppMembers->content_engine.get_filtered_windows();
-        for (SCWindow* w in filtered_windows) {
-            NSString* app_name = w.owningApplication.applicationName;
-            NSString* title = w.title;
-            NSString* message = [NSString stringWithFormat:@"%@ \"%@\"", title, app_name];
-            log_with_type(OS_LOG_TYPE_DEFAULT, message, @"window-controller");
-        }
+        int count = cpp->content_engine.windows.count;
 
-        space = [[CGSSpace alloc] initWithLevel:1];
-
-        // CGFloat width = 400, height = 250;
         CGFloat width = 320, height = 200;
-        // CGFloat width = 200, height = 125;
-        // TODO: separate into left- and right-padding
         CGFloat padding = 20;
         NSRect windowRect =
-            NSMakeRect(0, 0, (width + padding) * 3 + padding, height + padding * 2);
+            NSMakeRect(0, 0, (width + padding) * count + padding, height + padding * 2);
         NSRect screenCaptureRect = NSMakeRect(0, 0, width, height);
 
         int mask = NSWindowStyleMaskFullSizeContentView;
@@ -55,8 +45,8 @@ struct CppMembers {
 
         window.contentView = visualEffect;
 
-        for (int i = 0; i < filtered_windows.count; i++) {
-            SCWindow* capture_window = [filtered_windows objectAtIndex:i];
+        for (int i = 0; i < count; i++) {
+            SCWindow* capture_window = [cpp->content_engine.windows objectAtIndex:i];
             OpenGLView* screenCapture = [[OpenGLView alloc] initWithFrame:screenCaptureRect
                                                              targetWindow:capture_window];
             CGFloat x = padding;
@@ -64,20 +54,24 @@ struct CppMembers {
             x += (width + padding) * i;
             screenCapture.frameOrigin = CGPointMake(x, y);
             [visualEffect addSubview:screenCapture];
-            _cppMembers->screen_captures.push_back(screenCapture);
+            cpp->screen_captures.push_back(screenCapture);
+
+            NSString* app_name = capture_window.owningApplication.applicationName;
+            NSString* title = capture_window.title;
+            NSString* message = [NSString stringWithFormat:@"%@ \"%@\"", title, app_name];
+            log_with_type(OS_LOG_TYPE_DEFAULT, message, @"window-controller");
         }
+
+        space = [[CGSSpace alloc] initWithLevel:1];
 
         // TODO: experimental; consider adding/removing
         // window.ignoresMouseEvents = true;
-
-        // TODO: debug; remove
-        // window.movableByWindowBackground = true;
     }
     return self;
 }
 
 - (void)setupWindowAndSpace {
-    for (OpenGLView* screenCapture : _cppMembers->screen_captures) {
+    for (OpenGLView* screenCapture : cpp->screen_captures) {
         // dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
         //                ^{ [screenCapture startCapture]; });
         [screenCapture startCapture];
@@ -90,8 +84,6 @@ struct CppMembers {
     CGFloat y = fmax(screenSize.height - panelSize.height, 0) * 0.5;
     window.frameOrigin = NSMakePoint(x, y);
 
-    // [window center];
-    // [window setFrameAutosaveName:@"switcher"];
     [window makeKeyAndOrderFront:nil];
 
     [space addWindow:window];

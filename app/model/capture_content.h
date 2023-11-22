@@ -2,9 +2,11 @@
 
 class capture_content {
 public:
+    NSArray<SCWindow*>* windows;
+
     capture_content();
-    void build_content_list();
-    NSArray<SCWindow*>* get_filtered_windows();
+    void get_content();
+    void build_window_list();
 
 private:
     SCShareableContent* shareable_content;
