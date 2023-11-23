@@ -12,6 +12,8 @@ struct CppMembers;
     CGSSpace* space;
 }
 
+@property(nonatomic) bool isShown;
+
 - (void)showWindow;
 - (void)hideWindow;
 

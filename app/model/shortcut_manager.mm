@@ -17,7 +17,7 @@ void shortcut_manager::register_hotkey(NSString* shortcutString, std::string act
                             GetEventDispatcherTarget(), kEventHotKeyNoOptions, &hotKey);
     if (status != noErr) {
         log_with_type(OS_LOG_TYPE_ERROR, [NSString stringWithFormat:@"register fail: %d", status],
-                      @"global-switcher-shortcut");
+                      @"shortcut-manager");
     }
 }
 
@@ -27,11 +27,10 @@ void handle_event(EventHotKeyID hotKeyId, shortcut_manager* handler, bool is_pre
     std::string state = is_pressed ? "pressed" : "released";
 
     if (hotKeyId.id == 0) {
-        log_with_type(OS_LOG_TYPE_DEFAULT, "nextWindowShortcut " + state,
-                      @"global-switcher-shortcut");
+        log_with_type(OS_LOG_TYPE_DEFAULT, "nextWindowShortcut " + state, @"shortcut-manager");
         [handler->windowController showWindow];
     } else if (hotKeyId.id == 2) {
-        log_with_type(OS_LOG_TYPE_DEFAULT, "cancelShortcut " + state, @"global-switcher-shortcut");
+        log_with_type(OS_LOG_TYPE_DEFAULT, "cancelShortcut " + state, @"shortcut-manager");
     }
 }
 
@@ -70,17 +69,25 @@ CGEventRef modifier_callback(CGEventTapProxy proxy, CGEventType type, CGEventRef
     if (type == kCGEventFlagsChanged) {
         NSUInteger flags = CGEventGetFlags(cgEvent);
         if (flags & NSEventModifierFlagCommand) {
-            // log_with_type(OS_LOG_TYPE_DEFAULT, @"⌘ pressed", @"global-switcher-shortcut");
+            // log_with_type(OS_LOG_TYPE_DEFAULT, @"⌘ pressed", @"shortcut-manager");
         } else {
-            log_with_type(OS_LOG_TYPE_DEFAULT, @"⌘ released", @"global-switcher-shortcut");
+            log_with_type(OS_LOG_TYPE_DEFAULT, @"⌘ released", @"shortcut-manager");
             [handler->windowController hideWindow];
+        }
+    } else if (type == kCGEventKeyDown) {
+        CGKeyCode keycode =
+            (CGKeyCode)CGEventGetIntegerValueField(cgEvent, kCGKeyboardEventKeycode);
+        if (keycode == 53 && handler->windowController.isShown) {
+            log_with_type(OS_LOG_TYPE_DEFAULT, @"escape pressed", @"shortcut-manager");
+            [handler->windowController hideWindow];
+            return nil;
         }
     }
     return cgEvent;
 }
 
 void shortcut_manager::add_modifier_event_tap() {
-    CGEventMask eventMask = (1 << kCGEventFlagsChanged);
+    CGEventMask eventMask = CGEventMaskBit(kCGEventFlagsChanged) | CGEventMaskBit(kCGEventKeyDown);
     CFMachPortRef eventTap =
         CGEventTapCreate(kCGSessionEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault,
                          eventMask, modifier_callback, this);

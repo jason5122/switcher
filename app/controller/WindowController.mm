@@ -19,6 +19,8 @@ struct CppMembers {
         cpp->content_engine.get_content();
         cpp->content_engine.build_window_list();
 
+        _isShown = false;
+
         int count = cpp->content_engine.windows.count;
 
         CGFloat width = 320, height = 200;
@@ -72,6 +74,9 @@ struct CppMembers {
 }
 
 - (void)showWindow {
+    if (_isShown) return;
+    else _isShown = true;
+
     for (CaptureView* screenCapture : cpp->screen_captures) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
                        ^{ [screenCapture startCapture]; });
@@ -89,6 +94,9 @@ struct CppMembers {
 }
 
 - (void)hideWindow {
+    if (!_isShown) return;
+    else _isShown = false;
+
     [window orderOut:nil];
 
     for (CaptureView* screenCapture : cpp->screen_captures) {

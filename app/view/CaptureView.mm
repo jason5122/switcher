@@ -64,8 +64,6 @@ struct CppMembers {
 - (void)startCapture {
     if (hasStarted) return;
 
-    log_with_type(OS_LOG_TYPE_DEFAULT, @"hey there", @"capture-view");
-
     if (!cpp->capture_engine->start_capture()) {
         log_with_type(OS_LOG_TYPE_ERROR, @"start capture failed", @"capture-view");
     } else {

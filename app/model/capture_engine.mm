@@ -14,7 +14,7 @@ struct screen_capture {
 
     pthread_mutex_t mutex;
 
-    CGWindowID window;
+    CGWindowID window;  // TODO: use this to match and kill streams when they become nil
 
     NSOpenGLContext* context;
 
