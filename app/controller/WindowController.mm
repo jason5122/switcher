@@ -1,4 +1,5 @@
 #import "WindowController.h"
+#import "extensions/ScreenCaptureKit.h"
 #import "model/capture_content.h"
 #import "private_apis/AXUIElement.h"
 #import "util/log_util.h"
@@ -48,8 +49,47 @@ struct CppMembers {
 
         window.contentView = visualEffect;
 
-        for (int i = 0; i < count; i++) {
+        // YESSIR
+        // SCWindow* capture_window = [cpp->content_engine.windows objectAtIndex:i];
+
+        // SCWindow* hmm = [[SCWindow alloc] initWithWindowId:0 withFrame:capture_window.frame];
+
+        // CaptureView* screenCapture = [[CaptureView alloc] initWithFrame:screenCaptureRect
+        //                                                    targetWindow:capture_window];
+        // CGFloat x = padding;
+        // CGFloat y = padding;
+        // x += (width + padding) * i;
+        // screenCapture.frameOrigin = CGPointMake(x, y);
+        // [visualEffect addSubview:screenCapture];
+        // cpp->screen_captures.push_back(screenCapture);
+
+        // NSString* app_name = capture_window.owningApplication.applicationName;
+        // NSString* title = capture_window.title;
+        // NSString* message = [NSString stringWithFormat:@"%@ \"%@\"", title, app_name];
+        // log_with_type(OS_LOG_TYPE_DEFAULT, message, @"window-controller");
+        // YESSIR
+
+        for (int i = 0; i < 1; i++) {
             SCWindow* capture_window = [cpp->content_engine.windows objectAtIndex:i];
+
+            // SCWindow* hmm = [cpp->content_engine.windows objectAtIndex:i];
+            // SCRunningApplication* yessapp = [[SCRunningApplication alloc]
+            //     initWithBundleIdentifier:capture_window.owningApplication.bundleIdentifier
+            //              applicationName:capture_window.owningApplication.applicationName
+            //                    processID:capture_window.owningApplication.processID];
+            // SCWindow* yess = [[SCWindow alloc] initWithWindowId:capture_window.windowID
+            //                                               frame:capture_window.frame
+            //                                               title:capture_window.title
+            //                                   owningApplication:yessapp];
+
+            // if (capture_window.windowID != 58967) continue;
+            // capture_window.windowID = capture_window.windowID;
+            // CGWindowID wid = [capture_window getWindowID];
+            // capture_window.windowID = wid;
+
+            SCWindow* wow = [cpp->content_engine.windows objectAtIndex:1];
+            [capture_window setValue:[NSNumber numberWithInteger:wow.windowID] forKey:@"windowID"];
+
             CaptureView* screenCapture = [[CaptureView alloc] initWithFrame:screenCaptureRect
                                                                targetWindow:capture_window];
             CGFloat x = padding;
@@ -59,21 +99,36 @@ struct CppMembers {
             [visualEffect addSubview:screenCapture];
             cpp->screen_captures.push_back(screenCapture);
 
-            NSString* app_name = capture_window.owningApplication.applicationName;
-            NSString* title = capture_window.title;
-            NSString* message = [NSString stringWithFormat:@"%@ \"%@\"", title, app_name];
-            log_with_type(OS_LOG_TYPE_DEFAULT, message, @"window-controller");
+            // NSString* app_name = capture_window.owningApplication.applicationName;
+            // NSString* title = capture_window.title;
+            // NSString* message = [NSString stringWithFormat:@"%@ \"%@\"", title, app_name];
+            // log_with_type(OS_LOG_TYPE_DEFAULT, message, @"window-controller");
+
+            [self debugPrint:capture_window app:capture_window.owningApplication];
+            // [self debugPrint:yess app:yess.owningApplication];
         }
 
         space = [[CGSSpace alloc] initWithLevel:1];
         [space addWindow:window];
 
-        [self observeApplications];
+        // [self observeApplications];
 
         // TODO: experimental; consider adding/removing
         // window.ignoresMouseEvents = true;
     }
     return self;
+}
+
+- (void)debugPrint:(SCWindow*)scwindow app:(SCRunningApplication*)scapp {
+    log_with_type(OS_LOG_TYPE_DEFAULT,
+                  [NSString stringWithFormat:@"\"%@\" %d %fx%f layer: %ld %d \n %@ %@ %d",
+                                             scwindow.title, scwindow.windowID,
+                                             scwindow.frame.size.width, scwindow.frame.size.height,
+                                             scwindow.windowLayer, scwindow.onScreen,
+                                             scwindow.owningApplication.bundleIdentifier,
+                                             scwindow.owningApplication.applicationName,
+                                             scwindow.owningApplication.processID],
+                  @"window-controller");
 }
 
 - (void)observeApplications {
@@ -128,7 +183,9 @@ struct CppMembers {
         CGWindowID wid = CGWindowID();
         _AXUIElementGetWindow(windowRef, &wid);
 
-        AXUIElementPerformAction(windowRef, kAXRaiseAction);
+        // AXUIElementPerformAction(windowRef, kAXRaiseAction);
+        log_with_type(OS_LOG_TYPE_DEFAULT, [NSString stringWithFormat:@"wid: %d", wid],
+                      @"window-controller");
     }
 }
 

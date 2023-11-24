@@ -12,6 +12,7 @@ macos_app_bundle("app") {
     "AppDelegate.mm",
     "Menu.m",
     "controller/WindowController.mm",
+    "extensions/ScreenCaptureKit.m",
     "main.mm",
     "model/capture_content.mm",
     "model/capture_engine.mm",
