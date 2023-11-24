@@ -68,6 +68,7 @@ CGEventRef modifier_callback(CGEventTapProxy proxy, CGEventType type, CGEventRef
         NSUInteger flags = CGEventGetFlags(cgEvent);
         if (!(flags & NSEventModifierFlagCommand) && handler->windowController.isShown) {
             log_with_type(OS_LOG_TYPE_DEFAULT, @"⌘ released", @"shortcut-manager");
+            [handler->windowController focusSelectedIndex];
             [handler->windowController hideWindow];
         }
     } else if (type == kCGEventKeyDown) {
@@ -92,7 +93,7 @@ void shortcut_manager::add_modifier_event_tap() {
 }
 
 void shortcut_manager::set_native_command_tab_enabled(bool is_enabled) {
-    CGSSetSymbolicHotKeyEnabled(commandTab, is_enabled);
+    CGSSetSymbolicHotKeyEnabled(kCGCommandTab, is_enabled);
 }
 
 shortcut_manager::~shortcut_manager() {

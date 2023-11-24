@@ -1,12 +1,14 @@
 #import "WindowController.h"
 #import "extensions/ScreenCaptureKit.h"
 #import "private_apis/AXUIElement.h"
+#import "private_apis/SkyLight.h"
 #import "util/log_util.h"
 #import "view/CaptureView.h"
 #import <vector>
 
 struct CppMembers {
     std::vector<CaptureView*> screen_captures;
+    std::vector<AXUIElementRef> axui_refs;
 };
 
 @implementation WindowController
@@ -17,6 +19,7 @@ struct CppMembers {
         cpp = new CppMembers;
 
         _isShown = false;
+        selectedIndex = 0;
 
         [self observeApplications];
 
@@ -74,9 +77,9 @@ struct CppMembers {
             x += (width + padding) * i;
             screenCapture.frameOrigin = CGPointMake(x, y);
             [visualEffect addSubview:screenCapture];
-            cpp->screen_captures.push_back(screenCapture);
 
-            // AXUIElementPerformAction(windowRef, kAXRaiseAction);
+            cpp->screen_captures.push_back(screenCapture);
+            cpp->axui_refs.push_back(windowRef);
         }
     }
     return self;
@@ -121,6 +124,22 @@ struct CppMembers {
     AXObserverAddNotification(axObserver, axUiElement, kAXWindowCreatedNotification, nil);
     CFRunLoopAddSource(CFRunLoopGetMain(), AXObserverGetRunLoopSource(axObserver),
                        kCFRunLoopDefaultMode);
+
+    appPid = pid;
+}
+
+- (void)focusSelectedIndex {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    ProcessSerialNumber psn = ProcessSerialNumber();
+    CGWindowID wid = CGWindowID();
+    _AXUIElementGetWindow(cpp->axui_refs[selectedIndex], &wid);
+    GetProcessForPID(appPid, &psn);
+#pragma clang diagnostic pop
+
+    // https://github.com/koekeishiya/yabai/issues/1772#issuecomment-1649919480
+    _SLPSSetFrontProcessWithOptions(&psn, 0, kSLPSNoWindows);
+    AXUIElementPerformAction(cpp->axui_refs[selectedIndex], kAXRaiseAction);
 }
 
 - (void)showWindow {

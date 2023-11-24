@@ -33,9 +33,13 @@ macos_app_bundle("app") {
     "GLKit.framework",
     "Carbon.framework",
     "ShortcutRecorder.framework",
+    "SkyLight.framework",
   ]
 
-  framework_dirs = [ "third_party" ]
+  framework_dirs = [
+    "third_party",
+    "/System/Library/PrivateFrameworks",
+  ]
 
   include_dirs = [ "//app" ]
 

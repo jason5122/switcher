@@ -11,10 +11,13 @@ struct CppMembers;
 
 @private
     CGSSpace* space;
+    int selectedIndex;
+    pid_t appPid;
 }
 
 @property(nonatomic) bool isShown;
 
+- (void)focusSelectedIndex;
 - (void)showWindow;
 - (void)hideWindow;
 
