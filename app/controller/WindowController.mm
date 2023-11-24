@@ -1,6 +1,5 @@
 #import "WindowController.h"
 #import "extensions/ScreenCaptureKit.h"
-#import "model/capture_content.h"
 #import "private_apis/AXUIElement.h"
 #import "util/log_util.h"
 #import "view/CaptureView.h"
@@ -8,7 +7,6 @@
 
 struct CppMembers {
     std::vector<CaptureView*> screen_captures;
-    capture_content content_engine;
 };
 
 @implementation WindowController
@@ -17,9 +15,6 @@ struct CppMembers {
     self = [super init];
     if (self) {
         cpp = new CppMembers;
-        // cpp->content_engine = capture_content();
-        // cpp->content_engine.get_content();
-        // cpp->content_engine.build_window_list();
 
         _isShown = false;
 
