@@ -17,13 +17,18 @@ struct CppMembers {
     self = [super init];
     if (self) {
         cpp = new CppMembers;
-        cpp->content_engine = capture_content();
-        cpp->content_engine.get_content();
-        cpp->content_engine.build_window_list();
+        // cpp->content_engine = capture_content();
+        // cpp->content_engine.get_content();
+        // cpp->content_engine.build_window_list();
 
         _isShown = false;
 
-        int count = cpp->content_engine.windows.count;
+        [self observeApplications];
+
+        CFArrayRef windowList;
+        AXUIElementCopyAttributeValue(axUiElement, kAXWindowsAttribute, (CFTypeRef*)&windowList);
+
+        int count = CFArrayGetCount(windowList);
 
         CGFloat width = 320, height = 200;
         CGFloat padding = 20;
@@ -49,46 +54,23 @@ struct CppMembers {
 
         window.contentView = visualEffect;
 
-        // YESSIR
-        // SCWindow* capture_window = [cpp->content_engine.windows objectAtIndex:i];
+        space = [[CGSSpace alloc] initWithLevel:1];
+        [space addWindow:window];
 
-        // SCWindow* hmm = [[SCWindow alloc] initWithWindowId:0 withFrame:capture_window.frame];
+        log_with_type(
+            OS_LOG_TYPE_DEFAULT,
+            [NSString stringWithFormat:@"window count: %ld", CFArrayGetCount(windowList)],
+            @"window-controller");
 
-        // CaptureView* screenCapture = [[CaptureView alloc] initWithFrame:screenCaptureRect
-        //                                                    targetWindow:capture_window];
-        // CGFloat x = padding;
-        // CGFloat y = padding;
-        // x += (width + padding) * i;
-        // screenCapture.frameOrigin = CGPointMake(x, y);
-        // [visualEffect addSubview:screenCapture];
-        // cpp->screen_captures.push_back(screenCapture);
+        for (int i = 0; i < count; i++) {
+            AXUIElementRef windowRef = (AXUIElementRef)CFArrayGetValueAtIndex(windowList, i);
+            CGWindowID wid = CGWindowID();
+            _AXUIElementGetWindow(windowRef, &wid);
 
-        // NSString* app_name = capture_window.owningApplication.applicationName;
-        // NSString* title = capture_window.title;
-        // NSString* message = [NSString stringWithFormat:@"%@ \"%@\"", title, app_name];
-        // log_with_type(OS_LOG_TYPE_DEFAULT, message, @"window-controller");
-        // YESSIR
+            log_with_type(OS_LOG_TYPE_DEFAULT, [NSString stringWithFormat:@"wid: %d", wid],
+                          @"window-controller");
 
-        for (int i = 0; i < 1; i++) {
-            SCWindow* capture_window = [cpp->content_engine.windows objectAtIndex:i];
-
-            // SCWindow* hmm = [cpp->content_engine.windows objectAtIndex:i];
-            // SCRunningApplication* yessapp = [[SCRunningApplication alloc]
-            //     initWithBundleIdentifier:capture_window.owningApplication.bundleIdentifier
-            //              applicationName:capture_window.owningApplication.applicationName
-            //                    processID:capture_window.owningApplication.processID];
-            // SCWindow* yess = [[SCWindow alloc] initWithWindowId:capture_window.windowID
-            //                                               frame:capture_window.frame
-            //                                               title:capture_window.title
-            //                                   owningApplication:yessapp];
-
-            // if (capture_window.windowID != 58967) continue;
-            // capture_window.windowID = capture_window.windowID;
-            // CGWindowID wid = [capture_window getWindowID];
-            // capture_window.windowID = wid;
-
-            SCWindow* wow = [cpp->content_engine.windows objectAtIndex:1];
-            [capture_window setValue:[NSNumber numberWithInteger:wow.windowID] forKey:@"windowID"];
+            SCWindow* capture_window = [[SCWindow alloc] initWithId:wid];
 
             CaptureView* screenCapture = [[CaptureView alloc] initWithFrame:screenCaptureRect
                                                                targetWindow:capture_window];
@@ -99,36 +81,10 @@ struct CppMembers {
             [visualEffect addSubview:screenCapture];
             cpp->screen_captures.push_back(screenCapture);
 
-            // NSString* app_name = capture_window.owningApplication.applicationName;
-            // NSString* title = capture_window.title;
-            // NSString* message = [NSString stringWithFormat:@"%@ \"%@\"", title, app_name];
-            // log_with_type(OS_LOG_TYPE_DEFAULT, message, @"window-controller");
-
-            [self debugPrint:capture_window app:capture_window.owningApplication];
-            // [self debugPrint:yess app:yess.owningApplication];
+            // AXUIElementPerformAction(windowRef, kAXRaiseAction);
         }
-
-        space = [[CGSSpace alloc] initWithLevel:1];
-        [space addWindow:window];
-
-        // [self observeApplications];
-
-        // TODO: experimental; consider adding/removing
-        // window.ignoresMouseEvents = true;
     }
     return self;
-}
-
-- (void)debugPrint:(SCWindow*)scwindow app:(SCRunningApplication*)scapp {
-    log_with_type(OS_LOG_TYPE_DEFAULT,
-                  [NSString stringWithFormat:@"\"%@\" %d %fx%f layer: %ld %d \n %@ %@ %d",
-                                             scwindow.title, scwindow.windowID,
-                                             scwindow.frame.size.width, scwindow.frame.size.height,
-                                             scwindow.windowLayer, scwindow.onScreen,
-                                             scwindow.owningApplication.bundleIdentifier,
-                                             scwindow.owningApplication.applicationName,
-                                             scwindow.owningApplication.processID],
-                  @"window-controller");
 }
 
 - (void)observeApplications {
@@ -151,7 +107,7 @@ struct CppMembers {
     log_with_type(OS_LOG_TYPE_DEFAULT, sublime.localizedName, @"window-controller");
     pid_t pid = sublime.processIdentifier;
     AXObserverRef axObserver;
-    AXUIElementRef axUiElement = AXUIElementCreateApplication(pid);
+    axUiElement = AXUIElementCreateApplication(pid);
 
     // WARNING: starting SCStream triggers kAXWindowCreatedNotification (one per captured window)
     AXObserverCreate(
@@ -170,23 +126,6 @@ struct CppMembers {
     AXObserverAddNotification(axObserver, axUiElement, kAXWindowCreatedNotification, nil);
     CFRunLoopAddSource(CFRunLoopGetMain(), AXObserverGetRunLoopSource(axObserver),
                        kCFRunLoopDefaultMode);
-
-    CFArrayRef windowList;
-    AXUIElementCopyAttributeValue(axUiElement, kAXWindowsAttribute, (CFTypeRef*)&windowList);
-
-    log_with_type(OS_LOG_TYPE_DEFAULT,
-                  [NSString stringWithFormat:@"window count: %ld", CFArrayGetCount(windowList)],
-                  @"window-controller");
-
-    for (int i = 0; i < CFArrayGetCount(windowList); i++) {
-        AXUIElementRef windowRef = (AXUIElementRef)CFArrayGetValueAtIndex(windowList, i);
-        CGWindowID wid = CGWindowID();
-        _AXUIElementGetWindow(windowRef, &wid);
-
-        // AXUIElementPerformAction(windowRef, kAXRaiseAction);
-        log_with_type(OS_LOG_TYPE_DEFAULT, [NSString stringWithFormat:@"wid: %d", wid],
-                      @"window-controller");
-    }
 }
 
 - (void)showWindow {
