@@ -1,5 +1,6 @@
 #import "WindowController.h"
 #import "model/capture_content.h"
+#import "private_apis/AXUIElement.h"
 #import "util/log_util.h"
 #import "view/CaptureView.h"
 #import <vector>
@@ -67,10 +68,53 @@ struct CppMembers {
         space = [[CGSSpace alloc] initWithLevel:1];
         [space addWindow:window];
 
+        [self observeApplications];
+
         // TODO: experimental; consider adding/removing
         // window.ignoresMouseEvents = true;
     }
     return self;
+}
+
+- (void)observeApplications {
+    NSRunningApplication* sublime;
+
+    NSArray<NSRunningApplication*>* apps = NSWorkspace.sharedWorkspace.runningApplications;
+    for (NSRunningApplication* app in apps) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        ProcessSerialNumber psn = ProcessSerialNumber();
+        ProcessInfoRec info = ProcessInfoRec();
+        GetProcessForPID(app.processIdentifier, &psn);
+        GetProcessInformation(&psn, &info);
+#pragma clang diagnostic pop
+
+        if (info.processType == 'XPC!') continue;
+        if ([app.localizedName isEqual:@"Sublime Text"]) sublime = app;
+    }
+
+    log_with_type(OS_LOG_TYPE_DEFAULT, sublime.localizedName, @"window-controller");
+    pid_t pid = sublime.processIdentifier;
+    AXObserverRef axObserver;
+    AXUIElementRef axUiElement = AXUIElementCreateApplication(pid);
+
+    // WARNING: starting SCStream triggers kAXWindowCreatedNotification (one per captured window)
+    AXObserverCreate(
+        pid,
+        [](AXObserverRef observer, AXUIElementRef element, CFStringRef notificationName,
+           void* refCon) {
+            CGWindowID wid = CGWindowID();
+            _AXUIElementGetWindow(element, &wid);
+            if (CFEqual(notificationName, kAXWindowCreatedNotification)) {
+                log_with_type(OS_LOG_TYPE_DEFAULT,
+                              [NSString stringWithFormat:@"window created: %d", wid],
+                              @"window-controller");
+            }
+        },
+        &axObserver);
+    AXObserverAddNotification(axObserver, axUiElement, kAXWindowCreatedNotification, nil);
+    CFRunLoopAddSource(CFRunLoopGetMain(), AXObserverGetRunLoopSource(axObserver),
+                       kCFRunLoopDefaultMode);
 }
 
 - (void)showWindow {
@@ -80,7 +124,6 @@ struct CppMembers {
     for (CaptureView* screenCapture : cpp->screen_captures) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
                        ^{ [screenCapture startCapture]; });
-        // [screenCapture startCapture];
     }
 
     // actually center window

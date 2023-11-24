@@ -29,8 +29,6 @@ void handle_event(EventHotKeyID hotKeyId, shortcut_manager* handler, bool is_pre
     if (hotKeyId.id == 0) {
         log_with_type(OS_LOG_TYPE_DEFAULT, "nextWindowShortcut " + state, @"shortcut-manager");
         [handler->windowController showWindow];
-    } else if (hotKeyId.id == 2) {
-        log_with_type(OS_LOG_TYPE_DEFAULT, "cancelShortcut " + state, @"shortcut-manager");
     }
 }
 
@@ -68,9 +66,7 @@ CGEventRef modifier_callback(CGEventTapProxy proxy, CGEventType type, CGEventRef
     shortcut_manager* handler = (shortcut_manager*)inUserData;
     if (type == kCGEventFlagsChanged) {
         NSUInteger flags = CGEventGetFlags(cgEvent);
-        if (flags & NSEventModifierFlagCommand) {
-            // log_with_type(OS_LOG_TYPE_DEFAULT, @"⌘ pressed", @"shortcut-manager");
-        } else {
+        if (!(flags & NSEventModifierFlagCommand) && handler->windowController.isShown) {
             log_with_type(OS_LOG_TYPE_DEFAULT, @"⌘ released", @"shortcut-manager");
             [handler->windowController hideWindow];
         }
