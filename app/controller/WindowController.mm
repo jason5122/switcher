@@ -115,6 +115,21 @@ struct CppMembers {
     AXObserverAddNotification(axObserver, axUiElement, kAXWindowCreatedNotification, nil);
     CFRunLoopAddSource(CFRunLoopGetMain(), AXObserverGetRunLoopSource(axObserver),
                        kCFRunLoopDefaultMode);
+
+    CFArrayRef windowList;
+    AXUIElementCopyAttributeValue(axUiElement, kAXWindowsAttribute, (CFTypeRef*)&windowList);
+
+    log_with_type(OS_LOG_TYPE_DEFAULT,
+                  [NSString stringWithFormat:@"window count: %ld", CFArrayGetCount(windowList)],
+                  @"window-controller");
+
+    for (int i = 0; i < CFArrayGetCount(windowList); i++) {
+        AXUIElementRef windowRef = (AXUIElementRef)CFArrayGetValueAtIndex(windowList, i);
+        CGWindowID wid = CGWindowID();
+        _AXUIElementGetWindow(windowRef, &wid);
+
+        AXUIElementPerformAction(windowRef, kAXRaiseAction);
+    }
 }
 
 - (void)showWindow {
