@@ -7,7 +7,7 @@
 #import <vector>
 
 @interface WindowController : NSWindowController {
-    NSWindow* nswindow;
+    NSWindow* mainWindow;
     AXUIElementRef axUiElement;
 
 @private

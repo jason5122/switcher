@@ -1,3 +1,4 @@
+#import "model/window.h"
 #import "view/CaptureView.h"
 #import <Cocoa/Cocoa.h>
 
@@ -5,7 +6,7 @@
     CaptureView* captureView;
 }
 
-- (instancetype)initWithWindowId:(CGWindowID)windowId;
+- (instancetype)initWithWindow:(window)window;
 - (void)startCapture;
 - (void)stopCapture;
 

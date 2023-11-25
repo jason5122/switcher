@@ -21,49 +21,82 @@
         CGFloat padding = 30;
         NSRect windowRect =
             NSMakeRect(0, 0, (width + padding) * size + padding, height + padding * 2);
-        NSRect screenCaptureRect = NSMakeRect(0, 0, width, height);
 
         int mask = NSWindowStyleMaskFullSizeContentView;
-        nswindow = [[NSWindow alloc] initWithContentRect:windowRect
-                                               styleMask:mask
-                                                 backing:NSBackingStoreBuffered
-                                                   defer:false];
-        nswindow.hasShadow = false;
-        nswindow.backgroundColor = NSColor.clearColor;
+        mainWindow = [[NSWindow alloc] initWithContentRect:windowRect
+                                                 styleMask:mask
+                                                   backing:NSBackingStoreBuffered
+                                                     defer:false];
+        mainWindow.hasShadow = false;
+        mainWindow.backgroundColor = NSColor.clearColor;
 
-        NSVisualEffectView* visualEffect = [[NSVisualEffectView alloc] init];
-        visualEffect.blendingMode = NSVisualEffectBlendingModeBehindWindow;
-        visualEffect.material = NSVisualEffectMaterialHUDWindow;
-        visualEffect.state = NSVisualEffectStateActive;
+        // NSVisualEffectView* mainView = [[NSVisualEffectView alloc] init];
+        // // mainView.blendingMode = NSVisualEffectBlendingModeBehindWindow;
+        // mainView.material = NSVisualEffectMaterialHUDWindow;
+        // // mainView.material = NSVisualEffectMaterialSelection;
+        // mainView.state = NSVisualEffectStateActive;
+        // mainView.wantsLayer = true;
+        // mainView.layer.cornerRadius = 9.0;
 
-        visualEffect.wantsLayer = true;
-        visualEffect.layer.cornerRadius = 9.0;
-
-        nswindow.contentView = visualEffect;
+        NSStackView* mainView = [[NSStackView alloc] init];
+        // NSView* mainView = [[NSView alloc] init];
+        mainView.wantsLayer = true;
+        mainView.layer.borderColor = CGColorGetConstantColor(kCGColorBlack);
+        mainView.layer.borderWidth = 5;
+        mainView.layer.backgroundColor =
+            [NSColor colorWithCalibratedRed:1 green:0 blue:0 alpha:0.5f].CGColor;
+        ;
 
         space = [[CGSSpace alloc] initWithLevel:1];
-        [space addWindow:nswindow];
+        [space addWindow:mainWindow];
 
         for (int i = 0; i < size; i++) {
             CaptureViewController* captureViewController =
-                [[CaptureViewController alloc] initWithWindowId:windows[i].wid];
+                [[CaptureViewController alloc] initWithWindow:windows[i]];
             CGFloat x = padding;
             CGFloat y = padding;
             x += (width + padding) * i;
+            captureViewController.view.frame =
+                CGRectInset(captureViewController.view.frame, 10, 10);
             captureViewController.view.frameOrigin = CGPointMake(x, y);
-            [visualEffect addSubview:captureViewController.view];
+            // [mainView addSubview:captureViewController.view];
 
-            NSTextField* titleText = [NSTextField labelWithString:windows[i].title];
-            titleText.frameOrigin = CGPointMake(x, y - 20);
-            titleText.frameSize = CGSizeMake(width, 20);
-            titleText.alignment = NSTextAlignmentCenter;
-            [visualEffect addSubview:titleText];
+            // NSStackView* blurView = [[NSStackView alloc] init];
+            // NSVisualEffectView* blurView = [[NSVisualEffectView alloc] init];
+            // blurView.frame = CGRectMake(x, y, 320, 200);
+            // NSView* blurView = [[NSView alloc] initWithFrame:CGRectMake(0, 0, 600, 600)];
+            // blurView.blendingMode = NSVisualEffectBlendingModeBehindWindow;
+            // blurView.material = NSVisualEffectMaterialSelection;
+            // blurView.state = NSVisualEffectStateActive;
+            // blurView.wantsLayer = true;
+            // blurView.layer.cornerRadius = 9.0;
+
+            // NSTextField* titleText = [NSTextField labelWithString:windows[i].title];
+            // titleText.frameOrigin = CGPointMake(x, y - 20);
+            // titleText.frameSize = CGSizeMake(width, 20);
+            // titleText.alignment = NSTextAlignmentCenter;
+            // [mainView addSubview:titleText];
+
+            // [blurView addSubview:captureViewController.view];
+            // [mainView addSubview:blurView];
+            [mainView addSubview:captureViewController.view];
 
             capture_controllers.push_back(captureViewController);
         }
 
+        mainWindow.contentView = mainView;
+
         // TODO: experimental; maybe remove
-        nswindow.ignoresMouseEvents = true;
+        mainWindow.ignoresMouseEvents = true;
+
+        // actually center window
+        NSSize screenSize = NSScreen.mainScreen.frame.size;
+        NSSize panelSize = mainWindow.frame.size;
+        CGFloat x = fmax(screenSize.width - panelSize.width, 0) * 0.5;
+        CGFloat y = fmax(screenSize.height - panelSize.height, 0) * 0.5;
+        mainWindow.frameOrigin = NSMakePoint(x, y);
+
+        [mainWindow makeKeyAndOrderFront:nil];
     }
     return self;
 }
@@ -118,19 +151,19 @@
 
     // actually center window
     NSSize screenSize = NSScreen.mainScreen.frame.size;
-    NSSize panelSize = nswindow.frame.size;
+    NSSize panelSize = mainWindow.frame.size;
     CGFloat x = fmax(screenSize.width - panelSize.width, 0) * 0.5;
     CGFloat y = fmax(screenSize.height - panelSize.height, 0) * 0.5;
-    nswindow.frameOrigin = NSMakePoint(x, y);
+    mainWindow.frameOrigin = NSMakePoint(x, y);
 
-    [nswindow makeKeyAndOrderFront:nil];
+    [mainWindow makeKeyAndOrderFront:nil];
 }
 
 - (void)hideWindow {
     if (!_isShown) return;
     else _isShown = false;
 
-    [nswindow orderOut:nil];
+    [mainWindow orderOut:nil];
 
     for (CaptureViewController* controller : capture_controllers) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
