@@ -18,7 +18,8 @@
         int size = windows.size();
 
         CGFloat width = 320, height = 200;
-        CGFloat padding = 30;
+        CGFloat padding = 20;
+        // CGFloat padding = 0;
         NSRect windowRect =
             NSMakeRect(0, 0, (width + padding) * size + padding, height + padding * 2);
 
@@ -30,22 +31,22 @@
         mainWindow.hasShadow = false;
         mainWindow.backgroundColor = NSColor.clearColor;
 
-        // NSVisualEffectView* mainView = [[NSVisualEffectView alloc] init];
-        // // mainView.blendingMode = NSVisualEffectBlendingModeBehindWindow;
-        // mainView.material = NSVisualEffectMaterialHUDWindow;
-        // // mainView.material = NSVisualEffectMaterialSelection;
-        // mainView.state = NSVisualEffectStateActive;
-        // mainView.wantsLayer = true;
-        // mainView.layer.cornerRadius = 9.0;
-
-        NSStackView* mainView = [[NSStackView alloc] init];
-        // NSView* mainView = [[NSView alloc] init];
+        NSVisualEffectView* mainView = [[NSVisualEffectView alloc] init];
+        // mainView.blendingMode = NSVisualEffectBlendingModeBehindWindow;
+        mainView.material = NSVisualEffectMaterialHUDWindow;
+        // mainView.material = NSVisualEffectMaterialSelection;
+        mainView.state = NSVisualEffectStateActive;
         mainView.wantsLayer = true;
-        mainView.layer.borderColor = CGColorGetConstantColor(kCGColorBlack);
-        mainView.layer.borderWidth = 5;
-        mainView.layer.backgroundColor =
-            [NSColor colorWithCalibratedRed:1 green:0 blue:0 alpha:0.5f].CGColor;
-        ;
+        mainView.layer.cornerRadius = 9.0;
+
+        // NSStackView* mainView = [[NSStackView alloc] init];
+        // // NSView* mainView = [[NSView alloc] init];
+        // mainView.wantsLayer = true;
+        // mainView.layer.borderColor = CGColorGetConstantColor(kCGColorBlack);
+        // mainView.layer.borderWidth = 5;
+        // mainView.layer.backgroundColor =
+        //     [NSColor colorWithCalibratedRed:1 green:0 blue:0 alpha:0.5f].CGColor;
+        // ;
 
         space = [[CGSSpace alloc] initWithLevel:1];
         [space addWindow:mainWindow];
@@ -56,8 +57,8 @@
             CGFloat x = padding;
             CGFloat y = padding;
             x += (width + padding) * i;
-            captureViewController.view.frame =
-                CGRectInset(captureViewController.view.frame, 10, 10);
+            // captureViewController.view.frame =
+            //     CGRectInset(captureViewController.view.frame, 10, 10);
             captureViewController.view.frameOrigin = CGPointMake(x, y);
             // [mainView addSubview:captureViewController.view];
 
@@ -88,15 +89,6 @@
 
         // TODO: experimental; maybe remove
         mainWindow.ignoresMouseEvents = true;
-
-        // actually center window
-        NSSize screenSize = NSScreen.mainScreen.frame.size;
-        NSSize panelSize = mainWindow.frame.size;
-        CGFloat x = fmax(screenSize.width - panelSize.width, 0) * 0.5;
-        CGFloat y = fmax(screenSize.height - panelSize.height, 0) * 0.5;
-        mainWindow.frameOrigin = NSMakePoint(x, y);
-
-        [mainWindow makeKeyAndOrderFront:nil];
     }
     return self;
 }
