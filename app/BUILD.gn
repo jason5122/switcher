@@ -14,6 +14,7 @@ macos_app_bundle("app") {
     "controller/WindowController.mm",
     "extensions/ScreenCaptureKit.m",
     "main.mm",
+    "model/application.mm",
     "model/capture_engine.mm",
     "model/shortcut_manager.mm",
     "private_apis/CGSSpace.m",

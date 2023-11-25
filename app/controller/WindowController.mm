@@ -1,30 +1,24 @@
 #import "WindowController.h"
 #import "extensions/ScreenCaptureKit.h"
-#import "private_apis/AXUIElement.h"
+#import "private_apis/Accessiblity.h"
 #import "private_apis/SkyLight.h"
 #import "util/log_util.h"
-#import "view/CaptureView.h"
-#import <vector>
-
-struct CppMembers {
-    std::vector<CaptureView*> screen_captures;
-    std::vector<AXUIElementRef> axui_refs;
-};
 
 @implementation WindowController
 
 - (instancetype)init {
     self = [super init];
     if (self) {
-        cpp = new CppMembers;
-
         _isShown = false;
         selectedIndex = 0;
 
-        [self observeApplications];
+        [self addInitialApplications];
+
+        appPid = applications[0].runningApp.processIdentifier;
 
         CFArrayRef windowList;
-        AXUIElementCopyAttributeValue(axUiElement, kAXWindowsAttribute, (CFTypeRef*)&windowList);
+        AXUIElementCopyAttributeValue(applications[0].axUiElement, kAXWindowsAttribute,
+                                      (CFTypeRef*)&windowList);
 
         int count = CFArrayGetCount(windowList);
 
@@ -78,75 +72,51 @@ struct CppMembers {
             screenCapture.frameOrigin = CGPointMake(x, y);
             [visualEffect addSubview:screenCapture];
 
-            cpp->screen_captures.push_back(screenCapture);
-            cpp->axui_refs.push_back(windowRef);
+            screen_captures.push_back(screenCapture);
+            axui_refs.push_back(windowRef);
         }
     }
     return self;
 }
 
-- (void)observeApplications {
-    NSRunningApplication* sublime;
-
-    NSArray<NSRunningApplication*>* apps = NSWorkspace.sharedWorkspace.runningApplications;
-    for (NSRunningApplication* app in apps) {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-        ProcessSerialNumber psn = ProcessSerialNumber();
-        ProcessInfoRec info = ProcessInfoRec();
-        GetProcessForPID(app.processIdentifier, &psn);
-        GetProcessInformation(&psn, &info);
-#pragma clang diagnostic pop
-
-        if (info.processType == 'XPC!') continue;
-        if ([app.localizedName isEqual:@"Sublime Text"]) sublime = app;
+- (void)addInitialApplications {
+    for (NSRunningApplication* runningApp in NSWorkspace.sharedWorkspace.runningApplications) {
+        application app = application(runningApp);
+        if (![app.localizedName() isEqual:@"Sublime Text"]) continue;
+        if (!app.is_xpc()) applications.push_back(app);
     }
+}
 
-    log_with_type(OS_LOG_TYPE_DEFAULT, sublime.localizedName, @"window-controller");
-    pid_t pid = sublime.processIdentifier;
-    AXObserverRef axObserver;
-    axUiElement = AXUIElementCreateApplication(pid);
+- (void)cycleSelectedIndex {
+    selectedIndex++;
+    if (selectedIndex == axui_refs.size()) selectedIndex = 0;
 
-    // WARNING: starting SCStream triggers kAXWindowCreatedNotification (one per captured window)
-    AXObserverCreate(
-        pid,
-        [](AXObserverRef observer, AXUIElementRef element, CFStringRef notificationName,
-           void* refCon) {
-            CGWindowID wid = CGWindowID();
-            _AXUIElementGetWindow(element, &wid);
-            if (CFEqual(notificationName, kAXWindowCreatedNotification)) {
-                log_with_type(OS_LOG_TYPE_DEFAULT,
-                              [NSString stringWithFormat:@"window created: %d", wid],
-                              @"window-controller");
-            }
-        },
-        &axObserver);
-    AXObserverAddNotification(axObserver, axUiElement, kAXWindowCreatedNotification, nil);
-    CFRunLoopAddSource(CFRunLoopGetMain(), AXObserverGetRunLoopSource(axObserver),
-                       kCFRunLoopDefaultMode);
-
-    appPid = pid;
+    log_with_type(OS_LOG_TYPE_DEFAULT,
+                  [NSString stringWithFormat:@"index after cycle: %d", selectedIndex],
+                  @"window-controller");
 }
 
 - (void)focusSelectedIndex {
+    if (axui_refs.empty()) return;
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
     ProcessSerialNumber psn = ProcessSerialNumber();
     CGWindowID wid = CGWindowID();
-    _AXUIElementGetWindow(cpp->axui_refs[selectedIndex], &wid);
+    _AXUIElementGetWindow(axui_refs[selectedIndex], &wid);
     GetProcessForPID(appPid, &psn);
 #pragma clang diagnostic pop
 
     // https://github.com/koekeishiya/yabai/issues/1772#issuecomment-1649919480
     _SLPSSetFrontProcessWithOptions(&psn, 0, kSLPSNoWindows);
-    AXUIElementPerformAction(cpp->axui_refs[selectedIndex], kAXRaiseAction);
+    AXUIElementPerformAction(axui_refs[selectedIndex], kAXRaiseAction);
 }
 
 - (void)showWindow {
     if (_isShown) return;
     else _isShown = true;
 
-    for (CaptureView* screenCapture : cpp->screen_captures) {
+    for (CaptureView* screenCapture : screen_captures) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
                        ^{ [screenCapture startCapture]; });
     }
@@ -167,7 +137,7 @@ struct CppMembers {
 
     [window orderOut:nil];
 
-    for (CaptureView* screenCapture : cpp->screen_captures) {
+    for (CaptureView* screenCapture : screen_captures) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
                        ^{ [screenCapture stopCapture]; });
     }
