@@ -17,6 +17,7 @@ macos_app_bundle("app") {
     "model/application.mm",
     "model/capture_engine.mm",
     "model/shortcut_manager.mm",
+    "model/window.mm",
     "private_apis/CGSSpace.m",
     "util/file_util.mm",
     "util/log_util.mm",

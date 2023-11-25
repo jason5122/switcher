@@ -5,12 +5,10 @@
 application::application(NSRunningApplication* runningApp) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-    ProcessSerialNumber psn = ProcessSerialNumber();
     GetProcessForPID(runningApp.processIdentifier, &psn);
 #pragma clang diagnostic pop
 
     this->runningApp = runningApp;
-    this->psn = psn;
     this->axUiElement = AXUIElementCreateApplication(runningApp.processIdentifier);
 }
 
@@ -25,6 +23,19 @@ bool application::is_xpc() {
     GetProcessInformation(&psn, &info);
 #pragma clang diagnostic pop
     return info.processType == 'XPC!';
+}
+
+void application::populate_initial_windows() {
+    CFArrayRef windowList;
+    AXUIElementCopyAttributeValue(axUiElement, kAXWindowsAttribute, (CFTypeRef*)&windowList);
+    for (int i = 0; i < CFArrayGetCount(windowList); i++) {
+        AXUIElementRef windowRef = (AXUIElementRef)CFArrayGetValueAtIndex(windowList, i);
+        windows.push_back(window(runningApp.processIdentifier, windowRef));
+    }
+}
+
+void application::append_windows(std::vector<window>& windows) {
+    windows.insert(windows.end(), this->windows.begin(), this->windows.end());
 }
 
 void application::add_observer() {

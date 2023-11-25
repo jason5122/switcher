@@ -1,3 +1,5 @@
+#import <Cocoa/Cocoa.h>
+
 typedef enum {
     kSLPSAllWindows = 0x100,
     kSLPSUserGenerated = 0x200,

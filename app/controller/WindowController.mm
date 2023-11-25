@@ -1,7 +1,6 @@
 #import "WindowController.h"
 #import "extensions/ScreenCaptureKit.h"
 #import "private_apis/Accessiblity.h"
-#import "private_apis/SkyLight.h"
 #import "util/log_util.h"
 
 @implementation WindowController
@@ -12,29 +11,23 @@
         _isShown = false;
         selectedIndex = 0;
 
-        [self addInitialApplications];
+        [self populateInitialApplications];
 
-        appPid = applications[0].runningApp.processIdentifier;
-
-        CFArrayRef windowList;
-        AXUIElementCopyAttributeValue(applications[0].axUiElement, kAXWindowsAttribute,
-                                      (CFTypeRef*)&windowList);
-
-        int count = CFArrayGetCount(windowList);
+        int size = windows.size();
 
         CGFloat width = 320, height = 200;
         CGFloat padding = 20;
         NSRect windowRect =
-            NSMakeRect(0, 0, (width + padding) * count + padding, height + padding * 2);
+            NSMakeRect(0, 0, (width + padding) * size + padding, height + padding * 2);
         NSRect screenCaptureRect = NSMakeRect(0, 0, width, height);
 
         int mask = NSWindowStyleMaskFullSizeContentView;
-        window = [[NSWindow alloc] initWithContentRect:windowRect
-                                             styleMask:mask
-                                               backing:NSBackingStoreBuffered
-                                                 defer:false];
-        window.hasShadow = false;
-        window.backgroundColor = NSColor.clearColor;
+        nswindow = [[NSWindow alloc] initWithContentRect:windowRect
+                                               styleMask:mask
+                                                 backing:NSBackingStoreBuffered
+                                                   defer:false];
+        nswindow.hasShadow = false;
+        nswindow.backgroundColor = NSColor.clearColor;
 
         NSVisualEffectView* visualEffect = [[NSVisualEffectView alloc] init];
         visualEffect.blendingMode = NSVisualEffectBlendingModeBehindWindow;
@@ -44,26 +37,13 @@
         visualEffect.wantsLayer = true;
         visualEffect.layer.cornerRadius = 9.0;
 
-        window.contentView = visualEffect;
+        nswindow.contentView = visualEffect;
 
         space = [[CGSSpace alloc] initWithLevel:1];
-        [space addWindow:window];
+        [space addWindow:nswindow];
 
-        log_with_type(
-            OS_LOG_TYPE_DEFAULT,
-            [NSString stringWithFormat:@"window count: %ld", CFArrayGetCount(windowList)],
-            @"window-controller");
-
-        for (int i = 0; i < count; i++) {
-            AXUIElementRef windowRef = (AXUIElementRef)CFArrayGetValueAtIndex(windowList, i);
-            CGWindowID wid = CGWindowID();
-            _AXUIElementGetWindow(windowRef, &wid);
-
-            log_with_type(OS_LOG_TYPE_DEFAULT, [NSString stringWithFormat:@"wid: %d", wid],
-                          @"window-controller");
-
-            SCWindow* capture_window = [[SCWindow alloc] initWithId:wid];
-
+        for (int i = 0; i < size; i++) {
+            SCWindow* capture_window = [[SCWindow alloc] initWithId:windows[i].wid];
             CaptureView* screenCapture = [[CaptureView alloc] initWithFrame:screenCaptureRect
                                                                targetWindow:capture_window];
             CGFloat x = padding;
@@ -73,23 +53,32 @@
             [visualEffect addSubview:screenCapture];
 
             screen_captures.push_back(screenCapture);
-            axui_refs.push_back(windowRef);
         }
     }
     return self;
 }
 
-- (void)addInitialApplications {
+- (void)populateInitialApplications {
     for (NSRunningApplication* runningApp in NSWorkspace.sharedWorkspace.runningApplications) {
         application app = application(runningApp);
-        if (![app.localizedName() isEqual:@"Sublime Text"]) continue;
-        if (!app.is_xpc()) applications.push_back(app);
+
+        if ([app.localizedName() isEqual:@"Sublime Text"] ||
+            [app.localizedName() isEqual:@"Chromium"]) {
+            log_with_type(OS_LOG_TYPE_DEFAULT, app.localizedName(), @"window-controller");
+
+            if (!app.is_xpc()) {
+                app.populate_initial_windows();
+                applications.push_back(app);
+
+                app.append_windows(windows);
+            }
+        };
     }
 }
 
 - (void)cycleSelectedIndex {
     selectedIndex++;
-    if (selectedIndex == axui_refs.size()) selectedIndex = 0;
+    if (selectedIndex == windows.size()) selectedIndex = 0;
 
     log_with_type(OS_LOG_TYPE_DEFAULT,
                   [NSString stringWithFormat:@"index after cycle: %d", selectedIndex],
@@ -97,19 +86,9 @@
 }
 
 - (void)focusSelectedIndex {
-    if (axui_refs.empty()) return;
+    if (windows.empty()) return;
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-    ProcessSerialNumber psn = ProcessSerialNumber();
-    CGWindowID wid = CGWindowID();
-    _AXUIElementGetWindow(axui_refs[selectedIndex], &wid);
-    GetProcessForPID(appPid, &psn);
-#pragma clang diagnostic pop
-
-    // https://github.com/koekeishiya/yabai/issues/1772#issuecomment-1649919480
-    _SLPSSetFrontProcessWithOptions(&psn, 0, kSLPSNoWindows);
-    AXUIElementPerformAction(axui_refs[selectedIndex], kAXRaiseAction);
+    windows[selectedIndex].focus();
 }
 
 - (void)showWindow {
@@ -123,19 +102,19 @@
 
     // actually center window
     NSSize screenSize = NSScreen.mainScreen.frame.size;
-    NSSize panelSize = window.frame.size;
+    NSSize panelSize = nswindow.frame.size;
     CGFloat x = fmax(screenSize.width - panelSize.width, 0) * 0.5;
     CGFloat y = fmax(screenSize.height - panelSize.height, 0) * 0.5;
-    window.frameOrigin = NSMakePoint(x, y);
+    nswindow.frameOrigin = NSMakePoint(x, y);
 
-    [window makeKeyAndOrderFront:nil];
+    [nswindow makeKeyAndOrderFront:nil];
 }
 
 - (void)hideWindow {
     if (!_isShown) return;
     else _isShown = false;
 
-    [window orderOut:nil];
+    [nswindow orderOut:nil];
 
     for (CaptureView* screenCapture : screen_captures) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),

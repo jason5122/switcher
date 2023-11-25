@@ -1,4 +1,5 @@
 #import "model/application.h"
+#import "model/window.h"
 #import "private_apis/CGSSpace.h"
 #import "view/CaptureView.h"
 #import <Cocoa/Cocoa.h>
@@ -6,7 +7,7 @@
 #import <vector>
 
 @interface WindowController : NSWindowController <NSWindowDelegate> {
-    NSWindow* window;
+    NSWindow* nswindow;
     AXUIElementRef axUiElement;
 
 @private
@@ -15,8 +16,8 @@
     pid_t appPid;
 
     std::vector<application> applications;
+    std::vector<window> windows;
     std::vector<CaptureView*> screen_captures;
-    std::vector<AXUIElementRef> axui_refs;
 }
 
 @property(nonatomic) bool isShown;
