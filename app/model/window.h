@@ -5,8 +5,9 @@ class window {
 public:
     CGWindowID wid;
     NSString* title;
+    NSImage* icon;
 
-    window(pid_t app_pid, AXUIElementRef windowRef);
+    window(pid_t app_pid, AXUIElementRef windowRef, NSImage* icon);
     void focus();
 
 private:

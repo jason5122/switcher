@@ -17,7 +17,7 @@
 
         int size = windows.size();
 
-        CGFloat width = 320, height = 200;
+        CGFloat width = 280, height = 175;
         CGFloat padding = 20;
         // CGFloat padding = 0;
         NSRect windowRect =

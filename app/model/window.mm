@@ -1,7 +1,7 @@
 #import "private_apis/SkyLight.h"
 #import "window.h"
 
-window::window(pid_t app_pid, AXUIElementRef windowRef) {
+window::window(pid_t app_pid, AXUIElementRef windowRef, NSImage* icon) {
     this->app_pid = app_pid;
     this->windowRef = windowRef;
 #pragma clang diagnostic push
@@ -9,6 +9,7 @@ window::window(pid_t app_pid, AXUIElementRef windowRef) {
     GetProcessForPID(app_pid, &psn);
 #pragma clang diagnostic pop
     _AXUIElementGetWindow(windowRef, &wid);
+    this->icon = icon;
 
     // TODO: monitor title updates
     CFStringRef stringRef;

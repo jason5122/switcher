@@ -35,7 +35,8 @@ void application::populate_initial_windows() {
         CFBooleanRef minimizedRef;
         AXUIElementCopyAttributeValue(windowRef, kAXMinimizedAttribute, (CFTypeRef*)&minimizedRef);
         bool is_minimized = CFBooleanGetValue(minimizedRef);
-        if (!is_minimized) windows.push_back(window(runningApp.processIdentifier, windowRef));
+        if (!is_minimized)
+            windows.push_back(window(runningApp.processIdentifier, windowRef, runningApp.icon));
     }
 }
 
