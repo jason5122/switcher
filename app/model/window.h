@@ -4,6 +4,7 @@
 class window {
 public:
     CGWindowID wid;
+    NSString* title;
 
     window(pid_t app_pid, AXUIElementRef windowRef);
     void focus();

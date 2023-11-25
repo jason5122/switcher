@@ -30,7 +30,12 @@ void application::populate_initial_windows() {
     AXUIElementCopyAttributeValue(axUiElement, kAXWindowsAttribute, (CFTypeRef*)&windowList);
     for (int i = 0; i < CFArrayGetCount(windowList); i++) {
         AXUIElementRef windowRef = (AXUIElementRef)CFArrayGetValueAtIndex(windowList, i);
-        windows.push_back(window(runningApp.processIdentifier, windowRef));
+
+        // TODO: handle minimized windows better
+        CFBooleanRef minimizedRef;
+        AXUIElementCopyAttributeValue(windowRef, kAXMinimizedAttribute, (CFTypeRef*)&minimizedRef);
+        bool is_minimized = CFBooleanGetValue(minimizedRef);
+        if (!is_minimized) windows.push_back(window(runningApp.processIdentifier, windowRef));
     }
 }
 

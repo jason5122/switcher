@@ -16,7 +16,7 @@
         int size = windows.size();
 
         CGFloat width = 320, height = 200;
-        CGFloat padding = 20;
+        CGFloat padding = 30;
         NSRect windowRect =
             NSMakeRect(0, 0, (width + padding) * size + padding, height + padding * 2);
         NSRect screenCaptureRect = NSMakeRect(0, 0, width, height);
@@ -52,8 +52,17 @@
             screenCapture.frameOrigin = CGPointMake(x, y);
             [visualEffect addSubview:screenCapture];
 
+            NSTextField* titleText = [NSTextField labelWithString:windows[i].title];
+            titleText.frameOrigin = CGPointMake(x, y - 20);
+            titleText.frameSize = CGSizeMake(width, 20);
+            titleText.alignment = NSTextAlignmentCenter;
+            [visualEffect addSubview:titleText];
+
             screen_captures.push_back(screenCapture);
         }
+
+        // TODO: experimental; maybe remove
+        nswindow.ignoresMouseEvents = true;
     }
     return self;
 }
@@ -89,6 +98,12 @@
     if (windows.empty()) return;
 
     windows[selectedIndex].focus();
+
+    // window temp = windows[selectedIndex];
+    // windows.erase(windows.begin() + selectedIndex);
+    // windows.insert(windows.begin(), temp);
+
+    // selectedIndex = 0;
 }
 
 - (void)showWindow {

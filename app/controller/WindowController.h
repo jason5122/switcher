@@ -13,7 +13,6 @@
 @private
     CGSSpace* space;
     int selectedIndex;
-    pid_t appPid;
 
     std::vector<application> applications;
     std::vector<window> windows;

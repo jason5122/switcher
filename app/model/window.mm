@@ -9,6 +9,11 @@ window::window(pid_t app_pid, AXUIElementRef windowRef) {
     GetProcessForPID(app_pid, &psn);
 #pragma clang diagnostic pop
     _AXUIElementGetWindow(windowRef, &wid);
+
+    // TODO: monitor title updates
+    CFStringRef stringRef;
+    AXUIElementCopyAttributeValue(windowRef, kAXTitleAttribute, (CFTypeRef*)&stringRef);
+    title = (__bridge NSString*)stringRef;
 }
 
 void window::focus() {
