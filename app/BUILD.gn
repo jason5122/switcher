@@ -11,6 +11,7 @@ macos_app_bundle("app") {
   sources = [
     "AppDelegate.mm",
     "Menu.m",
+    "controller/CaptureViewController.mm",
     "controller/WindowController.mm",
     "extensions/ScreenCaptureKit.m",
     "main.mm",

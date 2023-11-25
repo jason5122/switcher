@@ -1,7 +1,9 @@
 #import "WindowController.h"
+#import "controller/CaptureViewController.h"
 #import "extensions/ScreenCaptureKit.h"
 #import "private_apis/Accessiblity.h"
 #import "util/log_util.h"
+#import "view/CaptureView.h"
 
 @implementation WindowController
 
@@ -43,14 +45,13 @@
         [space addWindow:nswindow];
 
         for (int i = 0; i < size; i++) {
-            SCWindow* capture_window = [[SCWindow alloc] initWithId:windows[i].wid];
-            CaptureView* screenCapture = [[CaptureView alloc] initWithFrame:screenCaptureRect
-                                                               targetWindow:capture_window];
+            CaptureViewController* captureViewController =
+                [[CaptureViewController alloc] initWithWindowId:windows[i].wid];
             CGFloat x = padding;
             CGFloat y = padding;
             x += (width + padding) * i;
-            screenCapture.frameOrigin = CGPointMake(x, y);
-            [visualEffect addSubview:screenCapture];
+            captureViewController.view.frameOrigin = CGPointMake(x, y);
+            [visualEffect addSubview:captureViewController.view];
 
             NSTextField* titleText = [NSTextField labelWithString:windows[i].title];
             titleText.frameOrigin = CGPointMake(x, y - 20);
@@ -58,7 +59,7 @@
             titleText.alignment = NSTextAlignmentCenter;
             [visualEffect addSubview:titleText];
 
-            screen_captures.push_back(screenCapture);
+            capture_controllers.push_back(captureViewController);
         }
 
         // TODO: experimental; maybe remove
@@ -110,9 +111,9 @@
     if (_isShown) return;
     else _isShown = true;
 
-    for (CaptureView* screenCapture : screen_captures) {
+    for (CaptureViewController* controller : capture_controllers) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
-                       ^{ [screenCapture startCapture]; });
+                       ^{ [controller startCapture]; });
     }
 
     // actually center window
@@ -131,9 +132,9 @@
 
     [nswindow orderOut:nil];
 
-    for (CaptureView* screenCapture : screen_captures) {
+    for (CaptureViewController* controller : capture_controllers) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
-                       ^{ [screenCapture stopCapture]; });
+                       ^{ [controller stopCapture]; });
     }
 }
 
