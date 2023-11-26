@@ -9,5 +9,7 @@
 - (instancetype)initWithWindow:(window)window;
 - (void)startCapture;
 - (void)stopCapture;
+- (void)highlight;
+- (void)unhighlight;
 
 @end

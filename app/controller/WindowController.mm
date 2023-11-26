@@ -112,8 +112,14 @@
 }
 
 - (void)cycleSelectedIndex {
+    if (capture_controllers.empty()) return;
+
+    [capture_controllers[selectedIndex] unhighlight];
+
     selectedIndex++;
     if (selectedIndex == windows.size()) selectedIndex = 0;
+
+    [capture_controllers[selectedIndex] highlight];
 
     log_with_type(OS_LOG_TYPE_DEFAULT,
                   [NSString stringWithFormat:@"index after cycle: %d", selectedIndex],

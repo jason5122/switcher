@@ -12,8 +12,6 @@
 
         NSStackView* stackView = [[NSStackView alloc] initWithFrame:captureRect];
         stackView.wantsLayer = true;
-        stackView.layer.backgroundColor =
-            [NSColor colorWithCalibratedRed:0 green:0 blue:0 alpha:0.1f].CGColor;
         stackView.layer.cornerRadius = 9.0;
 
         // CGRect finalFrame = CGRectInset(captureRect, 10, 10);
@@ -46,6 +44,15 @@
 
 - (void)stopCapture {
     [captureView stopCapture];
+}
+
+- (void)highlight {
+    self.view.layer.backgroundColor =
+        [NSColor colorWithCalibratedRed:0 green:0 blue:0 alpha:0.1f].CGColor;
+}
+
+- (void)unhighlight {
+    self.view.layer.backgroundColor = CGColorGetConstantColor(kCGColorClear);
 }
 
 @end
