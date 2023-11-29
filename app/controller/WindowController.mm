@@ -65,9 +65,7 @@
 
         CGFloat padding = 20;
         CGFloat innerPadding = 15;
-        CGFloat width = 280 + innerPadding, height = 175 + innerPadding * 2;
-        // NSRect windowRect = NSMakeRect(0, 0, (width + padding) * size + padding + innerPadding,
-        //                                height + padding * 2);
+        CGFloat width = 280, height = 175;
 
         int mask = NSWindowStyleMaskFullSizeContentView;
         mainWindow = [[NSWindow alloc] initWithContentRect:NSZeroRect
@@ -81,34 +79,24 @@
                                                            padding:padding
                                                       innerPadding:innerPadding];
 
-        // NSVisualEffectView* mainView = [[NSVisualEffectView alloc] init];
-        // mainView.material = NSVisualEffectMaterialHUDWindow;
-        // mainView.state = NSVisualEffectStateActive;
-        // mainView.wantsLayer = true;
-        // mainView.layer.cornerRadius = 9.0;
-
         for (int i = 0; i < size; i++) {
             custom_log(OS_LOG_TYPE_DEFAULT, @"window-controller", @"%d: %@", windows[i].wid,
                        windows[i].title);
-
             [mainView addCaptureSubview:windows[i]];
-
-            //     CaptureViewController* captureViewController =
-            //         [[CaptureViewController alloc] initWithWindow:windows[i]];
-            //     CGFloat x = padding;
-            //     CGFloat y = padding;
-            //     x += (width + padding) * i;
-            //     captureViewController.view.frameOrigin = CGPointMake(x, y);
-
-            //     [mainView addSubview:captureViewController.view];
-            //     capture_controllers.push_back(captureViewController);
         }
-        NSSize contentSize =
-            NSMakeSize((width + padding) * mainView.subviews.count + padding + innerPadding,
-                       height + padding * 2);
+        NSSize contentSize = NSMakeSize(
+            (width + padding + innerPadding) * mainView.subviews.count + padding + innerPadding,
+            height + (padding + innerPadding) * 2);
         [mainWindow setContentSize:contentSize];
 
         mainWindow.contentView = mainView;
+
+        // actually center window
+        NSSize screenSize = NSScreen.mainScreen.frame.size;
+        NSSize panelSize = mainWindow.frame.size;
+        CGFloat x = fmax(screenSize.width - panelSize.width, 0) * 0.5;
+        CGFloat y = fmax(screenSize.height - panelSize.height, 0) * 0.5;
+        mainWindow.frameOrigin = NSMakePoint(x, y);
 
         space = [[CGSSpace alloc] initWithLevel:1];
         [space addWindow:mainWindow];
@@ -137,22 +125,11 @@
 }
 
 - (void)cycleSelectedIndex {
-    if (capture_controllers.empty()) return;
-
-    [capture_controllers[selectedIndex] unhighlight];
-
-    selectedIndex++;
-    if (selectedIndex == windows.size()) selectedIndex = 0;
-
-    [capture_controllers[selectedIndex] highlight];
-
-    custom_log(OS_LOG_TYPE_DEFAULT, @"window-controller", @"index after cycle: %d", selectedIndex);
+    [((MainView*)mainWindow.contentView) cycleSelectedIndex];
 }
 
 - (void)focusSelectedIndex {
-    if (windows.empty()) return;
-
-    windows[selectedIndex].focus();
+    [((MainView*)mainWindow.contentView) focusSelectedIndex];
 }
 
 - (void)showWindow {
@@ -162,19 +139,6 @@
     // [self listWindowsExperiment];  // TODO: debug; remove
 
     [mainWindow.contentView startCaptureSubviews];
-
-    // for (CaptureViewController* controller : capture_controllers) {
-    //     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
-    //                    ^{ [controller startCapture]; });
-    // }
-
-    // actually center window
-    NSSize screenSize = NSScreen.mainScreen.frame.size;
-    NSSize panelSize = mainWindow.frame.size;
-    CGFloat x = fmax(screenSize.width - panelSize.width, 0) * 0.5;
-    CGFloat y = fmax(screenSize.height - panelSize.height, 0) * 0.5;
-    mainWindow.frameOrigin = NSMakePoint(x, y);
-
     [mainWindow makeKeyAndOrderFront:nil];
 }
 
@@ -183,13 +147,7 @@
     else _isShown = false;
 
     [mainWindow orderOut:nil];
-
     [mainWindow.contentView stopCaptureSubviews];
-
-    // for (CaptureViewController* controller : capture_controllers) {
-    //     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
-    //                    ^{ [controller stopCapture]; });
-    // }
 }
 
 @end

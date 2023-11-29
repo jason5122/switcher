@@ -7,6 +7,7 @@ public:
     NSString* title;
     NSImage* icon;
 
+    window();
     window(pid_t app_pid, AXUIElementRef windowRef, NSImage* icon);
     void focus();
 

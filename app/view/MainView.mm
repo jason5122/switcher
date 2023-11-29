@@ -11,6 +11,7 @@
         size = initialSize;
         padding = initialPadding;
         innerPadding = initialInnerPadding;
+        selectedIndex = 0;
 
         self.material = NSVisualEffectMaterialHUDWindow;
         self.state = NSVisualEffectStateActive;
@@ -26,7 +27,7 @@
 
     CGFloat x = padding;
     CGFloat y = padding;
-    x += (size.width + padding) * self.subviews.count;
+    x += (size.width + padding + innerPadding) * self.subviews.count;
     captureViewController.view.frameOrigin = CGPointMake(x, y);
 
     [self addSubview:captureViewController.view];
@@ -45,6 +46,21 @@
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
                        ^{ [controller stopCapture]; });
     }
+}
+
+- (void)cycleSelectedIndex {
+    if (capture_controllers.empty()) return;
+
+    [capture_controllers[selectedIndex] unhighlight];
+    selectedIndex++;
+    if (selectedIndex == capture_controllers.size()) selectedIndex = 0;
+    [capture_controllers[selectedIndex] highlight];
+}
+
+- (void)focusSelectedIndex {
+    if (capture_controllers.empty()) return;
+
+    [capture_controllers[selectedIndex] focusWindow];
 }
 
 @end

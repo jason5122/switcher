@@ -7,6 +7,8 @@
 - (instancetype)initWithWindow:(window)window {
     self = [super init];
     if (self) {
+        self->w = window;
+
         CGFloat padding = 15;
         CGFloat width = 280, height = 175;
         CGRect viewFrame = NSMakeRect(0, 0, width + padding * 2, height + padding * 2);
@@ -53,6 +55,10 @@
 
 - (void)unhighlight {
     self.view.layer.backgroundColor = CGColorGetConstantColor(kCGColorClear);
+}
+
+- (void)focusWindow {
+    w.focus();
 }
 
 @end

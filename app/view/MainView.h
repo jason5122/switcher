@@ -7,7 +7,13 @@
     NSSize size;
     CGFloat padding;
     CGFloat innerPadding;
+
+    // TODO: somehow extract this from self.subviews?
     std::vector<CaptureViewController*> capture_controllers;
+
+    // TODO: think about moving these to a controller (e.g., WindowController)
+    int selectedIndex;
+    std::vector<window> windows;
 }
 
 - (instancetype)initWithCaptureSize:(NSSize)size
@@ -17,5 +23,7 @@
 - (void)addCaptureSubview:(window)window;
 - (void)startCaptureSubviews;
 - (void)stopCaptureSubviews;
+- (void)cycleSelectedIndex;
+- (void)focusSelectedIndex;
 
 @end

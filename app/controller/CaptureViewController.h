@@ -4,6 +4,7 @@
 
 @interface CaptureViewController : NSViewController {
     CaptureView* captureView;
+    window w;  // TODO: better name and type?
 }
 
 - (instancetype)initWithWindow:(window)window;
@@ -11,5 +12,6 @@
 - (void)stopCapture;
 - (void)highlight;
 - (void)unhighlight;
+- (void)focusWindow;
 
 @end

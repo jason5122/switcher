@@ -1,6 +1,10 @@
 #import "private_apis/SkyLight.h"
 #import "window.h"
 
+// TODO: move this to view. this doesn't really belong in model
+
+window::window() {}  // TODO: maybe remove this in the future
+
 window::window(pid_t app_pid, AXUIElementRef windowRef, NSImage* icon) {
     this->app_pid = app_pid;
     this->windowRef = windowRef;

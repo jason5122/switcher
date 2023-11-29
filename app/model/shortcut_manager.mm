@@ -27,7 +27,7 @@ void handle_event(EventHotKeyID hotKeyId, shortcut_manager* handler, bool is_pre
 
     if (hotKeyId.id == 0) {
         custom_log(OS_LOG_TYPE_DEFAULT, @"shortcut-manager", @"nextWindowShortcut %@", state);
-        // [handler->windowController cycleSelectedIndex];
+        [handler->windowController cycleSelectedIndex];
         [handler->windowController showWindow];
     }
 }
@@ -68,7 +68,7 @@ CGEventRef modifier_callback(CGEventTapProxy proxy, CGEventType type, CGEventRef
         NSUInteger flags = CGEventGetFlags(cgEvent);
         if (!(flags & NSEventModifierFlagCommand) && handler->windowController.isShown) {
             custom_log(OS_LOG_TYPE_DEFAULT, @"shortcut-manager", @"⌘ released");
-            // [handler->windowController focusSelectedIndex];
+            [handler->windowController focusSelectedIndex];
             [handler->windowController hideWindow];
         }
     } else if (type == kCGEventKeyDown) {
