@@ -5,6 +5,7 @@ struct CppMembers;
 
 @interface CaptureView : NSOpenGLView {
     struct CppMembers* cpp;
+@public
     SCWindow* targetWindow;
     bool hasStarted;
 }

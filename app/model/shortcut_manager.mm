@@ -26,7 +26,7 @@ void handle_event(EventHotKeyID hotKeyId, shortcut_manager* handler, bool is_pre
     NSString* state = is_pressed ? @"pressed" : @"released";
 
     if (hotKeyId.id == 0) {
-        custom_log(OS_LOG_TYPE_DEFAULT, @"shortcut-manager", @"nextWindowShortcut %@", state);
+        // custom_log(OS_LOG_TYPE_DEFAULT, @"shortcut-manager", @"nextWindowShortcut %@", state);
         [handler->windowController cycleSelectedIndex];
         [handler->windowController showWindow];
     }
@@ -67,7 +67,7 @@ CGEventRef modifier_callback(CGEventTapProxy proxy, CGEventType type, CGEventRef
     if (type == kCGEventFlagsChanged) {
         NSUInteger flags = CGEventGetFlags(cgEvent);
         if (!(flags & NSEventModifierFlagCommand) && handler->windowController.isShown) {
-            custom_log(OS_LOG_TYPE_DEFAULT, @"shortcut-manager", @"⌘ released");
+            // custom_log(OS_LOG_TYPE_DEFAULT, @"shortcut-manager", @"⌘ released");
             [handler->windowController focusSelectedIndex];
             [handler->windowController hideWindow];
         }
@@ -75,7 +75,7 @@ CGEventRef modifier_callback(CGEventTapProxy proxy, CGEventType type, CGEventRef
         CGKeyCode keycode =
             (CGKeyCode)CGEventGetIntegerValueField(cgEvent, kCGKeyboardEventKeycode);
         if (keycode == 53 && handler->windowController.isShown) {
-            custom_log(OS_LOG_TYPE_DEFAULT, @"shortcut-manager", @"escape pressed");
+            // custom_log(OS_LOG_TYPE_DEFAULT, @"shortcut-manager", @"escape pressed");
             [handler->windowController hideWindow];
             return nil;
         }

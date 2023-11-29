@@ -3,6 +3,7 @@
 #import <Cocoa/Cocoa.h>
 
 @interface CaptureViewController : NSViewController {
+@public
     CaptureView* captureView;
     window w;  // TODO: better name and type?
 }

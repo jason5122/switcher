@@ -126,25 +126,40 @@
     for (NSDictionary* screen in (__bridge NSArray*)screenDicts) {
         for (NSDictionary* sp in screen[@"Spaces"]) {
             CGSSpaceID spaceId = [sp[@"id64"] intValue];
-            custom_log(OS_LOG_TYPE_DEFAULT, @"window-controller", @"%d", spaceId);
+            // custom_log(OS_LOG_TYPE_DEFAULT, @"window-controller", @"%d", spaceId);
 
             int setTags = 0;
             int clearTags = 0;
             NSArray* windowIds = (__bridge NSArray*)CGSCopyWindowsWithOptionsAndTags(
                 _CGSDefaultConnection(), 0, (__bridge CFArrayRef) @[ @(spaceId) ], 2, &setTags,
                 &clearTags);
-            custom_log(OS_LOG_TYPE_DEFAULT, @"window-controller", @"%@", windowIds);
+            // custom_log(OS_LOG_TYPE_DEFAULT, @"window-controller", @"%@", windowIds);
 
             for (int i = 0; i < windowIds.count; i++) {
                 // https://stackoverflow.com/a/74696817/14698275
                 id cfNumber = [windowIds objectAtIndex:i];
                 CGWindowID wid = [((NSNumber*)cfNumber) intValue];
-                custom_log(OS_LOG_TYPE_DEFAULT, @"window-controller", @"%d", wid);
+                // custom_log(OS_LOG_TYPE_DEFAULT, @"window-controller", @"%d", wid);
 
                 CGWindowLevel level;
                 CGSGetWindowLevel(_CGSDefaultConnection(), wid, &level);
                 if (level == CGWindowLevelForKey(kCGNormalWindowLevelKey)) {
-                    [mainWindow.contentView addCaptureSubviewId:wid];
+                    // [mainWindow.contentView addCaptureSubviewId:wid];
+                    // return;
+
+                    // CGFloat padding = 15;
+                    // CGFloat width = 280, height = 175;
+                    // CGRect viewFrame = NSMakeRect(0, 0, width + padding * 2, height + padding *
+                    // 2); CGRect captureFrame = NSMakeRect(padding, padding, width, height);
+                    // SCWindow* capture_window = [[SCWindow alloc] initWithId:wid];
+                    // CaptureView* captureView = [[CaptureView alloc] initWithFrame:captureFrame
+                    //                                                  targetWindow:capture_window];
+                    // [mainView addSubview:captureView];
+
+                    cvc1 = [[CaptureViewController alloc] initWithWindowId:wid];
+                    [mainView addSubview:cvc1.view];
+                    mainView->capture_controllers.push_back(cvc1);
+                    return;
                 }
             }
         }
@@ -232,6 +247,9 @@
     //     [self goshDarnSpaces];
     // }
     // [self goshDarnSpaces];
+    // for (CaptureView* subview in mainView.subviews) {
+    //     custom_log(OS_LOG_TYPE_DEFAULT, @"window-controller", @"%@", subview->targetWindow);
+    // }
 
     custom_log(OS_LOG_TYPE_DEFAULT, @"window-controller", @"size: %d",
                mainView->capture_controllers.size());
@@ -249,8 +267,8 @@
     CGFloat y = fmax(screenSize.height - panelSize.height, 0) * 0.5;
     mainWindow.frameOrigin = NSMakePoint(x, y);
 
-    // [mainView startCaptureSubviews];
-    [mainWindow.contentView startCaptureSubviews];
+    [mainView startCaptureSubviews];
+    // [mainWindow.contentView startCaptureSubviews];
     [mainWindow makeKeyAndOrderFront:nil];
 }
 
@@ -259,8 +277,8 @@
     else _isShown = false;
 
     [mainWindow orderOut:nil];
-    // [mainView stopCaptureSubviews];
-    [mainWindow.contentView stopCaptureSubviews];
+    [mainView stopCaptureSubviews];
+    // [mainWindow.contentView stopCaptureSubviews];
 
     // mainView.subviews = [NSArray array];
 }

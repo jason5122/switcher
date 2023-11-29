@@ -19,6 +19,11 @@
     std::vector<application> applications;
     std::vector<window> windows;
     std::vector<CaptureViewController*> capture_controllers;
+
+    CaptureViewController* cvc1;
+    CaptureView* cv1;
+
+    std::vector<CGWindowID> cgWindowIds;
 }
 
 @property(nonatomic) bool isShown;
