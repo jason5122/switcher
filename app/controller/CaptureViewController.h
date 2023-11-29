@@ -8,6 +8,7 @@
 }
 
 - (instancetype)initWithWindow:(window)window;
+- (instancetype)initWithWindowId:(CGWindowID)wid;
 - (void)startCapture;
 - (void)stopCapture;
 - (void)highlight;

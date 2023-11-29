@@ -34,6 +34,26 @@
     capture_controllers.push_back(captureViewController);
 }
 
+- (void)addCaptureSubviewId:(CGWindowID)wid {
+    CaptureViewController* captureViewController =
+        [[CaptureViewController alloc] initWithWindowId:wid];
+
+    CGFloat x = padding;
+    CGFloat y = padding;
+    x += (size.width + padding + innerPadding) * self.subviews.count;
+    captureViewController.view.frameOrigin = CGPointMake(x, y);
+
+    [self addSubview:captureViewController.view];
+    capture_controllers.push_back(captureViewController);
+}
+
+// - (void)removeCaptureSubview:(int)index {
+//     if (capture_controllers.empty()) return;
+
+//     [[self.subviews objectAtIndex:index] removeFromSuperview];
+//     capture_controllers.erase(capture_controllers.begin() + index);
+// }
+
 - (void)startCaptureSubviews {
     for (CaptureViewController* controller : capture_controllers) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),

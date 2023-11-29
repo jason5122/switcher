@@ -2,12 +2,14 @@
 #import "model/application.h"
 #import "model/window.h"
 #import "private_apis/CGSSpace.h"
+#import "view/MainView.h"
 #import <Cocoa/Cocoa.h>
 #import <ScreenCaptureKit/ScreenCaptureKit.h>
 #import <vector>
 
 @interface WindowController : NSWindowController {
     NSWindow* mainWindow;
+    MainView* mainView;
     AXUIElementRef axUiElement;
 
 @private

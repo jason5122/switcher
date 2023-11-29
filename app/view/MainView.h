@@ -21,6 +21,8 @@
                        innerPadding:(CGFloat)innerPadding;
 
 - (void)addCaptureSubview:(window)window;
+- (void)addCaptureSubviewId:(CGWindowID)wid;
+// - (void)removeCaptureSubview:(int)index;
 - (void)startCaptureSubviews;
 - (void)stopCaptureSubviews;
 - (void)cycleSelectedIndex;

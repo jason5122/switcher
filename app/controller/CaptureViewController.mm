@@ -40,6 +40,26 @@
     return self;
 }
 
+- (instancetype)initWithWindowId:(CGWindowID)wid {
+    self = [super init];
+    if (self) {
+        CGFloat padding = 15;
+        CGFloat width = 280, height = 175;
+        CGRect viewFrame = NSMakeRect(0, 0, width + padding * 2, height + padding * 2);
+        CGRect captureFrame = NSMakeRect(padding, padding, width, height);
+
+        NSStackView* stackView = [[NSStackView alloc] initWithFrame:viewFrame];
+        stackView.wantsLayer = true;
+        stackView.layer.cornerRadius = 9.0;
+
+        SCWindow* capture_window = [[SCWindow alloc] initWithId:wid];
+        captureView = [[CaptureView alloc] initWithFrame:captureFrame targetWindow:capture_window];
+        [stackView addSubview:captureView];
+        self.view = stackView;
+    }
+    return self;
+}
+
 - (void)startCapture {
     [captureView startCapture];
 }

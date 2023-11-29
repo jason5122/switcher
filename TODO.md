@@ -17,6 +17,11 @@
 - Remove Sonoma recording icon?
 - `CGSSpace` does not play nicely with notifications
 
+### Refactor
+
+- Move CGWindowID stuff out of `WindowController`
+- Combine private API stuff
+
 ## Repo/Project Tasks
 
 ### Repo
