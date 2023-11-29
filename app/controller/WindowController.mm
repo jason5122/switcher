@@ -2,16 +2,27 @@
 #import "controller/CaptureViewController.h"
 #import "extensions/ScreenCaptureKit.h"
 #import "private_apis/Accessiblity.h"
+#import "private_apis/CGSSpace.h"
+#import "private_apis/CGSWindows.h"
 #import "util/log_util.h"
 #import "view/CaptureView.h"
 
 @implementation WindowController
+
+- (void)listWindowsExperiment {
+    CFArrayRef screenDicts = CGSCopyManagedDisplaySpaces(_CGSDefaultConnection());
+    for (NSDictionary* dict in (__bridge NSArray*)screenDicts) {
+        custom_log(OS_LOG_TYPE_DEFAULT, @"window-controller", @"%@", dict);
+    }
+}
 
 - (instancetype)init {
     self = [super init];
     if (self) {
         _isShown = false;
         selectedIndex = 0;
+
+        [self listWindowsExperiment];
 
         [self populateInitialApplications];
 
@@ -98,8 +109,9 @@
         application app = application(runningApp);
 
         if ([app.localizedName() isEqual:@"Sublime Text"] ||
-            [app.localizedName() isEqual:@"Chromium"]) {
-            log_with_type(OS_LOG_TYPE_DEFAULT, app.localizedName(), @"window-controller");
+            [app.localizedName() isEqual:@"Chromium"] ||
+            [app.localizedName() isEqual:@"Alacritty"]) {
+            custom_log(OS_LOG_TYPE_DEFAULT, @"window-controller", app.localizedName());
 
             if (!app.is_xpc()) {
                 app.populate_initial_windows();
@@ -121,9 +133,7 @@
 
     [capture_controllers[selectedIndex] highlight];
 
-    log_with_type(OS_LOG_TYPE_DEFAULT,
-                  [NSString stringWithFormat:@"index after cycle: %d", selectedIndex],
-                  @"window-controller");
+    custom_log(OS_LOG_TYPE_DEFAULT, @"window-controller", @"index after cycle: %d", selectedIndex);
 }
 
 - (void)focusSelectedIndex {

@@ -16,18 +16,17 @@ void shortcut_manager::register_hotkey(NSString* shortcutString, std::string act
         RegisterEventHotKey(shortcut.carbonKeyCode, shortcut.carbonModifierFlags, hotKeyId,
                             GetEventDispatcherTarget(), kEventHotKeyNoOptions, &hotKey);
     if (status != noErr) {
-        log_with_type(OS_LOG_TYPE_ERROR, [NSString stringWithFormat:@"register fail: %d", status],
-                      @"shortcut-manager");
+        custom_log(OS_LOG_TYPE_ERROR, @"shortcut-manager", @"register fail: %d", status);
     }
 }
 
 void handle_event(EventHotKeyID hotKeyId, shortcut_manager* handler, bool is_pressed) {
     if (!is_pressed) return;
 
-    std::string state = is_pressed ? "pressed" : "released";
+    NSString* state = is_pressed ? @"pressed" : @"released";
 
     if (hotKeyId.id == 0) {
-        log_with_type(OS_LOG_TYPE_DEFAULT, "nextWindowShortcut " + state, @"shortcut-manager");
+        custom_log(OS_LOG_TYPE_DEFAULT, @"shortcut-manager", @"nextWindowShortcut %@", state);
         [handler->windowController cycleSelectedIndex];
         [handler->windowController showWindow];
     }
@@ -68,7 +67,7 @@ CGEventRef modifier_callback(CGEventTapProxy proxy, CGEventType type, CGEventRef
     if (type == kCGEventFlagsChanged) {
         NSUInteger flags = CGEventGetFlags(cgEvent);
         if (!(flags & NSEventModifierFlagCommand) && handler->windowController.isShown) {
-            log_with_type(OS_LOG_TYPE_DEFAULT, @"⌘ released", @"shortcut-manager");
+            custom_log(OS_LOG_TYPE_DEFAULT, @"shortcut-manager", @"⌘ released");
             [handler->windowController focusSelectedIndex];
             [handler->windowController hideWindow];
         }
@@ -76,7 +75,7 @@ CGEventRef modifier_callback(CGEventTapProxy proxy, CGEventType type, CGEventRef
         CGKeyCode keycode =
             (CGKeyCode)CGEventGetIntegerValueField(cgEvent, kCGKeyboardEventKeycode);
         if (keycode == 53 && handler->windowController.isShown) {
-            log_with_type(OS_LOG_TYPE_DEFAULT, @"escape pressed", @"shortcut-manager");
+            custom_log(OS_LOG_TYPE_DEFAULT, @"shortcut-manager", @"escape pressed");
             [handler->windowController hideWindow];
             return nil;
         }

@@ -73,7 +73,7 @@ capture_engine::capture_engine(NSOpenGLContext* context, NSRect frame, SCWindow*
                                  sampleHandlerQueue:nil
                                               error:&error];
     if (!did_add_output) {
-        log_with_type(OS_LOG_TYPE_ERROR, [error localizedFailureReason], @"capture-engine");
+        custom_log(OS_LOG_TYPE_ERROR, @"capture-engine", [error localizedFailureReason]);
         // return !did_add_output;
     }
 }
@@ -85,7 +85,7 @@ bool capture_engine::start_capture() {
     [sc->disp startCaptureWithCompletionHandler:^(NSError* _Nullable error) {
       is_success = (BOOL)(error == nil);
       if (!is_success) {
-          log_with_type(OS_LOG_TYPE_ERROR, [error localizedFailureReason], @"capture-engine");
+          custom_log(OS_LOG_TYPE_ERROR, @"capture-engine", [error localizedFailureReason]);
       }
       dispatch_semaphore_signal(stream_start_completed);
     }];
@@ -100,7 +100,7 @@ bool capture_engine::stop_capture() {
     [sc->disp stopCaptureWithCompletionHandler:^(NSError* _Nullable error) {
       is_success = (BOOL)(error == nil);
       if (!is_success) {
-          log_with_type(OS_LOG_TYPE_ERROR, [error localizedFailureReason], @"capture-engine");
+          custom_log(OS_LOG_TYPE_ERROR, @"capture-engine", [error localizedFailureReason]);
       }
       dispatch_semaphore_signal(stream_stop_completed);
     }];

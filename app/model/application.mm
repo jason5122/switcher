@@ -55,9 +55,7 @@ void application::add_observer() {
             CGWindowID wid = CGWindowID();
             _AXUIElementGetWindow(element, &wid);
             if (CFEqual(notificationName, kAXWindowCreatedNotification)) {
-                log_with_type(OS_LOG_TYPE_DEFAULT,
-                              [NSString stringWithFormat:@"window created: %d", wid],
-                              @"application");
+                custom_log(OS_LOG_TYPE_DEFAULT, @"application", @"window created: %d", wid);
             }
         },
         &axObserver);

@@ -33,7 +33,7 @@ struct CppMembers {
 
     NSOpenGLPixelFormat* pf = [[NSOpenGLPixelFormat alloc] initWithAttributes:attribs];
     if (!pf) {
-        log_with_type(OS_LOG_TYPE_ERROR, @"failed to create pixel format", @"capture-view");
+        custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"failed to create pixel format");
         return nil;
     }
 
@@ -65,7 +65,7 @@ struct CppMembers {
     if (hasStarted) return;
 
     if (!cpp->capture_engine->start_capture()) {
-        log_with_type(OS_LOG_TYPE_ERROR, @"start capture failed", @"capture-view");
+        custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"start capture failed");
     } else {
         hasStarted = true;
     }
@@ -75,7 +75,7 @@ struct CppMembers {
     if (!hasStarted) return;
 
     if (!cpp->capture_engine->stop_capture()) {
-        log_with_type(OS_LOG_TYPE_ERROR, @"stop capture failed", @"capture-view");
+        custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"stop capture failed");
     } else {
         hasStarted = false;
     }

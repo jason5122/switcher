@@ -2,13 +2,13 @@
 
 typedef size_t CGSSpaceID;
 typedef int CGSConnectionID;
-extern CGSConnectionID _CGSDefaultConnection();
-extern CGSSpaceID CGSSpaceCreate(CGSConnectionID cid, int unknown, CFDictionaryRef options);
-extern void CGSSpaceDestroy(CGSConnectionID cid, CGSSpaceID sid);
-extern void CGSSpaceSetAbsoluteLevel(const CGSConnectionID cid, CGSSpaceID space, int level);
-extern void CGSAddWindowsToSpaces(CGSConnectionID cid, CFArrayRef windows, CFArrayRef spaces);
-extern void CGSShowSpaces(CGSConnectionID cid, CFArrayRef spaces);
-extern void CGSHideSpaces(CGSConnectionID cid, CFArrayRef spaces);
+extern "C" CGSConnectionID _CGSDefaultConnection();
+extern "C" CGSSpaceID CGSSpaceCreate(CGSConnectionID cid, int unknown, CFDictionaryRef options);
+extern "C" void CGSSpaceDestroy(CGSConnectionID cid, CGSSpaceID sid);
+extern "C" void CGSSpaceSetAbsoluteLevel(const CGSConnectionID cid, CGSSpaceID space, int level);
+extern "C" void CGSAddWindowsToSpaces(CGSConnectionID cid, CFArrayRef windows, CFArrayRef spaces);
+extern "C" void CGSShowSpaces(CGSConnectionID cid, CFArrayRef spaces);
+extern "C" void CGSHideSpaces(CGSConnectionID cid, CFArrayRef spaces);
 
 @interface CGSSpace : NSObject {
     CGSSpaceID identifier;

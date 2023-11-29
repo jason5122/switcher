@@ -24,7 +24,7 @@
         iconView.image.size = NSMakeSize(48, 48);
         iconView.frame = NSMakeRect(width - 48, 0, 48, 48);
         iconView.wantsLayer = true;
-        iconView.layer.backgroundColor = NSColor.redColor.CGColor;
+        // iconView.layer.backgroundColor = NSColor.redColor.CGColor;
         [captureView addSubview:iconView];
 
         // NSTextField* titleText = [NSTextField labelWithString:window.title];
@@ -48,7 +48,7 @@
 
 - (void)highlight {
     self.view.layer.backgroundColor =
-        [NSColor colorWithCalibratedRed:0 green:0 blue:0 alpha:0.1f].CGColor;
+        [NSColor colorWithCalibratedRed:0 green:0 blue:0 alpha:0.15f].CGColor;
 }
 
 - (void)unhighlight {
