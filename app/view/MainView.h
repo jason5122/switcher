@@ -28,5 +28,6 @@
 - (void)stopCaptureSubviews;
 - (void)cycleSelectedIndex;
 - (void)focusSelectedIndex;
+- (void)ahaha;
 
 @end

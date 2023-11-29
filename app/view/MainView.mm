@@ -1,4 +1,5 @@
 #import "MainView.h"
+#import "model/spaces.h"
 #import "view/CaptureView.h"
 
 @implementation MainView
@@ -19,6 +20,21 @@
         self.layer.cornerRadius = 9.0;
     }
     return self;
+}
+
+- (void)ahaha {
+    for (CGWindowID wid : get_all_window_ids()) {
+        CaptureViewController* captureViewController =
+            [[CaptureViewController alloc] initWithWindowId:wid];
+
+        CGFloat x = padding;
+        CGFloat y = padding;
+        x += (size.width + padding + innerPadding) * self.subviews.count;
+        captureViewController.view.frameOrigin = CGPointMake(x, y);
+
+        [self addSubview:captureViewController.view];
+        capture_controllers.push_back(captureViewController);
+    }
 }
 
 - (void)addCaptureSubview:(window)window {
