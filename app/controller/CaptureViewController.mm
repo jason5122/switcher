@@ -8,15 +8,15 @@
     if (self) {
         CGFloat padding = 15;
         CGFloat width = 280, height = 175;
+        CGRect viewFrame = NSMakeRect(0, 0, width + padding * 2, height + padding * 2);
+        CGRect captureFrame = NSMakeRect(padding, padding, width, height);
 
-        NSStackView* stackView = [[NSStackView alloc] init];
+        NSStackView* stackView = [[NSStackView alloc] initWithFrame:viewFrame];
         stackView.wantsLayer = true;
         stackView.layer.cornerRadius = 9.0;
 
-        // CGRect finalFrame = CGRectInset(captureRect, 10, 10);
-        CGRect finalFrame = NSMakeRect(padding, padding, width, height);
         SCWindow* capture_window = [[SCWindow alloc] initWithId:window.wid];
-        captureView = [[CaptureView alloc] initWithFrame:finalFrame targetWindow:capture_window];
+        captureView = [[CaptureView alloc] initWithFrame:captureFrame targetWindow:capture_window];
         [stackView addSubview:captureView];
 
         NSImageView* iconView = [NSImageView imageViewWithImage:window.icon];
@@ -31,9 +31,6 @@
         // titleText.frameSize = CGSizeMake(width, 20);
         // titleText.alignment = NSTextAlignmentCenter;
         // [stackView addSubview:titleText];
-
-        NSRect captureRect = NSMakeRect(0, 0, width + padding * 2, height + padding * 2);
-        stackView.frame = captureRect;
 
         self.view = stackView;
     }

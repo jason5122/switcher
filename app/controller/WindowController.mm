@@ -62,12 +62,11 @@
 
         int size = windows.size();
 
-        CGFloat innerPadding = 15;
-        CGFloat width = 280 + innerPadding * 2, height = 175 + innerPadding * 2;
         CGFloat padding = 20;
-        // CGFloat padding = 0;
-        NSRect windowRect =
-            NSMakeRect(0, 0, (width + padding) * size + padding, height + padding * 2);
+        CGFloat innerPadding = 15;
+        CGFloat width = 280 + innerPadding, height = 175 + innerPadding * 2;
+        NSRect windowRect = NSMakeRect(0, 0, (width + padding) * size + padding + innerPadding,
+                                       height + padding * 2);
 
         int mask = NSWindowStyleMaskFullSizeContentView;
         mainWindow = [[NSWindow alloc] initWithContentRect:windowRect
@@ -78,21 +77,10 @@
         mainWindow.backgroundColor = NSColor.clearColor;
 
         NSVisualEffectView* mainView = [[NSVisualEffectView alloc] init];
-        // mainView.blendingMode = NSVisualEffectBlendingModeBehindWindow;
         mainView.material = NSVisualEffectMaterialHUDWindow;
-        // mainView.material = NSVisualEffectMaterialSelection;
         mainView.state = NSVisualEffectStateActive;
         mainView.wantsLayer = true;
         mainView.layer.cornerRadius = 9.0;
-
-        // NSStackView* mainView = [[NSStackView alloc] init];
-        // // NSView* mainView = [[NSView alloc] init];
-        // mainView.wantsLayer = true;
-        // mainView.layer.borderColor = CGColorGetConstantColor(kCGColorBlack);
-        // mainView.layer.borderWidth = 5;
-        // mainView.layer.backgroundColor =
-        //     [NSColor colorWithCalibratedRed:1 green:0 blue:0 alpha:0.5f].CGColor;
-        // ;
 
         space = [[CGSSpace alloc] initWithLevel:1];
         [space addWindow:mainWindow];
@@ -106,39 +94,15 @@
             CGFloat x = padding;
             CGFloat y = padding;
             x += (width + padding) * i;
-            // captureViewController.view.frame =
-            //     CGRectInset(captureViewController.view.frame, 10, 10);
             captureViewController.view.frameOrigin = CGPointMake(x, y);
-            // [mainView addSubview:captureViewController.view];
 
-            // NSStackView* blurView = [[NSStackView alloc] init];
-            // NSVisualEffectView* blurView = [[NSVisualEffectView alloc] init];
-            // blurView.frame = CGRectMake(x, y, 320, 200);
-            // NSView* blurView = [[NSView alloc] initWithFrame:CGRectMake(0, 0, 600, 600)];
-            // blurView.blendingMode = NSVisualEffectBlendingModeBehindWindow;
-            // blurView.material = NSVisualEffectMaterialSelection;
-            // blurView.state = NSVisualEffectStateActive;
-            // blurView.wantsLayer = true;
-            // blurView.layer.cornerRadius = 9.0;
-
-            // NSTextField* titleText = [NSTextField labelWithString:windows[i].title];
-            // titleText.frameOrigin = CGPointMake(x, y - 20);
-            // titleText.frameSize = CGSizeMake(width, 20);
-            // titleText.alignment = NSTextAlignmentCenter;
-            // [mainView addSubview:titleText];
-
-            // [blurView addSubview:captureViewController.view];
-            // [mainView addSubview:blurView];
             [mainView addSubview:captureViewController.view];
-
             capture_controllers.push_back(captureViewController);
         }
 
         mainWindow.contentView = mainView;
-
-        // TODO: experimental; maybe remove
-        mainWindow.ignoresMouseEvents = true;
     }
+
     return self;
 }
 
