@@ -13,7 +13,9 @@
     std::vector<CaptureViewController*> capture_controllers;
 
     // TODO: think about moving these to a controller (e.g., WindowController)
+@public
     int selectedIndex;
+
     std::vector<window> windows;
 }
 

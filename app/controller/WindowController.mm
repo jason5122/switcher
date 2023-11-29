@@ -32,13 +32,6 @@
                                             innerPadding:innerPadding];
         mainWindow.contentView = mainView;
 
-        // for (CGWindowID wid : get_all_window_ids()) {
-        //     cvc1 = [[CaptureViewController alloc] initWithWindowId:wid];
-        //     [mainView addSubview:cvc1.view];
-        //     mainView->capture_controllers.push_back(cvc1);
-        //     break;
-        // }
-
         space = [[CGSSpace alloc] initWithLevel:1];
         [space addWindow:mainWindow];
     }
@@ -46,7 +39,7 @@
 }
 
 - (void)cycleSelectedIndex {
-    // [((MainView*)mainWindow.contentView) cycleSelectedIndex];
+    [((MainView*)mainWindow.contentView) cycleSelectedIndex];
 }
 
 - (void)focusSelectedIndex {
@@ -56,6 +49,9 @@
 - (void)showWindow {
     if (_isShown) return;
     else _isShown = true;
+
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0 * NSEC_PER_SEC), dispatch_get_main_queue(),
+                   ^{ [mainView startCaptureSubviews]; });
 
     CGFloat padding = 20;
     CGFloat innerPadding = 15;
@@ -74,34 +70,8 @@
     CGFloat x = fmax(screenSize.width - panelSize.width, 0) * 0.5;
     CGFloat y = fmax(screenSize.height - panelSize.height, 0) * 0.5;
     mainWindow.frameOrigin = NSMakePoint(x, y);
+
     [mainWindow makeKeyAndOrderFront:nil];
-
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0 * NSEC_PER_SEC), dispatch_get_main_queue(),
-                   ^{ [mainView startCaptureSubviews]; });
-
-    // CGFloat padding = 20;
-    // CGFloat innerPadding = 15;
-    // CGFloat width = 280, height = 175;
-
-    // custom_log(OS_LOG_TYPE_DEFAULT, @"window-controller", @"size: %d",
-    //            mainView->capture_controllers.size());
-
-    // NSSize contentSize =
-    //     NSMakeSize((width + padding + innerPadding) * mainWindow.contentView.subviews.count +
-    //                    padding + innerPadding,
-    //                height + (padding + innerPadding) * 2);
-    // [mainWindow setContentSize:contentSize];
-
-    // // actually center window
-    // NSSize screenSize = NSScreen.mainScreen.frame.size;
-    // NSSize panelSize = mainWindow.frame.size;
-    // CGFloat x = fmax(screenSize.width - panelSize.width, 0) * 0.5;
-    // CGFloat y = fmax(screenSize.height - panelSize.height, 0) * 0.5;
-    // mainWindow.frameOrigin = NSMakePoint(x, y);
-
-    // [mainView startCaptureSubviews];
-    // // [mainWindow.contentView startCaptureSubviews];
-    // [mainWindow makeKeyAndOrderFront:nil];
 }
 
 - (void)hideWindow {
@@ -110,9 +80,10 @@
 
     [mainWindow orderOut:nil];
     [mainView stopCaptureSubviews];
-    // // [mainWindow.contentView stopCaptureSubviews];
 
     mainView.subviews = [NSArray array];
+    mainView->capture_controllers.clear();
+    mainView->selectedIndex = 0;
 }
 
 @end
