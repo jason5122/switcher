@@ -16,8 +16,6 @@
         _isShown = false;
         selectedIndex = 0;
 
-        // [self populateInitialApplications];
-
         CGFloat padding = 20;
         CGFloat innerPadding = 15;
         CGFloat width = 280, height = 175;
@@ -41,35 +39,14 @@
         //     break;
         // }
 
-        [mainView ahaha];
-
         space = [[CGSSpace alloc] initWithLevel:1];
         [space addWindow:mainWindow];
     }
     return self;
 }
 
-- (void)populateInitialApplications {
-    for (NSRunningApplication* runningApp in NSWorkspace.sharedWorkspace.runningApplications) {
-        application app = application(runningApp);
-
-        if ([app.localizedName() isEqual:@"Sublime Text"] ||
-            [app.localizedName() isEqual:@"Chromium"] ||
-            [app.localizedName() isEqual:@"Alacritty"]) {
-            custom_log(OS_LOG_TYPE_DEFAULT, @"window-controller", app.localizedName());
-
-            if (!app.is_xpc()) {
-                app.populate_initial_windows();
-                applications.push_back(app);
-
-                app.append_windows(windows);
-            }
-        };
-    }
-}
-
 - (void)cycleSelectedIndex {
-    [((MainView*)mainWindow.contentView) cycleSelectedIndex];
+    // [((MainView*)mainWindow.contentView) cycleSelectedIndex];
 }
 
 - (void)focusSelectedIndex {
@@ -84,9 +61,7 @@
     CGFloat innerPadding = 15;
     CGFloat width = 280, height = 175;
 
-    custom_log(OS_LOG_TYPE_DEFAULT, @"window-controller", @"size: %d",
-               mainView->capture_controllers.size());
-
+    [mainView ahaha];
     NSSize contentSize =
         NSMakeSize((width + padding + innerPadding) * mainWindow.contentView.subviews.count +
                        padding + innerPadding,
@@ -99,10 +74,34 @@
     CGFloat x = fmax(screenSize.width - panelSize.width, 0) * 0.5;
     CGFloat y = fmax(screenSize.height - panelSize.height, 0) * 0.5;
     mainWindow.frameOrigin = NSMakePoint(x, y);
-
-    [mainView startCaptureSubviews];
-    // [mainWindow.contentView startCaptureSubviews];
     [mainWindow makeKeyAndOrderFront:nil];
+
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0 * NSEC_PER_SEC), dispatch_get_main_queue(),
+                   ^{ [mainView startCaptureSubviews]; });
+
+    // CGFloat padding = 20;
+    // CGFloat innerPadding = 15;
+    // CGFloat width = 280, height = 175;
+
+    // custom_log(OS_LOG_TYPE_DEFAULT, @"window-controller", @"size: %d",
+    //            mainView->capture_controllers.size());
+
+    // NSSize contentSize =
+    //     NSMakeSize((width + padding + innerPadding) * mainWindow.contentView.subviews.count +
+    //                    padding + innerPadding,
+    //                height + (padding + innerPadding) * 2);
+    // [mainWindow setContentSize:contentSize];
+
+    // // actually center window
+    // NSSize screenSize = NSScreen.mainScreen.frame.size;
+    // NSSize panelSize = mainWindow.frame.size;
+    // CGFloat x = fmax(screenSize.width - panelSize.width, 0) * 0.5;
+    // CGFloat y = fmax(screenSize.height - panelSize.height, 0) * 0.5;
+    // mainWindow.frameOrigin = NSMakePoint(x, y);
+
+    // [mainView startCaptureSubviews];
+    // // [mainWindow.contentView startCaptureSubviews];
+    // [mainWindow makeKeyAndOrderFront:nil];
 }
 
 - (void)hideWindow {
@@ -111,9 +110,9 @@
 
     [mainWindow orderOut:nil];
     [mainView stopCaptureSubviews];
-    // [mainWindow.contentView stopCaptureSubviews];
+    // // [mainWindow.contentView stopCaptureSubviews];
 
-    // mainView.subviews = [NSArray array];
+    mainView.subviews = [NSArray array];
 }
 
 @end
