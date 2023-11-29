@@ -9,6 +9,7 @@
     CGFloat innerPadding;
 
     // TODO: somehow extract this from self.subviews?
+@public
     std::vector<CaptureViewController*> capture_controllers;
 
     // TODO: think about moving these to a controller (e.g., WindowController)

@@ -89,7 +89,7 @@
         CGWindowID wid = [((NSNumber*)cfNumber) intValue];
         custom_log(OS_LOG_TYPE_DEFAULT, @"window-controller", @"%d", wid);
 
-        [mainView addCaptureSubviewId:wid];
+        [mainWindow.contentView addCaptureSubviewId:wid];
     }
 }
 
@@ -97,21 +97,56 @@
 - (void)aha {
     int setTags = 0;
     int clearTags = 0;
-    NSArray* windowIds = (__bridge NSArray*)CGSCopyWindowsWithOptionsAndTags(
-        _CGSDefaultConnection(), 0,
-        (__bridge CFArrayRef) @[ @(CGSManagedDisplayGetCurrentSpace(
-            _CGSDefaultConnection(), kCGSPackagesMainDisplayIdentifier)) ],
-        2, &setTags, &clearTags);
-    for (int i = 0; i < windowIds.count; i++) {
-        // https://stackoverflow.com/a/74696817/14698275
-        id cfNumber = [windowIds objectAtIndex:i];
-        CGWindowID wid = [((NSNumber*)cfNumber) intValue];
-        custom_log(OS_LOG_TYPE_DEFAULT, @"window-controller", @"%d", wid);
+    CGSSpaceID spaceId = CGSManagedDisplayGetCurrentSpace(_CGSDefaultConnection(),
+                                                          kCGSPackagesMainDisplayIdentifier);
+    custom_log(OS_LOG_TYPE_DEFAULT, @"window-controller", @"spaceId: %d", spaceId);
 
-        CGWindowLevel level;
-        CGSGetWindowLevel(_CGSDefaultConnection(), wid, &level);
-        if (level == CGWindowLevelForKey(kCGNormalWindowLevelKey)) {
-            [mainView addCaptureSubviewId:wid];
+    NSArray* windowIds = (__bridge NSArray*)CGSCopyWindowsWithOptionsAndTags(
+        _CGSDefaultConnection(), 0, (__bridge CFArrayRef) @[ @(spaceId) ], 2, &setTags,
+        &clearTags);
+
+    custom_log(OS_LOG_TYPE_DEFAULT, @"window-controller", @"count: %d", windowIds.count);
+
+    // for (int i = 0; i < windowIds.count; i++) {
+    //     // https://stackoverflow.com/a/74696817/14698275
+    //     id cfNumber = [windowIds objectAtIndex:i];
+    //     CGWindowID wid = [((NSNumber*)cfNumber) intValue];
+    //     // custom_log(OS_LOG_TYPE_DEFAULT, @"window-controller", @"%d", wid);
+
+    //     CGWindowLevel level;
+    //     CGSGetWindowLevel(_CGSDefaultConnection(), wid, &level);
+    //     if (level == CGWindowLevelForKey(kCGNormalWindowLevelKey)) {
+    //         [mainView addCaptureSubviewId:wid];
+    //     }
+    // }
+}
+
+- (void)goshDarnSpaces {
+    CFArrayRef screenDicts = CGSCopyManagedDisplaySpaces(_CGSDefaultConnection());
+    for (NSDictionary* screen in (__bridge NSArray*)screenDicts) {
+        for (NSDictionary* sp in screen[@"Spaces"]) {
+            CGSSpaceID spaceId = [sp[@"id64"] intValue];
+            custom_log(OS_LOG_TYPE_DEFAULT, @"window-controller", @"%d", spaceId);
+
+            int setTags = 0;
+            int clearTags = 0;
+            NSArray* windowIds = (__bridge NSArray*)CGSCopyWindowsWithOptionsAndTags(
+                _CGSDefaultConnection(), 0, (__bridge CFArrayRef) @[ @(spaceId) ], 2, &setTags,
+                &clearTags);
+            custom_log(OS_LOG_TYPE_DEFAULT, @"window-controller", @"%@", windowIds);
+
+            for (int i = 0; i < windowIds.count; i++) {
+                // https://stackoverflow.com/a/74696817/14698275
+                id cfNumber = [windowIds objectAtIndex:i];
+                CGWindowID wid = [((NSNumber*)cfNumber) intValue];
+                custom_log(OS_LOG_TYPE_DEFAULT, @"window-controller", @"%d", wid);
+
+                CGWindowLevel level;
+                CGSGetWindowLevel(_CGSDefaultConnection(), wid, &level);
+                if (level == CGWindowLevelForKey(kCGNormalWindowLevelKey)) {
+                    [mainWindow.contentView addCaptureSubviewId:wid];
+                }
+            }
         }
     }
 }
@@ -122,17 +157,14 @@
         _isShown = false;
         selectedIndex = 0;
 
-        [self populateInitialApplications];
-
-        int size = windows.size();
+        // [self populateInitialApplications];
 
         CGFloat padding = 20;
         CGFloat innerPadding = 15;
         CGFloat width = 280, height = 175;
 
-        int mask = NSWindowStyleMaskFullSizeContentView;
         mainWindow = [[NSWindow alloc] initWithContentRect:NSZeroRect
-                                                 styleMask:mask
+                                                 styleMask:NSWindowStyleMaskFullSizeContentView
                                                    backing:NSBackingStoreBuffered
                                                      defer:false];
         mainWindow.hasShadow = false;
@@ -141,34 +173,18 @@
         mainView = [[MainView alloc] initWithCaptureSize:NSMakeSize(width, height)
                                                  padding:padding
                                             innerPadding:innerPadding];
-
-        for (int i = 0; i < size; i++) {
-            custom_log(OS_LOG_TYPE_DEFAULT, @"window-controller", @"%d: %@", windows[i].wid,
-                       windows[i].title);
-            // [mainView addCaptureSubview:windows[i]];
-            // [mainView addCaptureSubviewId:windows[i].wid];
-        }
-
-        [self aha];
-
-        NSSize contentSize = NSMakeSize(
-            (width + padding + innerPadding) * mainView.subviews.count + padding + innerPadding,
-            height + (padding + innerPadding) * 2);
-        [mainWindow setContentSize:contentSize];
-
         mainWindow.contentView = mainView;
 
-        // actually center window
-        NSSize screenSize = NSScreen.mainScreen.frame.size;
-        NSSize panelSize = mainWindow.frame.size;
-        CGFloat x = fmax(screenSize.width - panelSize.width, 0) * 0.5;
-        CGFloat y = fmax(screenSize.height - panelSize.height, 0) * 0.5;
-        mainWindow.frameOrigin = NSMakePoint(x, y);
+        // mainWindow.contentView = [[MainView alloc] initWithCaptureSize:NSMakeSize(width, height)
+        //                                                        padding:padding
+        //                                                   innerPadding:innerPadding];
+
+        // [self aha];
+        [self goshDarnSpaces];
 
         space = [[CGSSpace alloc] initWithLevel:1];
         [space addWindow:mainWindow];
     }
-
     return self;
 }
 
@@ -203,9 +219,37 @@
     if (_isShown) return;
     else _isShown = true;
 
+    CGFloat padding = 20;
+    CGFloat innerPadding = 15;
+    CGFloat width = 280, height = 175;
+
     // [self listWindowsExperiment];  // TODO: debug; remove
     // [self consistentSpaceExperiment];
 
+    // [self aha];
+    // if (mainView.subviews.count == 0) {
+    //     custom_log(OS_LOG_TYPE_DEFAULT, @"window-controller", @"god damn it");
+    //     [self goshDarnSpaces];
+    // }
+    // [self goshDarnSpaces];
+
+    custom_log(OS_LOG_TYPE_DEFAULT, @"window-controller", @"size: %d",
+               mainView->capture_controllers.size());
+
+    NSSize contentSize =
+        NSMakeSize((width + padding + innerPadding) * mainWindow.contentView.subviews.count +
+                       padding + innerPadding,
+                   height + (padding + innerPadding) * 2);
+    [mainWindow setContentSize:contentSize];
+
+    // actually center window
+    NSSize screenSize = NSScreen.mainScreen.frame.size;
+    NSSize panelSize = mainWindow.frame.size;
+    CGFloat x = fmax(screenSize.width - panelSize.width, 0) * 0.5;
+    CGFloat y = fmax(screenSize.height - panelSize.height, 0) * 0.5;
+    mainWindow.frameOrigin = NSMakePoint(x, y);
+
+    // [mainView startCaptureSubviews];
     [mainWindow.contentView startCaptureSubviews];
     [mainWindow makeKeyAndOrderFront:nil];
 }
@@ -215,9 +259,10 @@
     else _isShown = false;
 
     [mainWindow orderOut:nil];
+    // [mainView stopCaptureSubviews];
     [mainWindow.contentView stopCaptureSubviews];
 
-    // mainWindow.contentView.subviews = [NSArray array];
+    // mainView.subviews = [NSArray array];
 }
 
 @end
