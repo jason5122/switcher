@@ -24,6 +24,7 @@ macos_app_bundle("app") {
     "util/log_util.mm",
     "util/shader_util.cc",
     "view/CaptureView.mm",
+    "view/MainView.mm",
   ]
 
   frameworks = [

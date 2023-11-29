@@ -1,6 +1,7 @@
 #import "CaptureViewController.h"
 #import "extensions/ScreenCaptureKit.h"
 
+// TODO: maybe get rid of this and merge with CaptureView.mm?
 @implementation CaptureViewController
 
 - (instancetype)initWithWindow:(window)window {

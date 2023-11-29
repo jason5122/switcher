@@ -6,6 +6,7 @@
 #import "private_apis/CGSWindows.h"
 #import "util/log_util.h"
 #import "view/CaptureView.h"
+#import "view/MainView.h"
 
 @implementation WindowController
 
@@ -65,42 +66,52 @@
         CGFloat padding = 20;
         CGFloat innerPadding = 15;
         CGFloat width = 280 + innerPadding, height = 175 + innerPadding * 2;
-        NSRect windowRect = NSMakeRect(0, 0, (width + padding) * size + padding + innerPadding,
-                                       height + padding * 2);
+        // NSRect windowRect = NSMakeRect(0, 0, (width + padding) * size + padding + innerPadding,
+        //                                height + padding * 2);
 
         int mask = NSWindowStyleMaskFullSizeContentView;
-        mainWindow = [[NSWindow alloc] initWithContentRect:windowRect
+        mainWindow = [[NSWindow alloc] initWithContentRect:NSZeroRect
                                                  styleMask:mask
                                                    backing:NSBackingStoreBuffered
                                                      defer:false];
         mainWindow.hasShadow = false;
         mainWindow.backgroundColor = NSColor.clearColor;
 
-        NSVisualEffectView* mainView = [[NSVisualEffectView alloc] init];
-        mainView.material = NSVisualEffectMaterialHUDWindow;
-        mainView.state = NSVisualEffectStateActive;
-        mainView.wantsLayer = true;
-        mainView.layer.cornerRadius = 9.0;
+        MainView* mainView = [[MainView alloc] initWithCaptureSize:NSMakeSize(width, height)
+                                                           padding:padding
+                                                      innerPadding:innerPadding];
 
-        space = [[CGSSpace alloc] initWithLevel:1];
-        [space addWindow:mainWindow];
+        // NSVisualEffectView* mainView = [[NSVisualEffectView alloc] init];
+        // mainView.material = NSVisualEffectMaterialHUDWindow;
+        // mainView.state = NSVisualEffectStateActive;
+        // mainView.wantsLayer = true;
+        // mainView.layer.cornerRadius = 9.0;
 
         for (int i = 0; i < size; i++) {
             custom_log(OS_LOG_TYPE_DEFAULT, @"window-controller", @"%d: %@", windows[i].wid,
                        windows[i].title);
 
-            CaptureViewController* captureViewController =
-                [[CaptureViewController alloc] initWithWindow:windows[i]];
-            CGFloat x = padding;
-            CGFloat y = padding;
-            x += (width + padding) * i;
-            captureViewController.view.frameOrigin = CGPointMake(x, y);
+            [mainView addCaptureSubview:windows[i]];
 
-            [mainView addSubview:captureViewController.view];
-            capture_controllers.push_back(captureViewController);
+            //     CaptureViewController* captureViewController =
+            //         [[CaptureViewController alloc] initWithWindow:windows[i]];
+            //     CGFloat x = padding;
+            //     CGFloat y = padding;
+            //     x += (width + padding) * i;
+            //     captureViewController.view.frameOrigin = CGPointMake(x, y);
+
+            //     [mainView addSubview:captureViewController.view];
+            //     capture_controllers.push_back(captureViewController);
         }
+        NSSize contentSize =
+            NSMakeSize((width + padding) * mainView.subviews.count + padding + innerPadding,
+                       height + padding * 2);
+        [mainWindow setContentSize:contentSize];
 
         mainWindow.contentView = mainView;
+
+        space = [[CGSSpace alloc] initWithLevel:1];
+        [space addWindow:mainWindow];
     }
 
     return self;
@@ -142,24 +153,20 @@
     if (windows.empty()) return;
 
     windows[selectedIndex].focus();
-
-    // window temp = windows[selectedIndex];
-    // windows.erase(windows.begin() + selectedIndex);
-    // windows.insert(windows.begin(), temp);
-
-    // selectedIndex = 0;
 }
 
 - (void)showWindow {
     if (_isShown) return;
     else _isShown = true;
 
-    [self listWindowsExperiment];  // TODO: debug; remove
+    // [self listWindowsExperiment];  // TODO: debug; remove
 
-    for (CaptureViewController* controller : capture_controllers) {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
-                       ^{ [controller startCapture]; });
-    }
+    [mainWindow.contentView startCaptureSubviews];
+
+    // for (CaptureViewController* controller : capture_controllers) {
+    //     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
+    //                    ^{ [controller startCapture]; });
+    // }
 
     // actually center window
     NSSize screenSize = NSScreen.mainScreen.frame.size;
@@ -177,10 +184,12 @@
 
     [mainWindow orderOut:nil];
 
-    for (CaptureViewController* controller : capture_controllers) {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
-                       ^{ [controller stopCapture]; });
-    }
+    [mainWindow.contentView stopCaptureSubviews];
+
+    // for (CaptureViewController* controller : capture_controllers) {
+    //     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
+    //                    ^{ [controller stopCapture]; });
+    // }
 }
 
 @end
