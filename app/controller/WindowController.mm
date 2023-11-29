@@ -10,9 +10,45 @@
 @implementation WindowController
 
 - (void)listWindowsExperiment {
-    CFArrayRef screenDicts = CGSCopyManagedDisplaySpaces(_CGSDefaultConnection());
-    for (NSDictionary* dict in (__bridge NSArray*)screenDicts) {
-        custom_log(OS_LOG_TYPE_DEFAULT, @"window-controller", @"%@", dict);
+    // CFArrayRef screenDicts = CGSCopyManagedDisplaySpaces(_CGSDefaultConnection());
+    // for (NSDictionary* dict in (__bridge NSArray*)screenDicts) {
+    //     NSNumber* spaceId = dict[@"Spaces"][0][@"id64"];
+    //     int setTags = 0;
+    //     int clearTags = 0;
+    //     NSArray* windowIds = (__bridge NSArray*)CGSCopyWindowsWithOptionsAndTags(
+    //         _CGSDefaultConnection(), 0, (__bridge CFArrayRef) @[ spaceId ], 2, &setTags,
+    //         &clearTags);
+
+    //     // custom_log(OS_LOG_TYPE_DEFAULT, @"window-controller", @"%@", windowIds);
+
+    //     for (NSNumber* number in windowIds) {
+    //         CGWindowID wid = [number unsignedIntValue];
+    //         CGWindowLevel level;
+    //         CGSGetWindowLevel(_CGSDefaultConnection(), wid, &level);
+
+    //         if (level == CGWindowLevelForKey(kCGNormalWindowLevelKey)) {
+    //             custom_log(OS_LOG_TYPE_DEFAULT, @"window-controller", @"%d: level %d", wid,
+    //             level);
+    //         }
+    //     }
+    // }
+
+    int setTags = 0;
+    int clearTags = 0;
+    NSArray* windowIds = (__bridge NSArray*)CGSCopyWindowsWithOptionsAndTags(
+        _CGSDefaultConnection(), 0,
+        (__bridge CFArrayRef) @[ @(CGSManagedDisplayGetCurrentSpace(
+            _CGSDefaultConnection(), kCGSPackagesMainDisplayIdentifier)) ],
+        2, &setTags, &clearTags);
+
+    for (NSNumber* number in windowIds) {
+        CGWindowID wid = [number unsignedIntValue];
+        CGWindowLevel level;
+        CGSGetWindowLevel(_CGSDefaultConnection(), wid, &level);
+
+        if (level == CGWindowLevelForKey(kCGNormalWindowLevelKey)) {
+            custom_log(OS_LOG_TYPE_DEFAULT, @"window-controller", @"%d: level %d", wid, level);
+        }
     }
 }
 
@@ -21,8 +57,6 @@
     if (self) {
         _isShown = false;
         selectedIndex = 0;
-
-        [self listWindowsExperiment];
 
         [self populateInitialApplications];
 
@@ -63,6 +97,9 @@
         [space addWindow:mainWindow];
 
         for (int i = 0; i < size; i++) {
+            custom_log(OS_LOG_TYPE_DEFAULT, @"window-controller", @"%d: %@", windows[i].wid,
+                       windows[i].title);
+
             CaptureViewController* captureViewController =
                 [[CaptureViewController alloc] initWithWindow:windows[i]];
             CGFloat x = padding;
@@ -151,6 +188,8 @@
 - (void)showWindow {
     if (_isShown) return;
     else _isShown = true;
+
+    [self listWindowsExperiment];  // TODO: debug; remove
 
     for (CaptureViewController* controller : capture_controllers) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
