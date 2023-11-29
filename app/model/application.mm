@@ -36,12 +36,13 @@ void application::populate_initial_windows() {
         AXUIElementCopyAttributeValue(windowRef, kAXMinimizedAttribute, (CFTypeRef*)&minimizedRef);
         bool is_minimized = CFBooleanGetValue(minimizedRef);
         if (!is_minimized) {
-            windows.push_back(window(runningApp.processIdentifier, windowRef, runningApp.icon));
+            windows.push_back(
+                window_element(runningApp.processIdentifier, windowRef, runningApp.icon));
         }
     }
 }
 
-void application::append_windows(std::vector<window>& windows) {
+void application::append_windows(std::vector<window_element>& windows) {
     windows.insert(windows.end(), this->windows.begin(), this->windows.end());
 }
 

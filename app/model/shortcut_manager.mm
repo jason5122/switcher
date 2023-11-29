@@ -66,7 +66,7 @@ CGEventRef modifier_callback(CGEventTapProxy proxy, CGEventType type, CGEventRef
     shortcut_manager* handler = (shortcut_manager*)inUserData;
     if (type == kCGEventFlagsChanged) {
         NSUInteger flags = CGEventGetFlags(cgEvent);
-        if (!(flags & NSEventModifierFlagCommand) && handler->windowController.isShown) {
+        if (!(flags & NSEventModifierFlagCommand) && handler->windowController.shown) {
             // custom_log(OS_LOG_TYPE_DEFAULT, @"shortcut-manager", @"⌘ released");
             [handler->windowController focusSelectedIndex];
             [handler->windowController hideWindow];
@@ -74,7 +74,7 @@ CGEventRef modifier_callback(CGEventTapProxy proxy, CGEventType type, CGEventRef
     } else if (type == kCGEventKeyDown) {
         CGKeyCode keycode =
             (CGKeyCode)CGEventGetIntegerValueField(cgEvent, kCGKeyboardEventKeycode);
-        if (keycode == 53 && handler->windowController.isShown) {
+        if (keycode == 53 && handler->windowController.shown) {
             // custom_log(OS_LOG_TYPE_DEFAULT, @"shortcut-manager", @"escape pressed");
             [handler->windowController hideWindow];
             return nil;

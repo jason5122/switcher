@@ -1,4 +1,4 @@
-#import "window.h"
+#import "model/window_element.h"
 #import <Cocoa/Cocoa.h>
 #import <vector>
 
@@ -8,12 +8,12 @@ public:
     NSString* localizedName();
     bool is_xpc();
     void populate_initial_windows();
-    void append_windows(std::vector<window>& windows);
+    void append_windows(std::vector<window_element>& windows);
     void add_observer();
 
 private:
     NSRunningApplication* runningApp;
     ProcessSerialNumber psn;
     AXUIElementRef axUiElement;
-    std::vector<window> windows;
+    std::vector<window_element> windows;
 };

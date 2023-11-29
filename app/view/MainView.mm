@@ -37,9 +37,9 @@
     }
 }
 
-- (void)addCaptureSubview:(window)window {
+- (void)addCaptureSubview:(window_element)window_element {
     CaptureViewController* captureViewController =
-        [[CaptureViewController alloc] initWithWindow:window];
+        [[CaptureViewController alloc] initWithWindow:window_element];
 
     CGFloat x = padding;
     CGFloat y = padding;
@@ -62,13 +62,6 @@
     [self addSubview:captureViewController.view];
     capture_controllers.push_back(captureViewController);
 }
-
-// - (void)removeCaptureSubview:(int)index {
-//     if (capture_controllers.empty()) return;
-
-//     [[self.subviews objectAtIndex:index] removeFromSuperview];
-//     capture_controllers.erase(capture_controllers.begin() + index);
-// }
 
 - (void)startCaptureSubviews {
     for (CaptureViewController* controller : capture_controllers) {
@@ -96,7 +89,7 @@
 - (void)focusSelectedIndex {
     if (capture_controllers.empty()) return;
 
-    [capture_controllers[selectedIndex] focusWindow];
+    // [capture_controllers[selectedIndex] focusWindow];
 }
 
 @end

@@ -1,19 +1,17 @@
-#import "model/window.h"
+#import "model/window_element.h"
 #import "view/CaptureView.h"
 #import <Cocoa/Cocoa.h>
 
 @interface CaptureViewController : NSViewController {
 @public
     CaptureView* captureView;
-    window w;  // TODO: better name and type?
 }
 
-- (instancetype)initWithWindow:(window)window;
+- (instancetype)initWithWindow:(window_element)window_element;
 - (instancetype)initWithWindowId:(CGWindowID)wid;
 - (void)startCapture;
 - (void)stopCapture;
 - (void)highlight;
 - (void)unhighlight;
-- (void)focusWindow;
 
 @end

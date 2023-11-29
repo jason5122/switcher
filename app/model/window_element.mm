@@ -1,11 +1,11 @@
 #import "private_apis/SkyLight.h"
-#import "window.h"
+#import "window_element.h"
 
 // TODO: move this to view. this doesn't really belong in model
 
-window::window() {}  // TODO: maybe remove this in the future
+window_element::window_element() {}  // TODO: maybe remove this in the future
 
-window::window(pid_t app_pid, AXUIElementRef windowRef, NSImage* icon) {
+window_element::window_element(pid_t app_pid, AXUIElementRef windowRef, NSImage* icon) {
     this->app_pid = app_pid;
     this->windowRef = windowRef;
 #pragma clang diagnostic push
@@ -21,7 +21,7 @@ window::window(pid_t app_pid, AXUIElementRef windowRef, NSImage* icon) {
     title = (__bridge NSString*)stringRef;
 }
 
-void window::focus() {
+void window_element::focus() {
     // https://github.com/koekeishiya/yabai/issues/1772#issuecomment-1649919480
     _SLPSSetFrontProcessWithOptions(&psn, 0, kSLPSNoWindows);
     AXUIElementPerformAction(windowRef, kAXRaiseAction);

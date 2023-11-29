@@ -21,6 +21,7 @@
 
 - Move CGWindowID stuff out of `WindowController`
 - Combine private API stuff
+- Use [three-letter prefixes](https://google.github.io/styleguide/objcguide.html#prefixes)
 
 ## Repo/Project Tasks
 

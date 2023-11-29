@@ -4,11 +4,9 @@
 // TODO: maybe get rid of this and merge with CaptureView.mm?
 @implementation CaptureViewController
 
-- (instancetype)initWithWindow:(window)window {
+- (instancetype)initWithWindow:(window_element)window_element {
     self = [super init];
     if (self) {
-        self->w = window;
-
         CGFloat padding = 15;
         CGFloat width = 280, height = 175;
         CGRect viewFrame = NSMakeRect(0, 0, width + padding * 2, height + padding * 2);
@@ -18,11 +16,11 @@
         stackView.wantsLayer = true;
         stackView.layer.cornerRadius = 9.0;
 
-        SCWindow* capture_window = [[SCWindow alloc] initWithId:window.wid];
+        SCWindow* capture_window = [[SCWindow alloc] initWithId:window_element.wid];
         captureView = [[CaptureView alloc] initWithFrame:captureFrame targetWindow:capture_window];
         [stackView addSubview:captureView];
 
-        NSImageView* iconView = [NSImageView imageViewWithImage:window.icon];
+        NSImageView* iconView = [NSImageView imageViewWithImage:window_element.icon];
         iconView.image.size = NSMakeSize(48, 48);
         iconView.frame = NSMakeRect(width - 48, 0, 48, 48);
         iconView.wantsLayer = true;
@@ -75,10 +73,6 @@
 
 - (void)unhighlight {
     self.view.layer.backgroundColor = CGColorGetConstantColor(kCGColorClear);
-}
-
-- (void)focusWindow {
-    w.focus();
 }
 
 @end

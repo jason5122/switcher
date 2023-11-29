@@ -9,7 +9,13 @@ struct CppMembers {
 - (instancetype)init {
     self = [super init];
     if (self) {
-        windowController = [[WindowController alloc] init];
+        CGSize size = CGSizeMake(280, 175);
+        CGFloat padding = 20;
+        CGFloat innerPadding = 15;
+
+        windowController = [[WindowController alloc] initWithSize:size
+                                                          padding:padding
+                                                     innerPadding:innerPadding];
         switcher_shortcut = new shortcut_manager(windowController);
     }
     return self;

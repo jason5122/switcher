@@ -1,5 +1,5 @@
 #import "controller/CaptureViewController.h"
-#import "model/window.h"
+#import "model/window_element.h"
 #import <Cocoa/Cocoa.h>
 #import <vector>
 
@@ -15,17 +15,14 @@
     // TODO: think about moving these to a controller (e.g., WindowController)
 @public
     int selectedIndex;
-
-    std::vector<window> windows;
 }
 
 - (instancetype)initWithCaptureSize:(NSSize)size
                             padding:(CGFloat)padding
                        innerPadding:(CGFloat)innerPadding;
 
-- (void)addCaptureSubview:(window)window;
+- (void)addCaptureSubview:(window_element)window_element;
 - (void)addCaptureSubviewId:(CGWindowID)wid;
-// - (void)removeCaptureSubview:(int)index;
 - (void)startCaptureSubviews;
 - (void)stopCaptureSubviews;
 - (void)cycleSelectedIndex;
