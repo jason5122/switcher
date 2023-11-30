@@ -4,14 +4,11 @@
 
 ### Implement
 
-- Keyboard shortcuts
-- Window switching capabilities
-- Multiple window captures
-- Centered thumbnails
 - [Universal binaries](https://developer.apple.com/documentation/apple-silicon/building-a-universal-macos-binary#Update-the-Architecture-List-of-Custom-Makefiles)
 
 ### Fix
 
+- Recording icon sometimes gets stuck. Is this due to an hanging stream?
 - Prevent window from ever gaining focus on click
   - Still allow click actions
 - Remove Sonoma recording icon?
@@ -19,8 +16,8 @@
 
 ### Refactor
 
-- Move CGWindowID stuff out of `WindowController`
-- Combine private API stuff
+- Make `shortcut_manager.mm` a controller
+  - It shouldn't be a model since it contains a controller (WindowController)
 - Use [three-letter prefixes](https://google.github.io/styleguide/objcguide.html#prefixes)
 
 ## Repo/Project Tasks
