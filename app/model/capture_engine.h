@@ -16,8 +16,7 @@ struct program_info_t;
 
 class capture_engine {
 public:
-    capture_engine(NSOpenGLContext* context, NSRect frame, SCWindow* target_window,
-                   CaptureView* captureView);
+    capture_engine(SCWindow* target_window, CaptureView* captureView);
     bool start_capture();
     bool stop_capture();
     void tick();
@@ -25,7 +24,7 @@ public:
 
 private:
     CaptureView* captureView;
-    ScreenCaptureDelegate* capture_delegate;
+    ScreenCaptureDelegate* captureDelegate;
 
     screen_capture* sc;
     program_info_t* program;

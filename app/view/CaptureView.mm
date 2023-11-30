@@ -40,12 +40,6 @@ struct program_info_t {
     program_info_t* program;
     GLuint quadVAOId, quadVBOId;
     bool quadInit;
-
-    SCStream* disp;
-    SCStreamConfiguration* stream_config;
-@public
-    IOSurfaceRef current, prev;
-    pthread_mutex_t mutex;
 }
 @end
 
@@ -85,45 +79,45 @@ struct program_info_t {
         quadInit = false;
 
         // sc = new screen_capture();
-        program = new program_info_t();
-        captureDelegate = [[ScreenCaptureDelegate2 alloc] init];
+        // program = new program_info_t();
+        // captureDelegate = [[ScreenCaptureDelegate2 alloc] init];
 
-        [self setupShaders];
+        // [self setupShaders];
 
-        // captureDelegate.sc = sc;
-        captureDelegate->captureView = self;
+        // // captureDelegate.sc = sc;
+        // captureDelegate->captureView = self;
 
-        pthread_mutex_init(&mutex, NULL);
-        SCContentFilter* content_filter;
+        // pthread_mutex_init(&mutex, NULL);
+        // SCContentFilter* content_filter;
 
-        stream_config = [[SCStreamConfiguration alloc] init];
+        // stream_config = [[SCStreamConfiguration alloc] init];
 
-        content_filter =
-            [[SCContentFilter alloc] initWithDesktopIndependentWindow:theTargetWindow];
+        // content_filter =
+        //     [[SCContentFilter alloc] initWithDesktopIndependentWindow:theTargetWindow];
 
-        stream_config.width = frame.size.width * 2;
-        stream_config.height = frame.size.height * 2;
+        // stream_config.width = frame.size.width * 2;
+        // stream_config.height = frame.size.height * 2;
 
-        stream_config.queueDepth = 8;
-        stream_config.showsCursor = false;
-        stream_config.pixelFormat = 'BGRA';
-        stream_config.colorSpaceName = kCGColorSpaceDisplayP3;
-        // TODO: do these have any effect?
-        stream_config.scalesToFit = true;
-        // sc->stream_config.backgroundColor = CGColorGetConstantColor(kCGColorClear);
+        // stream_config.queueDepth = 8;
+        // stream_config.showsCursor = false;
+        // stream_config.pixelFormat = 'BGRA';
+        // stream_config.colorSpaceName = kCGColorSpaceDisplayP3;
+        // // TODO: do these have any effect?
+        // stream_config.scalesToFit = true;
+        // // sc->stream_config.backgroundColor = CGColorGetConstantColor(kCGColorClear);
 
-        disp = [[SCStream alloc] initWithFilter:content_filter
-                                  configuration:stream_config
-                                       delegate:nil];
+        // disp = [[SCStream alloc] initWithFilter:content_filter
+        //                           configuration:stream_config
+        //                                delegate:nil];
 
-        NSError* error = nil;
-        BOOL did_add_output = [disp addStreamOutput:captureDelegate
-                                               type:SCStreamOutputTypeScreen
-                                 sampleHandlerQueue:nil
-                                              error:&error];
-        if (!did_add_output) {
-            custom_log(OS_LOG_TYPE_ERROR, @"capture-view", error.localizedFailureReason);
-        }
+        // NSError* error = nil;
+        // BOOL did_add_output = [disp addStreamOutput:captureDelegate
+        //                                        type:SCStreamOutputTypeScreen
+        //                          sampleHandlerQueue:nil
+        //                                       error:&error];
+        // if (!did_add_output) {
+        //     custom_log(OS_LOG_TYPE_ERROR, @"capture-view", error.localizedFailureReason);
+        // }
     }
     return self;
 }
@@ -140,7 +134,7 @@ struct program_info_t {
     [self.openGLContext setValues:&opacity forParameter:NSOpenGLCPSurfaceOpacity];
 #pragma clang diagnostic pop
 
-    cap_engine = new capture_engine(self.openGLContext, self.frame, targetWindow, self);
+    cap_engine = new capture_engine(targetWindow, self);
 }
 
 - (void)startCapture {

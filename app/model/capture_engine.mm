@@ -9,17 +9,6 @@
 // TODO: merge this whole file with CaptureView?
 
 struct screen_capture {
-    SCStream* disp;
-    SCStreamConfiguration* stream_config;
-
-    IOSurfaceRef current, prev;
-
-    pthread_mutex_t mutex;
-
-    CGWindowID window;  // TODO: use this to match and kill streams when they become nil
-
-    NSOpenGLContext* context;
-
     capture_engine* capture_engine;
 };
 
@@ -31,53 +20,41 @@ struct program_info_t {
     GLint uniform[NUM_UNIFORMS];
 };
 
-capture_engine::capture_engine(NSOpenGLContext* context, NSRect frame, SCWindow* target_window,
-                               CaptureView* captureView) {
+capture_engine::capture_engine(SCWindow* targetWindow, CaptureView* captureView) {
     this->captureView = captureView;
 
     sc = new screen_capture();
     program = new program_info_t();
 
-    capture_delegate = [[ScreenCaptureDelegate alloc] init:captureView screenCapture:sc];
-    // capture_delegate.sc = sc;
+    captureDelegate = [[ScreenCaptureDelegate alloc] init:captureView screenCapture:sc];
 
     setup_shaders();
 
     sc->capture_engine = this;
 
-    pthread_mutex_init(&sc->mutex, NULL);
+    pthread_mutex_init(&captureView->mutex, NULL);
 
-    // TODO: from start_capture(); clean this up
-    SCContentFilter* content_filter;
+    captureView->streamConfig = [[SCStreamConfiguration alloc] init];
+    captureView->streamConfig.width = captureView.frame.size.width * 2;
+    captureView->streamConfig.height = captureView.frame.size.height * 2;
+    captureView->streamConfig.queueDepth = 8;
+    captureView->streamConfig.showsCursor = false;
+    captureView->streamConfig.pixelFormat = 'BGRA';
+    captureView->streamConfig.colorSpaceName = kCGColorSpaceDisplayP3;
 
-    sc->stream_config = [[SCStreamConfiguration alloc] init];
-
-    sc->window = target_window.windowID;
-    content_filter = [[SCContentFilter alloc] initWithDesktopIndependentWindow:target_window];
-
-    sc->stream_config.width = frame.size.width * 2;
-    sc->stream_config.height = frame.size.height * 2;
-
-    sc->stream_config.queueDepth = 8;
-    sc->stream_config.showsCursor = false;
-    sc->stream_config.pixelFormat = 'BGRA';
-    sc->stream_config.colorSpaceName = kCGColorSpaceDisplayP3;
-    // TODO: do these have any effect?
-    sc->stream_config.scalesToFit = true;
-    // sc->stream_config.backgroundColor = CGColorGetConstantColor(kCGColorClear);
-
-    sc->disp = [[SCStream alloc] initWithFilter:content_filter
-                                  configuration:sc->stream_config
-                                       delegate:nil];
+    SCContentFilter* contentFilter =
+        [[SCContentFilter alloc] initWithDesktopIndependentWindow:targetWindow];
+    captureView->disp = [[SCStream alloc] initWithFilter:contentFilter
+                                           configuration:captureView->streamConfig
+                                                delegate:nil];
 
     NSError* error = nil;
-    BOOL did_add_output = [sc->disp addStreamOutput:capture_delegate
-                                               type:SCStreamOutputTypeScreen
-                                 sampleHandlerQueue:nil
-                                              error:&error];
+    BOOL did_add_output = [captureView->disp addStreamOutput:captureDelegate
+                                                        type:SCStreamOutputTypeScreen
+                                          sampleHandlerQueue:nil
+                                                       error:&error];
     if (!did_add_output) {
         custom_log(OS_LOG_TYPE_ERROR, @"capture-engine", error.localizedFailureReason);
-        // return !did_add_output;
     }
 }
 
@@ -85,7 +62,7 @@ bool capture_engine::start_capture() {
     dispatch_semaphore_t stream_start_completed = dispatch_semaphore_create(0);
 
     __block BOOL is_success = false;
-    [sc->disp startCaptureWithCompletionHandler:^(NSError* _Nullable error) {
+    [captureView->disp startCaptureWithCompletionHandler:^(NSError* _Nullable error) {
       is_success = (BOOL)(error == nil);
       if (!is_success) {
           custom_log(OS_LOG_TYPE_ERROR, @"capture-engine", error.localizedFailureReason);
@@ -100,7 +77,7 @@ bool capture_engine::stop_capture() {
     dispatch_semaphore_t stream_stop_completed = dispatch_semaphore_create(0);
 
     __block BOOL is_success = false;
-    [sc->disp stopCaptureWithCompletionHandler:^(NSError* _Nullable error) {
+    [captureView->disp stopCaptureWithCompletionHandler:^(NSError* _Nullable error) {
       is_success = (BOOL)(error == nil);
       if (!is_success) {
           custom_log(OS_LOG_TYPE_ERROR, @"capture-engine", error.localizedFailureReason);
@@ -168,15 +145,15 @@ void capture_engine::init_quad(IOSurfaceRef surface) {
 }
 
 void capture_engine::tick() {
-    if (!sc->current) return;
+    if (!captureView->current) return;
 
-    IOSurfaceRef prev_prev = sc->prev;
-    if (pthread_mutex_lock(&sc->mutex)) return;
-    sc->prev = sc->current;
-    sc->current = NULL;
-    pthread_mutex_unlock(&sc->mutex);
+    IOSurfaceRef prev_prev = captureView->prev;
+    if (pthread_mutex_lock(&captureView->mutex)) return;
+    captureView->prev = captureView->current;
+    captureView->current = NULL;
+    pthread_mutex_unlock(&captureView->mutex);
 
-    if (prev_prev == sc->prev) return;
+    if (prev_prev == captureView->prev) return;
 
     if (prev_prev) {
         IOSurfaceDecrementUseCount(prev_prev);
@@ -185,11 +162,11 @@ void capture_engine::tick() {
 }
 
 void capture_engine::render() {
-    if (!sc->prev) return;
+    if (!captureView->prev) return;
 
     GLuint name;
     CGLContextObj cgl_ctx = captureView.openGLContext.CGLContextObj;
-    IOSurfaceRef surface = (IOSurfaceRef)sc->prev;
+    IOSurfaceRef surface = (IOSurfaceRef)captureView->prev;
 
     GLsizei width = (GLsizei)IOSurfaceGetWidth(surface);
     GLsizei height = (GLsizei)IOSurfaceGetHeight(surface);
@@ -269,13 +246,13 @@ void capture_engine::render() {
 
     IOSurfaceRef prev_current = NULL;
 
-    if (frame_surface && !pthread_mutex_lock(&sc->mutex)) {
-        prev_current = sc->current;
-        sc->current = frame_surface;
-        CFRetain(sc->current);
-        IOSurfaceIncrementUseCount(sc->current);
+    if (frame_surface && !pthread_mutex_lock(&captureView->mutex)) {
+        prev_current = captureView->current;
+        captureView->current = frame_surface;
+        CFRetain(captureView->current);
+        IOSurfaceIncrementUseCount(captureView->current);
 
-        pthread_mutex_unlock(&sc->mutex);
+        pthread_mutex_unlock(&captureView->mutex);
     }
 
     if (prev_current) {

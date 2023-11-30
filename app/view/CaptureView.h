@@ -5,6 +5,12 @@
 @public
     SCWindow* targetWindow;
     bool hasStarted;
+
+@public
+    SCStream* disp;
+    SCStreamConfiguration* streamConfig;
+    IOSurfaceRef current, prev;
+    pthread_mutex_t mutex;
 }
 
 - (id)initWithFrame:(NSRect)frame targetWindow:(SCWindow*)window;
