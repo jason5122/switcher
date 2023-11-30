@@ -10,6 +10,7 @@ public:
     void populate_initial_windows();
     void append_windows(std::vector<window_element>& windows);
     void add_observer();
+    static std::vector<application> get_running_applications();
 
 private:
     NSRunningApplication* runningApp;

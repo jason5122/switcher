@@ -25,8 +25,8 @@
                                             innerPadding:theInnerPadding];
         self.window.contentView = mainView;
 
-        space = [[Space alloc] initWithLevel:1];
-        [space addWindow:self.window];
+        sp = new space(1);
+        sp->add_window(self.window);
     }
     return self;
 }

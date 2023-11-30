@@ -1,4 +1,4 @@
-#import "model/spaces.h"
+#import "model/space.h"
 #import "view/MainView.h"
 #import <Cocoa/Cocoa.h>
 
@@ -7,7 +7,7 @@
     CGFloat padding;
     CGFloat innerPadding;
     MainView* mainView;
-    Space* space;
+    space* sp;
 }
 
 @property(nonatomic, getter=isShown) bool shown;

@@ -1,5 +1,5 @@
 #import "MainView.h"
-#import "model/spaces.h"
+#import "model/space.h"
 #import "view/CaptureView.h"
 
 @implementation MainView
@@ -23,7 +23,7 @@
 }
 
 - (void)populateWithCurrentWindows {
-    for (CGWindowID wid : [Space getAllWindowIds]) {
+    for (CGWindowID wid : space::get_all_window_ids()) {
         CaptureViewController* captureViewController =
             [[CaptureViewController alloc] initWithWindowId:wid
                                                        size:size

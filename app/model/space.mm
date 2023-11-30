@@ -1,25 +1,19 @@
-#import "spaces.h"
+#import "space.h"
 
-@implementation Space
-
-- (instancetype)initWithLevel:(int)level {
-    self = [super init];
-    if (self) {
-        int flag = 0x1;
-        identifier = CGSSpaceCreate(_CGSDefaultConnection(), flag, nil);
-        CGSSpaceSetAbsoluteLevel(_CGSDefaultConnection(), self->identifier, level);
-        CGSShowSpaces(_CGSDefaultConnection(), (__bridge CFArrayRef) @[ @(self->identifier) ]);
-    }
-    return self;
+space::space(int level) {
+    int flag = 0x1;
+    identifier = CGSSpaceCreate(_CGSDefaultConnection(), flag, nil);
+    CGSSpaceSetAbsoluteLevel(_CGSDefaultConnection(), identifier, level);
+    CGSShowSpaces(_CGSDefaultConnection(), (__bridge CFArrayRef) @[ @(identifier) ]);
 }
 
-- (void)addWindow:(NSWindow*)window {
+void space::add_window(NSWindow* window) {
     CGSAddWindowsToSpaces(_CGSDefaultConnection(),
                           (__bridge CFArrayRef) @[ @(window.windowNumber) ],
-                          (__bridge CFArrayRef) @[ @(self->identifier) ]);
+                          (__bridge CFArrayRef) @[ @(identifier) ]);
 }
 
-+ (std::vector<CGWindowID>)getAllWindowIds {
+std::vector<CGWindowID> space::get_all_window_ids() {
     std::vector<CGWindowID> result;
     CFArrayRef screenDicts = CGSCopyManagedDisplaySpaces(_CGSDefaultConnection());
     for (NSDictionary* screen in (__bridge NSArray*)screenDicts) {
@@ -46,9 +40,7 @@
     return result;
 }
 
-- (void)dealloc {
-    CGSHideSpaces(_CGSDefaultConnection(), (__bridge CFArrayRef) @[ @(self->identifier) ]);
-    CGSSpaceDestroy(_CGSDefaultConnection(), self->identifier);
+space::~space() {
+    CGSHideSpaces(_CGSDefaultConnection(), (__bridge CFArrayRef) @[ @(identifier) ]);
+    CGSSpaceDestroy(_CGSDefaultConnection(), identifier);
 }
-
-@end
