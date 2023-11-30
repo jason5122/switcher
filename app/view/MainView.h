@@ -4,7 +4,7 @@
 #import <vector>
 
 @interface MainView : NSVisualEffectView {
-    NSSize size;
+    CGSize size;
     CGFloat padding;
     CGFloat innerPadding;
 
@@ -17,12 +17,11 @@
     int selectedIndex;
 }
 
-- (instancetype)initWithCaptureSize:(NSSize)size
+- (instancetype)initWithCaptureSize:(CGSize)size
                             padding:(CGFloat)padding
                        innerPadding:(CGFloat)innerPadding;
 
 - (void)addCaptureSubview:(window_element)window_element;
-- (void)addCaptureSubviewId:(CGWindowID)wid;
 - (void)startCaptureSubviews;
 - (void)stopCaptureSubviews;
 - (void)cycleSelectedIndex;

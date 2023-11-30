@@ -4,14 +4,14 @@
 
 @implementation MainView
 
-- (instancetype)initWithCaptureSize:(NSSize)initialSize
-                            padding:(CGFloat)initialPadding
-                       innerPadding:(CGFloat)initialInnerPadding {
+- (instancetype)initWithCaptureSize:(CGSize)theSize
+                            padding:(CGFloat)thePadding
+                       innerPadding:(CGFloat)theInnerPadding {
     self = [super init];
     if (self) {
-        size = initialSize;
-        padding = initialPadding;
-        innerPadding = initialInnerPadding;
+        size = theSize;
+        padding = thePadding;
+        innerPadding = theInnerPadding;
         selectedIndex = 0;
 
         self.material = NSVisualEffectMaterialHUDWindow;
@@ -25,7 +25,9 @@
 - (void)ahaha {
     for (CGWindowID wid : get_all_window_ids()) {
         CaptureViewController* captureViewController =
-            [[CaptureViewController alloc] initWithWindowId:wid];
+            [[CaptureViewController alloc] initWithWindowId:wid
+                                                       size:size
+                                               innerPadding:innerPadding];
 
         CGFloat x = padding;
         CGFloat y = padding;
@@ -40,19 +42,6 @@
 - (void)addCaptureSubview:(window_element)window_element {
     CaptureViewController* captureViewController =
         [[CaptureViewController alloc] initWithWindow:window_element];
-
-    CGFloat x = padding;
-    CGFloat y = padding;
-    x += (size.width + padding + innerPadding) * self.subviews.count;
-    captureViewController.view.frameOrigin = CGPointMake(x, y);
-
-    [self addSubview:captureViewController.view];
-    capture_controllers.push_back(captureViewController);
-}
-
-- (void)addCaptureSubviewId:(CGWindowID)wid {
-    CaptureViewController* captureViewController =
-        [[CaptureViewController alloc] initWithWindowId:wid];
 
     CGFloat x = padding;
     CGFloat y = padding;

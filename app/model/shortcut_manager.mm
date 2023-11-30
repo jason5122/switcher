@@ -27,8 +27,8 @@ void handle_event(EventHotKeyID hotKeyId, shortcut_manager* handler, bool is_pre
 
     if (hotKeyId.id == 0) {
         // custom_log(OS_LOG_TYPE_DEFAULT, @"shortcut-manager", @"nextWindowShortcut %@", state);
-        [handler->windowController cycleSelectedIndex];
         [handler->windowController showWindow];
+        [handler->windowController cycleSelectedIndex];
     }
 }
 

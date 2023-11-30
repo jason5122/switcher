@@ -6,6 +6,8 @@
 #import <OpenGL/gl3.h>
 #import <pthread.h>
 
+// TODO: merge this whole file with CaptureView?
+
 struct screen_capture {
     SCStream* disp;
     SCStreamConfiguration* stream_config;

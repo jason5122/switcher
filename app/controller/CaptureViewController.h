@@ -7,8 +7,10 @@
     CaptureView* captureView;
 }
 
+- (instancetype)initWithWindowId:(CGWindowID)wid
+                            size:(CGSize)size
+                    innerPadding:(CGFloat)innerPadding;
 - (instancetype)initWithWindow:(window_element)window_element;
-- (instancetype)initWithWindowId:(CGWindowID)wid;
 - (void)startCapture;
 - (void)stopCapture;
 - (void)highlight;

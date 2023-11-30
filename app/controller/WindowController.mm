@@ -51,11 +51,12 @@
     if (_shown) return;
     else _shown = true;
 
+    [mainView ahaha];
+
     // TODO: why does this crash without a dispatch?
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0 * NSEC_PER_SEC), dispatch_get_main_queue(),
                    ^{ [mainView startCaptureSubviews]; });
 
-    [mainView ahaha];
     NSSize contentSize =
         NSMakeSize((size.width + padding + innerPadding) * self.window.contentView.subviews.count +
                        padding + innerPadding,

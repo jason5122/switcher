@@ -38,13 +38,14 @@
     return self;
 }
 
-- (instancetype)initWithWindowId:(CGWindowID)wid {
+- (instancetype)initWithWindowId:(CGWindowID)wid
+                            size:(CGSize)size
+                    innerPadding:(CGFloat)innerPadding {
     self = [super init];
     if (self) {
-        CGFloat padding = 15;
-        CGFloat width = 280, height = 175;
-        CGRect viewFrame = NSMakeRect(0, 0, width + padding * 2, height + padding * 2);
-        CGRect captureFrame = NSMakeRect(padding, padding, width, height);
+        CGRect viewFrame =
+            NSMakeRect(0, 0, size.width + innerPadding * 2, size.height + innerPadding * 2);
+        CGRect captureFrame = NSMakeRect(innerPadding, innerPadding, size.width, size.height);
 
         NSStackView* stackView = [[NSStackView alloc] initWithFrame:viewFrame];
         stackView.wantsLayer = true;
