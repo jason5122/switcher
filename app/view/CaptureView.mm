@@ -36,10 +36,16 @@ struct program_info_t {
 @interface CaptureView () {
     capture_engine* cap_engine;
     ScreenCaptureDelegate2* captureDelegate;
-    screen_capture* sc;
+    // screen_capture* sc;
     program_info_t* program;
     GLuint quadVAOId, quadVBOId;
     bool quadInit;
+
+    SCStream* disp;
+    SCStreamConfiguration* stream_config;
+@public
+    IOSurfaceRef current, prev;
+    pthread_mutex_t mutex;
 }
 @end
 
@@ -79,45 +85,45 @@ struct program_info_t {
         quadInit = false;
 
         // sc = new screen_capture();
-        // program = new program_info_t();
-        // captureDelegate = [[ScreenCaptureDelegate2 alloc] init];
+        program = new program_info_t();
+        captureDelegate = [[ScreenCaptureDelegate2 alloc] init];
 
-        // [self setupShaders];
+        [self setupShaders];
 
         // captureDelegate.sc = sc;
-        // captureDelegate->captureView = self;
+        captureDelegate->captureView = self;
 
-        // pthread_mutex_init(&sc->mutex, NULL);
-        // SCContentFilter* content_filter;
+        pthread_mutex_init(&mutex, NULL);
+        SCContentFilter* content_filter;
 
-        // sc->stream_config = [[SCStreamConfiguration alloc] init];
+        stream_config = [[SCStreamConfiguration alloc] init];
 
-        // content_filter =
-        //     [[SCContentFilter alloc] initWithDesktopIndependentWindow:theTargetWindow];
+        content_filter =
+            [[SCContentFilter alloc] initWithDesktopIndependentWindow:theTargetWindow];
 
-        // sc->stream_config.width = frame.size.width * 2;
-        // sc->stream_config.height = frame.size.height * 2;
+        stream_config.width = frame.size.width * 2;
+        stream_config.height = frame.size.height * 2;
 
-        // sc->stream_config.queueDepth = 8;
-        // sc->stream_config.showsCursor = false;
-        // sc->stream_config.pixelFormat = 'BGRA';
-        // sc->stream_config.colorSpaceName = kCGColorSpaceDisplayP3;
-        // // TODO: do these have any effect?
-        // sc->stream_config.scalesToFit = true;
-        // // sc->stream_config.backgroundColor = CGColorGetConstantColor(kCGColorClear);
+        stream_config.queueDepth = 8;
+        stream_config.showsCursor = false;
+        stream_config.pixelFormat = 'BGRA';
+        stream_config.colorSpaceName = kCGColorSpaceDisplayP3;
+        // TODO: do these have any effect?
+        stream_config.scalesToFit = true;
+        // sc->stream_config.backgroundColor = CGColorGetConstantColor(kCGColorClear);
 
-        // sc->disp = [[SCStream alloc] initWithFilter:content_filter
-        //                               configuration:sc->stream_config
-        //                                    delegate:nil];
+        disp = [[SCStream alloc] initWithFilter:content_filter
+                                  configuration:stream_config
+                                       delegate:nil];
 
-        // NSError* error = nil;
-        // BOOL did_add_output = [sc->disp addStreamOutput:captureDelegate
-        //                                            type:SCStreamOutputTypeScreen
-        //                              sampleHandlerQueue:nil
-        //                                           error:&error];
-        // if (!did_add_output) {
-        //     custom_log(OS_LOG_TYPE_ERROR, @"capture-view", error.localizedFailureReason);
-        // }
+        NSError* error = nil;
+        BOOL did_add_output = [disp addStreamOutput:captureDelegate
+                                               type:SCStreamOutputTypeScreen
+                                 sampleHandlerQueue:nil
+                                              error:&error];
+        if (!did_add_output) {
+            custom_log(OS_LOG_TYPE_ERROR, @"capture-view", error.localizedFailureReason);
+        }
     }
     return self;
 }
@@ -137,42 +143,10 @@ struct program_info_t {
     cap_engine = new capture_engine(self.openGLContext, self.frame, targetWindow);
 }
 
-- (void)startCapture {
-    if (hasStarted) return;
-
-    if (!cap_engine->start_capture()) {
-        custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"start capture failed");
-    } else {
-        hasStarted = true;
-    }
-}
-
-- (void)stopCapture {
-    if (!hasStarted) return;
-
-    if (!cap_engine->stop_capture()) {
-        custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"stop capture failed");
-    } else {
-        hasStarted = false;
-    }
-}
-
 // - (void)startCapture {
 //     if (hasStarted) return;
 
-//     dispatch_semaphore_t stream_start_completed = dispatch_semaphore_create(0);
-
-//     __block BOOL success = false;
-//     [sc->disp startCaptureWithCompletionHandler:^(NSError* _Nullable error) {
-//       success = (BOOL)(error == nil);
-//       if (!success) {
-//           custom_log(OS_LOG_TYPE_ERROR, @"capture-view", error.localizedFailureReason);
-//       }
-//       dispatch_semaphore_signal(stream_start_completed);
-//     }];
-//     dispatch_semaphore_wait(stream_start_completed, DISPATCH_TIME_FOREVER);
-
-//     if (!success) {
+//     if (!cap_engine->start_capture()) {
 //         custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"start capture failed");
 //     } else {
 //         hasStarted = true;
@@ -182,24 +156,56 @@ struct program_info_t {
 // - (void)stopCapture {
 //     if (!hasStarted) return;
 
-//     dispatch_semaphore_t stream_stop_completed = dispatch_semaphore_create(0);
-
-//     __block BOOL success = false;
-//     [sc->disp stopCaptureWithCompletionHandler:^(NSError* _Nullable error) {
-//       success = (BOOL)(error == nil);
-//       if (!success) {
-//           custom_log(OS_LOG_TYPE_ERROR, @"capture-view", error.localizedFailureReason);
-//       }
-//       dispatch_semaphore_signal(stream_stop_completed);
-//     }];
-//     dispatch_semaphore_wait(stream_stop_completed, DISPATCH_TIME_FOREVER);
-
-//     if (!success) {
+//     if (!cap_engine->stop_capture()) {
 //         custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"stop capture failed");
 //     } else {
 //         hasStarted = false;
 //     }
 // }
+
+- (void)startCapture {
+    if (hasStarted) return;
+
+    dispatch_semaphore_t stream_start_completed = dispatch_semaphore_create(0);
+
+    __block BOOL success = false;
+    [disp startCaptureWithCompletionHandler:^(NSError* _Nullable error) {
+      success = (BOOL)(error == nil);
+      if (!success) {
+          custom_log(OS_LOG_TYPE_ERROR, @"capture-view", error.localizedFailureReason);
+      }
+      dispatch_semaphore_signal(stream_start_completed);
+    }];
+    dispatch_semaphore_wait(stream_start_completed, DISPATCH_TIME_FOREVER);
+
+    if (!success) {
+        custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"start capture failed");
+    } else {
+        hasStarted = true;
+    }
+}
+
+- (void)stopCapture {
+    if (!hasStarted) return;
+
+    dispatch_semaphore_t stream_stop_completed = dispatch_semaphore_create(0);
+
+    __block BOOL success = false;
+    [disp stopCaptureWithCompletionHandler:^(NSError* _Nullable error) {
+      success = (BOOL)(error == nil);
+      if (!success) {
+          custom_log(OS_LOG_TYPE_ERROR, @"capture-view", error.localizedFailureReason);
+      }
+      dispatch_semaphore_signal(stream_stop_completed);
+    }];
+    dispatch_semaphore_wait(stream_stop_completed, DISPATCH_TIME_FOREVER);
+
+    if (!success) {
+        custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"stop capture failed");
+    } else {
+        hasStarted = false;
+    }
+}
 
 - (void)update {
     [super update];
@@ -263,15 +269,15 @@ struct program_info_t {
 }
 
 - (void)tick {
-    if (!sc->current) return;
+    if (!current) return;
 
-    IOSurfaceRef prev_prev = sc->prev;
-    if (pthread_mutex_lock(&sc->mutex)) return;
-    sc->prev = sc->current;
-    sc->current = NULL;
-    pthread_mutex_unlock(&sc->mutex);
+    IOSurfaceRef prev_prev = prev;
+    if (pthread_mutex_lock(&mutex)) return;
+    prev = current;
+    current = NULL;
+    pthread_mutex_unlock(&mutex);
 
-    if (prev_prev == sc->prev) return;
+    if (prev_prev == prev) return;
 
     if (prev_prev) {
         IOSurfaceDecrementUseCount(prev_prev);
@@ -280,10 +286,10 @@ struct program_info_t {
 }
 
 - (void)render {
-    if (!sc->prev) return;
+    if (!prev) return;
 
     GLuint name;
-    IOSurfaceRef surface = (IOSurfaceRef)sc->prev;
+    IOSurfaceRef surface = (IOSurfaceRef)prev;
 
     GLsizei width = (GLsizei)IOSurfaceGetWidth(surface);
     GLsizei height = (GLsizei)IOSurfaceGetHeight(surface);
@@ -356,13 +362,13 @@ struct program_info_t {
 
     IOSurfaceRef prev_current = NULL;
 
-    if (frame_surface && !pthread_mutex_lock(&_sc->mutex)) {
-        prev_current = _sc->current;
-        _sc->current = frame_surface;
-        CFRetain(_sc->current);
-        IOSurfaceIncrementUseCount(_sc->current);
+    if (frame_surface && !pthread_mutex_lock(&captureView->mutex)) {
+        prev_current = captureView->current;
+        captureView->current = frame_surface;
+        CFRetain(captureView->current);
+        IOSurfaceIncrementUseCount(captureView->current);
 
-        pthread_mutex_unlock(&_sc->mutex);
+        pthread_mutex_unlock(&captureView->mutex);
     }
 
     if (prev_current) {
