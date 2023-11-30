@@ -4,9 +4,11 @@
 #import <Cocoa/Cocoa.h>
 #import <OpenGL/gl3.h>
 
-struct CppMembers {
-    capture_engine* capture_engine;
-};
+// http://philjordan.eu/article/mixing-objective-c-c++-and-objective-c++
+@interface CaptureView () {
+    capture_engine* cap_engine;
+}
+@end
 
 @implementation CaptureView
 
@@ -39,7 +41,6 @@ struct CppMembers {
 
     self = [super initWithFrame:frame pixelFormat:pf];
     if (self) {
-        cpp = new CppMembers;
         targetWindow = window;
         hasStarted = false;
     }
@@ -58,13 +59,13 @@ struct CppMembers {
     [self.openGLContext setValues:&opacity forParameter:NSOpenGLCPSurfaceOpacity];
 #pragma clang diagnostic pop
 
-    cpp->capture_engine = new capture_engine(self.openGLContext, self.frame, targetWindow);
+    cap_engine = new capture_engine(self.openGLContext, self.frame, targetWindow);
 }
 
 - (void)startCapture {
     if (hasStarted) return;
 
-    if (!cpp->capture_engine->start_capture()) {
+    if (!cap_engine->start_capture()) {
         custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"start capture failed");
     } else {
         hasStarted = true;
@@ -74,7 +75,7 @@ struct CppMembers {
 - (void)stopCapture {
     if (!hasStarted) return;
 
-    if (!cpp->capture_engine->stop_capture()) {
+    if (!cap_engine->stop_capture()) {
         custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"stop capture failed");
     } else {
         hasStarted = false;
