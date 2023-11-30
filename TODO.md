@@ -4,10 +4,14 @@
 
 ### Implement
 
+- Detect more types of crashes/signals
+  - Spawn a second process to detect with the app closes?
 - [Universal binaries](https://developer.apple.com/documentation/apple-silicon/building-a-universal-macos-binary#Update-the-Architecture-List-of-Custom-Makefiles)
 
 ### Fix
 
+- Memory leak
+  - Use Instruments.app to measure
 - Recording icon sometimes gets stuck. Is this due to an hanging stream?
 - Prevent window from ever gaining focus on click
   - Still allow click actions
