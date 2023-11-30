@@ -57,7 +57,7 @@
                    size.height + (padding + innerPadding) * 2);
     [self.window setContentSize:contentSize];
 
-    // [self.window actuallyCenter];
+    [self.window actuallyCenter];
 
     [self.window makeKeyAndOrderFront:nil];
 }

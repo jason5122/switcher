@@ -17,7 +17,8 @@ struct program_info_t {
 };
 
 @interface ScreenCaptureDelegate : NSObject <SCStreamOutput> {
-    CaptureView* captureView;
+    // https://mobiarch.wordpress.com/2014/02/05/circular-reference-and-arc/
+    __weak CaptureView* captureView;
 }
 
 - (instancetype)initWithCaptureView:(CaptureView*)captureView;
