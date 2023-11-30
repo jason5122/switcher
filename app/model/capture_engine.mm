@@ -8,16 +8,10 @@
 
 // TODO: merge this whole file with CaptureView?
 
-struct screen_capture {
-    capture_engine* capture_engine;
-};
-
 capture_engine::capture_engine(CaptureView* captureView) {
     this->captureView = captureView;
 
-    sc = new screen_capture();
-    captureDelegate = [[ScreenCaptureDelegate alloc] init:captureView screenCapture:sc];
-    sc->capture_engine = this;
+    captureDelegate = [[ScreenCaptureDelegate alloc] initWithCaptureView:captureView];
 
     [captureView setupShaders];
 
@@ -29,36 +23,6 @@ capture_engine::capture_engine(CaptureView* captureView) {
     if (!did_add_output) {
         custom_log(OS_LOG_TYPE_ERROR, @"capture-engine", error.localizedFailureReason);
     }
-}
-
-bool capture_engine::start_capture() {
-    dispatch_semaphore_t stream_start_completed = dispatch_semaphore_create(0);
-
-    __block BOOL is_success = false;
-    [captureView->disp startCaptureWithCompletionHandler:^(NSError* _Nullable error) {
-      is_success = (BOOL)(error == nil);
-      if (!is_success) {
-          custom_log(OS_LOG_TYPE_ERROR, @"capture-engine", error.localizedFailureReason);
-      }
-      dispatch_semaphore_signal(stream_start_completed);
-    }];
-    dispatch_semaphore_wait(stream_start_completed, DISPATCH_TIME_FOREVER);
-    return is_success;
-}
-
-bool capture_engine::stop_capture() {
-    dispatch_semaphore_t stream_stop_completed = dispatch_semaphore_create(0);
-
-    __block BOOL is_success = false;
-    [captureView->disp stopCaptureWithCompletionHandler:^(NSError* _Nullable error) {
-      is_success = (BOOL)(error == nil);
-      if (!is_success) {
-          custom_log(OS_LOG_TYPE_ERROR, @"capture-engine", error.localizedFailureReason);
-      }
-      dispatch_semaphore_signal(stream_stop_completed);
-    }];
-    dispatch_semaphore_wait(stream_stop_completed, DISPATCH_TIME_FOREVER);
-    return is_success;
 }
 
 void capture_engine::init_quad(IOSurfaceRef surface) {
@@ -155,11 +119,10 @@ void capture_engine::render() {
 
 @implementation ScreenCaptureDelegate
 
-- (instancetype)init:(CaptureView*)theCaptureView screenCapture:(screen_capture*)theSc {
+- (instancetype)initWithCaptureView:(CaptureView*)theCaptureView {
     self = [super init];
     if (self) {
         captureView = theCaptureView;
-        sc = theSc;
     }
     return self;
 }
@@ -203,8 +166,8 @@ void capture_engine::render() {
     [captureView.openGLContext makeCurrentContext];
     CGLLockContext(cgl_ctx);
 
-    sc->capture_engine->tick();
-    sc->capture_engine->render();
+    [captureView tick];
+    [captureView render];
 
     [captureView.openGLContext flushBuffer];
 

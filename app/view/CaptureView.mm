@@ -8,26 +8,9 @@
 #import <OpenGL/gl3.h>
 #import <pthread.h>
 
-struct screen_capture {
-    SCStream* disp;
-    SCStreamConfiguration* stream_config;
-
-    IOSurfaceRef current, prev;
-
-    pthread_mutex_t mutex;
-};
-
-@interface ScreenCaptureDelegate2 : NSObject <SCStreamOutput> {
-@public
-    CaptureView* captureView;
-}
-@property struct screen_capture* sc;
-@end
-
 // http://philjordan.eu/article/mixing-objective-c-c++-and-objective-c++
 @interface CaptureView () {
     capture_engine* cap_engine;
-    ScreenCaptureDelegate2* captureDelegate;
 }
 @end
 
@@ -101,42 +84,10 @@ struct screen_capture {
     cap_engine = new capture_engine(self);
 }
 
-- (void)startCapture {
-    if (hasStarted) return;
-
-    if (!cap_engine->start_capture()) {
-        custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"start capture failed");
-    } else {
-        hasStarted = true;
-    }
-}
-
-- (void)stopCapture {
-    if (!hasStarted) return;
-
-    if (!cap_engine->stop_capture()) {
-        custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"stop capture failed");
-    } else {
-        hasStarted = false;
-    }
-}
-
 // - (void)startCapture {
 //     if (hasStarted) return;
 
-//     dispatch_semaphore_t stream_start_completed = dispatch_semaphore_create(0);
-
-//     __block BOOL success = false;
-//     [disp startCaptureWithCompletionHandler:^(NSError* _Nullable error) {
-//       success = (BOOL)(error == nil);
-//       if (!success) {
-//           custom_log(OS_LOG_TYPE_ERROR, @"capture-view", error.localizedFailureReason);
-//       }
-//       dispatch_semaphore_signal(stream_start_completed);
-//     }];
-//     dispatch_semaphore_wait(stream_start_completed, DISPATCH_TIME_FOREVER);
-
-//     if (!success) {
+//     if (!cap_engine->start_capture()) {
 //         custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"start capture failed");
 //     } else {
 //         hasStarted = true;
@@ -146,24 +97,56 @@ struct screen_capture {
 // - (void)stopCapture {
 //     if (!hasStarted) return;
 
-//     dispatch_semaphore_t stream_stop_completed = dispatch_semaphore_create(0);
-
-//     __block BOOL success = false;
-//     [disp stopCaptureWithCompletionHandler:^(NSError* _Nullable error) {
-//       success = (BOOL)(error == nil);
-//       if (!success) {
-//           custom_log(OS_LOG_TYPE_ERROR, @"capture-view", error.localizedFailureReason);
-//       }
-//       dispatch_semaphore_signal(stream_stop_completed);
-//     }];
-//     dispatch_semaphore_wait(stream_stop_completed, DISPATCH_TIME_FOREVER);
-
-//     if (!success) {
+//     if (!cap_engine->stop_capture()) {
 //         custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"stop capture failed");
 //     } else {
 //         hasStarted = false;
 //     }
 // }
+
+- (void)startCapture {
+    if (hasStarted) return;
+
+    dispatch_semaphore_t stream_start_completed = dispatch_semaphore_create(0);
+
+    __block BOOL success = false;
+    [disp startCaptureWithCompletionHandler:^(NSError* _Nullable error) {
+      success = (BOOL)(error == nil);
+      if (!success) {
+          custom_log(OS_LOG_TYPE_ERROR, @"capture-view", error.localizedFailureReason);
+      }
+      dispatch_semaphore_signal(stream_start_completed);
+    }];
+    dispatch_semaphore_wait(stream_start_completed, DISPATCH_TIME_FOREVER);
+
+    if (!success) {
+        custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"start capture failed");
+    } else {
+        hasStarted = true;
+    }
+}
+
+- (void)stopCapture {
+    if (!hasStarted) return;
+
+    dispatch_semaphore_t stream_stop_completed = dispatch_semaphore_create(0);
+
+    __block BOOL success = false;
+    [disp stopCaptureWithCompletionHandler:^(NSError* _Nullable error) {
+      success = (BOOL)(error == nil);
+      if (!success) {
+          custom_log(OS_LOG_TYPE_ERROR, @"capture-view", error.localizedFailureReason);
+      }
+      dispatch_semaphore_signal(stream_stop_completed);
+    }];
+    dispatch_semaphore_wait(stream_stop_completed, DISPATCH_TIME_FOREVER);
+
+    if (!success) {
+        custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"stop capture failed");
+    } else {
+        hasStarted = false;
+    }
+}
 
 - (void)update {
     [super update];
@@ -296,55 +279,6 @@ struct screen_capture {
     glDisableVertexAttribArray(ATTRIB_VERTEX);
     glDisableVertexAttribArray(ATTRIB_TEXCOORD);
     glDisable(GL_TEXTURE_RECTANGLE);
-}
-
-@end
-
-@implementation ScreenCaptureDelegate2
-
-- (void)stream:(SCStream*)stream
-    didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
-                   ofType:(SCStreamOutputType)type {
-    if (type == SCStreamOutputTypeScreen) {
-        [self update:sampleBuffer];
-        [self draw];
-    }
-}
-
-- (void)update:(CMSampleBufferRef)sampleBuffer {
-    CVImageBufferRef image_buffer = CMSampleBufferGetImageBuffer(sampleBuffer);
-
-    CVPixelBufferLockBaseAddress(image_buffer, 0);
-    IOSurfaceRef frame_surface = CVPixelBufferGetIOSurface(image_buffer);
-    CVPixelBufferUnlockBaseAddress(image_buffer, 0);
-
-    IOSurfaceRef prev_current = NULL;
-
-    if (frame_surface && !pthread_mutex_lock(&captureView->mutex)) {
-        prev_current = captureView->current;
-        captureView->current = frame_surface;
-        CFRetain(captureView->current);
-        IOSurfaceIncrementUseCount(captureView->current);
-
-        pthread_mutex_unlock(&captureView->mutex);
-    }
-
-    if (prev_current) {
-        IOSurfaceDecrementUseCount(prev_current);
-        CFRelease(prev_current);
-    }
-}
-
-- (void)draw {
-    [captureView.openGLContext makeCurrentContext];
-    CGLLockContext(captureView.openGLContext.CGLContextObj);
-
-    [captureView tick];
-    [captureView render];
-
-    [captureView.openGLContext flushBuffer];
-
-    CGLUnlockContext(captureView.openGLContext.CGLContextObj);
 }
 
 @end

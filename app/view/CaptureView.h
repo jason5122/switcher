@@ -26,6 +26,9 @@ struct program_info_t {
 - (id)initWithFrame:(NSRect)frame targetWindow:(SCWindow*)window;
 - (void)startCapture;
 - (void)stopCapture;
+
 - (void)setupShaders;
+- (void)tick;
+- (void)render;
 
 @end
