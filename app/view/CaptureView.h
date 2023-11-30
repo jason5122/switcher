@@ -1,11 +1,10 @@
 #import <Cocoa/Cocoa.h>
-#import <ScreenCaptureKit/ScreenCaptureKit.h>
 
 @interface CaptureView : NSOpenGLView {
     bool hasStarted;
 }
 
-- (id)initWithFrame:(NSRect)frame targetWindow:(SCWindow*)window;
+- (id)initWithFrame:(NSRect)frame windowId:(CGWindowID)wid;
 - (void)startCapture;
 - (void)stopCapture;
 

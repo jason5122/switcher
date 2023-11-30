@@ -1,9 +1,5 @@
 #import "AppDelegate.h"
 
-struct CppMembers {
-    shortcut_manager* switcher_shortcut;
-};
-
 @implementation AppDelegate
 
 - (instancetype)init {
@@ -16,21 +12,21 @@ struct CppMembers {
         windowController = [[WindowController alloc] initWithSize:size
                                                           padding:padding
                                                      innerPadding:innerPadding];
-        switcher_shortcut = new shortcut_manager(windowController);
+        sh_manager = new shortcut_manager(windowController);
     }
     return self;
 }
 
 - (void)applicationWillFinishLaunching:(NSNotification*)notification {
     shortcut_manager::set_native_command_tab_enabled(false);
-    switcher_shortcut->register_hotkey(@"⌘⇥", "nextWindowShortcut");
-    switcher_shortcut->register_hotkey(@"⌘", "holdShortcut");
-    switcher_shortcut->add_global_handler();
-    switcher_shortcut->add_modifier_event_tap();
+    sh_manager->register_hotkey(@"⌘⇥", "nextWindowShortcut");
+    sh_manager->register_hotkey(@"⌘", "holdShortcut");
+    sh_manager->add_global_handler();
+    sh_manager->add_modifier_event_tap();
 }
 
 - (void)applicationWillTerminate:(NSNotification*)notification {
-    switcher_shortcut->set_native_command_tab_enabled(true);
+    sh_manager->set_native_command_tab_enabled(true);
 }
 
 @end

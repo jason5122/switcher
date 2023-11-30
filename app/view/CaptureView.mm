@@ -1,4 +1,5 @@
 #import "CaptureView.h"
+#import "extensions/ScreenCaptureKit+InitWithId.h"
 #import "util/file_util.h"
 #import "util/log_util.h"
 #import "util/shader_util.h"
@@ -41,7 +42,7 @@ struct program_info_t {
 
 @implementation CaptureView
 
-- (id)initWithFrame:(NSRect)frame targetWindow:(SCWindow*)targetWindow {
+- (id)initWithFrame:(NSRect)frame windowId:(CGWindowID)wid {
     NSOpenGLPixelFormatAttribute attribs[] = {
         NSOpenGLPFAAllowOfflineRenderers,
         NSOpenGLPFAAccelerated,
@@ -83,6 +84,7 @@ struct program_info_t {
         streamConfig.pixelFormat = 'BGRA';
         streamConfig.colorSpaceName = kCGColorSpaceDisplayP3;
 
+        SCWindow* targetWindow = [[SCWindow alloc] initWithId:wid];
         SCContentFilter* contentFilter =
             [[SCContentFilter alloc] initWithDesktopIndependentWindow:targetWindow];
         disp = [[SCStream alloc] initWithFilter:contentFilter

@@ -1,5 +1,4 @@
 #import "CaptureViewController.h"
-#import "extensions/ScreenCaptureKit+InitWithId.h"
 
 // TODO: maybe get rid of this and merge with CaptureView.mm?
 @implementation CaptureViewController
@@ -16,8 +15,7 @@
         stackView.wantsLayer = true;
         stackView.layer.cornerRadius = 9.0;
 
-        SCWindow* capture_window = [[SCWindow alloc] initWithId:window_element.wid];
-        captureView = [[CaptureView alloc] initWithFrame:captureFrame targetWindow:capture_window];
+        captureView = [[CaptureView alloc] initWithFrame:captureFrame windowId:window_element.wid];
         [stackView addSubview:captureView];
 
         NSImageView* iconView = [NSImageView imageViewWithImage:window_element.icon];
@@ -51,8 +49,7 @@
         stackView.wantsLayer = true;
         stackView.layer.cornerRadius = 9.0;
 
-        SCWindow* capture_window = [[SCWindow alloc] initWithId:wid];
-        captureView = [[CaptureView alloc] initWithFrame:captureFrame targetWindow:capture_window];
+        captureView = [[CaptureView alloc] initWithFrame:captureFrame windowId:wid];
         [stackView addSubview:captureView];
         self.view = stackView;
     }

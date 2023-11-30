@@ -1,12 +1,5 @@
 #import "WindowController.h"
-#import "controller/CaptureViewController.h"
 #import "extensions/NSWindow+ActuallyCenter.h"
-#import "model/spaces.h"
-#import "private_apis/Accessiblity.h"
-#import "private_apis/CGSSpace.h"
-#import "private_apis/CGSWindows.h"
-#import "util/log_util.h"
-#import "view/CaptureView.h"
 
 @implementation WindowController
 
