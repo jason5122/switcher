@@ -49,6 +49,7 @@
     // TODO: why does this crash without a dispatch?
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0 * NSEC_PER_SEC), dispatch_get_main_queue(),
                    ^{ [mainView startCaptureSubviews]; });
+    // [mainView startCaptureSubviews];
 
     NSSize contentSize =
         NSMakeSize((size.width + padding + innerPadding) * self.window.contentView.subviews.count +
@@ -56,7 +57,8 @@
                    size.height + (padding + innerPadding) * 2);
     [self.window setContentSize:contentSize];
 
-    [self.window actuallyCenter];
+    // [self.window actuallyCenter];
+
     [self.window makeKeyAndOrderFront:nil];
 }
 

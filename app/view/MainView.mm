@@ -54,15 +54,21 @@
 
 - (void)startCaptureSubviews {
     for (CaptureViewController* controller : capture_controllers) {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
-                       ^{ [controller startCapture]; });
+        // dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
+        //                ^{ [controller startCapture]; });
+        for (int i = 0; i < 100; i++) {
+            [controller startCapture];
+            [controller stopCapture];
+        }
+        [controller startCapture];
     }
 }
 
 - (void)stopCaptureSubviews {
     for (CaptureViewController* controller : capture_controllers) {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
-                       ^{ [controller stopCapture]; });
+        // dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
+        //                ^{ [controller stopCapture]; });
+        [controller stopCapture];
     }
 }
 

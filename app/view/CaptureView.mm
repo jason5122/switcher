@@ -248,7 +248,7 @@ struct program_info_t {
     if (!prev) return;
 
     GLuint name;
-    IOSurfaceRef surface = (IOSurfaceRef)prev;
+    IOSurfaceRef surface = prev;
 
     GLsizei width = (GLsizei)IOSurfaceGetWidth(surface);
     GLsizei height = (GLsizei)IOSurfaceGetHeight(surface);
@@ -297,6 +297,8 @@ struct program_info_t {
     glDisableVertexAttribArray(ATTRIB_VERTEX);
     glDisableVertexAttribArray(ATTRIB_TEXCOORD);
     glDisable(GL_TEXTURE_RECTANGLE);
+
+    glDeleteTextures(1, &name);
 }
 
 @end
