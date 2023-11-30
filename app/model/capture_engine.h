@@ -3,7 +3,6 @@
 #import <ScreenCaptureKit/ScreenCaptureKit.h>
 
 struct screen_capture;
-struct program_info_t;
 
 @interface ScreenCaptureDelegate : NSObject <SCStreamOutput> {
     CaptureView* captureView;
@@ -16,7 +15,7 @@ struct program_info_t;
 
 class capture_engine {
 public:
-    capture_engine(SCWindow* target_window, CaptureView* captureView);
+    capture_engine(CaptureView* captureView);
     bool start_capture();
     bool stop_capture();
     void tick();
@@ -27,11 +26,6 @@ private:
     ScreenCaptureDelegate* captureDelegate;
 
     screen_capture* sc;
-    program_info_t* program;
 
-    GLuint quadVAOId, quadVBOId;
-    BOOL quadInit = NO;
-
-    void setup_shaders();
     void init_quad(IOSurfaceRef surface);
 };

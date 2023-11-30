@@ -17,14 +17,6 @@ struct screen_capture {
     pthread_mutex_t mutex;
 };
 
-enum { UNIFORM_MVP, UNIFORM_TEXTURE, NUM_UNIFORMS };
-enum { ATTRIB_VERTEX, ATTRIB_TEXCOORD, NUM_ATTRIBS };
-
-struct program_info_t {
-    GLuint id;
-    GLint uniform[NUM_UNIFORMS];
-};
-
 @interface ScreenCaptureDelegate2 : NSObject <SCStreamOutput> {
 @public
     CaptureView* captureView;
@@ -36,16 +28,12 @@ struct program_info_t {
 @interface CaptureView () {
     capture_engine* cap_engine;
     ScreenCaptureDelegate2* captureDelegate;
-    // screen_capture* sc;
-    program_info_t* program;
-    GLuint quadVAOId, quadVBOId;
-    bool quadInit;
 }
 @end
 
 @implementation CaptureView
 
-- (id)initWithFrame:(NSRect)frame targetWindow:(SCWindow*)theTargetWindow {
+- (id)initWithFrame:(NSRect)frame targetWindow:(SCWindow*)targetWindow {
     NSOpenGLPixelFormatAttribute attribs[] = {
         NSOpenGLPFAAllowOfflineRenderers,
         NSOpenGLPFAAccelerated,
@@ -74,50 +62,26 @@ struct program_info_t {
 
     self = [super initWithFrame:frame pixelFormat:pf];
     if (self) {
-        targetWindow = theTargetWindow;
         hasStarted = false;
         quadInit = false;
 
-        // sc = new screen_capture();
-        // program = new program_info_t();
-        // captureDelegate = [[ScreenCaptureDelegate2 alloc] init];
+        program = new program_info_t();
 
-        // [self setupShaders];
+        streamConfig = [[SCStreamConfiguration alloc] init];
+        streamConfig.width = frame.size.width * 2;
+        streamConfig.height = frame.size.height * 2;
+        streamConfig.queueDepth = 8;
+        streamConfig.showsCursor = false;
+        streamConfig.pixelFormat = 'BGRA';
+        streamConfig.colorSpaceName = kCGColorSpaceDisplayP3;
 
-        // // captureDelegate.sc = sc;
-        // captureDelegate->captureView = self;
+        SCContentFilter* contentFilter =
+            [[SCContentFilter alloc] initWithDesktopIndependentWindow:targetWindow];
+        disp = [[SCStream alloc] initWithFilter:contentFilter
+                                  configuration:streamConfig
+                                       delegate:nil];
 
-        // pthread_mutex_init(&mutex, NULL);
-        // SCContentFilter* content_filter;
-
-        // stream_config = [[SCStreamConfiguration alloc] init];
-
-        // content_filter =
-        //     [[SCContentFilter alloc] initWithDesktopIndependentWindow:theTargetWindow];
-
-        // stream_config.width = frame.size.width * 2;
-        // stream_config.height = frame.size.height * 2;
-
-        // stream_config.queueDepth = 8;
-        // stream_config.showsCursor = false;
-        // stream_config.pixelFormat = 'BGRA';
-        // stream_config.colorSpaceName = kCGColorSpaceDisplayP3;
-        // // TODO: do these have any effect?
-        // stream_config.scalesToFit = true;
-        // // sc->stream_config.backgroundColor = CGColorGetConstantColor(kCGColorClear);
-
-        // disp = [[SCStream alloc] initWithFilter:content_filter
-        //                           configuration:stream_config
-        //                                delegate:nil];
-
-        // NSError* error = nil;
-        // BOOL did_add_output = [disp addStreamOutput:captureDelegate
-        //                                        type:SCStreamOutputTypeScreen
-        //                          sampleHandlerQueue:nil
-        //                                       error:&error];
-        // if (!did_add_output) {
-        //     custom_log(OS_LOG_TYPE_ERROR, @"capture-view", error.localizedFailureReason);
-        // }
+        pthread_mutex_init(&mutex, NULL);
     }
     return self;
 }
@@ -134,7 +98,7 @@ struct program_info_t {
     [self.openGLContext setValues:&opacity forParameter:NSOpenGLCPSurfaceOpacity];
 #pragma clang diagnostic pop
 
-    cap_engine = new capture_engine(targetWindow, self);
+    cap_engine = new capture_engine(self);
 }
 
 - (void)startCapture {

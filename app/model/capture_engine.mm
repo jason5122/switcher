@@ -12,41 +12,14 @@ struct screen_capture {
     capture_engine* capture_engine;
 };
 
-enum { UNIFORM_MVP, UNIFORM_TEXTURE, NUM_UNIFORMS };
-enum { ATTRIB_VERTEX, ATTRIB_TEXCOORD, NUM_ATTRIBS };
-
-struct program_info_t {
-    GLuint id;
-    GLint uniform[NUM_UNIFORMS];
-};
-
-capture_engine::capture_engine(SCWindow* targetWindow, CaptureView* captureView) {
+capture_engine::capture_engine(CaptureView* captureView) {
     this->captureView = captureView;
 
     sc = new screen_capture();
-    program = new program_info_t();
-
     captureDelegate = [[ScreenCaptureDelegate alloc] init:captureView screenCapture:sc];
-
-    setup_shaders();
-
     sc->capture_engine = this;
 
-    pthread_mutex_init(&captureView->mutex, NULL);
-
-    captureView->streamConfig = [[SCStreamConfiguration alloc] init];
-    captureView->streamConfig.width = captureView.frame.size.width * 2;
-    captureView->streamConfig.height = captureView.frame.size.height * 2;
-    captureView->streamConfig.queueDepth = 8;
-    captureView->streamConfig.showsCursor = false;
-    captureView->streamConfig.pixelFormat = 'BGRA';
-    captureView->streamConfig.colorSpaceName = kCGColorSpaceDisplayP3;
-
-    SCContentFilter* contentFilter =
-        [[SCContentFilter alloc] initWithDesktopIndependentWindow:targetWindow];
-    captureView->disp = [[SCStream alloc] initWithFilter:contentFilter
-                                           configuration:captureView->streamConfig
-                                                delegate:nil];
+    [captureView setupShaders];
 
     NSError* error = nil;
     BOOL did_add_output = [captureView->disp addStreamOutput:captureDelegate
@@ -88,43 +61,6 @@ bool capture_engine::stop_capture() {
     return is_success;
 }
 
-void capture_engine::setup_shaders() {
-    glGenVertexArrays(1, &quadVAOId);
-    glGenBuffers(1, &quadVBOId);
-
-    glBindVertexArray(quadVAOId);
-
-    char* vsrc = read_file(resource_path("shaders/texture.vsh"));
-    char* fsrc = read_file(resource_path("shaders/textureRect.fsh"));
-
-    GLuint prog = glCreateProgram();
-
-    GLuint vertShader = 0, fragShader = 0;
-    const GLchar* vertSource = vsrc;
-    const GLchar* fragSource = fsrc;
-    glueCompileShader(GL_VERTEX_SHADER, 1, &vertSource, &vertShader);
-    glueCompileShader(GL_FRAGMENT_SHADER, 1, &fragSource, &fragShader);
-    glAttachShader(prog, vertShader);
-    glAttachShader(prog, fragShader);
-
-    // TODO: do we need this?
-    glBindAttribLocation(prog, ATTRIB_VERTEX, "inVertex");
-    glBindAttribLocation(prog, ATTRIB_TEXCOORD, "inTexCoord");
-
-    glueLinkProgram(prog);
-
-    program->uniform[UNIFORM_MVP] = glGetUniformLocation(prog, "MVP");
-    program->uniform[UNIFORM_TEXTURE] = glGetUniformLocation(prog, "tex");
-    program->id = prog;
-
-    if (vertShader) glDeleteShader(vertShader);
-    if (fragShader) glDeleteShader(fragShader);
-    free(vsrc);
-    free(fsrc);
-
-    glBindVertexArray(0);
-}
-
 void capture_engine::init_quad(IOSurfaceRef surface) {
     GLfloat logoWidth = (GLfloat)IOSurfaceGetWidth(surface);
     GLfloat logoHeight = (GLfloat)IOSurfaceGetHeight(surface);
@@ -132,8 +68,8 @@ void capture_engine::init_quad(IOSurfaceRef surface) {
                       -1.0f, -1.0f, 0.0f, 0.0f,       1.0f, -1.0f, logoWidth, 0.0f,
                       -1.0f, 1.0f,  0.0f, logoHeight, 1.0f, 1.0f,  logoWidth, logoHeight};
 
-    glBindVertexArray(quadVAOId);
-    glBindBuffer(GL_ARRAY_BUFFER, quadVBOId);
+    glBindVertexArray(captureView->quadVAOId);
+    glBindBuffer(GL_ARRAY_BUFFER, captureView->quadVBOId);
     glBufferData(GL_ARRAY_BUFFER, sizeof(quad), quad, GL_STATIC_DRAW);
     // positions
     glVertexAttribPointer(ATTRIB_VERTEX, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), NULL);
@@ -141,7 +77,7 @@ void capture_engine::init_quad(IOSurfaceRef surface) {
     glVertexAttribPointer(ATTRIB_TEXCOORD, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat),
                           (const GLvoid*)(2 * sizeof(GLfloat)));
 
-    quadInit = YES;
+    captureView->quadInit = true;
 }
 
 void capture_engine::tick() {
@@ -186,9 +122,9 @@ void capture_engine::render() {
     glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    if (!quadInit) init_quad(surface);
+    if (!captureView->quadInit) init_quad(surface);
 
-    glUseProgram(program->id);
+    glUseProgram(captureView->program->id);
 
     // const GLfloat mvp[] = {
     //     1.0f, 0.0f, 0.0f, 0.0f,  //
@@ -199,14 +135,14 @@ void capture_engine::render() {
     GLKMatrix4 mvp = GLKMatrix4Identity;
     mvp = GLKMatrix4Rotate(mvp, M_PI, 1.0, 0.0, 0.0);
 
-    glUniformMatrix4fv(program->uniform[UNIFORM_MVP], 1, GL_FALSE, mvp.m);
+    glUniformMatrix4fv(captureView->program->uniform[UNIFORM_MVP], 1, GL_FALSE, mvp.m);
 
-    glUniform1i(program->uniform[UNIFORM_TEXTURE], 0);
+    glUniform1i(captureView->program->uniform[UNIFORM_TEXTURE], 0);
 
     glBindTexture(GL_TEXTURE_RECTANGLE, name);
     glEnable(GL_TEXTURE_RECTANGLE);
 
-    glBindVertexArray(quadVAOId);
+    glBindVertexArray(captureView->quadVAOId);
     glEnableVertexAttribArray(ATTRIB_VERTEX);
     glEnableVertexAttribArray(ATTRIB_TEXCOORD);
 
