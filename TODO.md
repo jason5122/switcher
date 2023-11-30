@@ -21,8 +21,6 @@
 
 ### Refactor
 
-- Make `shortcut_manager.mm` a controller
-  - It shouldn't be a model since it contains a controller (WindowController)
 - Use [three-letter prefixes](https://google.github.io/styleguide/objcguide.html#prefixes)
 
 ## Repo/Project Tasks

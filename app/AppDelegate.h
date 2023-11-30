@@ -1,10 +1,10 @@
 #import "controller/WindowController.h"
-#import "model/shortcut_manager.h"
+#import "controller/shortcut_controller.h"
 #import <Cocoa/Cocoa.h>
 
 @interface AppDelegate : NSObject <NSApplicationDelegate> {
     WindowController* windowController;
-    shortcut_manager* sh_manager;
+    shortcut_controller* sh_controller;
 }
 
 @end

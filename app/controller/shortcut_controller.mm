@@ -1,14 +1,14 @@
 #import "private_apis/CGS.h"
-#import "shortcut_manager.h"
+#import "shortcut_controller.h"
 #import "util/log_util.h"
 #import <ShortcutRecorder/ShortcutRecorder.h>
 #import <vector>
 
-shortcut_manager::shortcut_manager(WindowController* windowController) {
+shortcut_controller::shortcut_controller(WindowController* windowController) {
     this->windowController = windowController;
 }
 
-void shortcut_manager::register_hotkey(NSString* shortcutString, std::string action) {
+void shortcut_controller::register_hotkey(NSString* shortcutString, std::string action) {
     SRShortcut* shortcut = [SRShortcut shortcutWithKeyEquivalent:shortcutString];
     EventHotKeyID hotKeyId = {signature, global_hotkey_map[action]};
     EventHotKeyRef hotKey;
@@ -20,7 +20,7 @@ void shortcut_manager::register_hotkey(NSString* shortcutString, std::string act
     }
 }
 
-void handle_event(EventHotKeyID hotKeyId, shortcut_manager* handler, bool is_pressed) {
+void handle_event(EventHotKeyID hotKeyId, shortcut_controller* handler, bool is_pressed) {
     if (!is_pressed) return;
 
     NSString* state = is_pressed ? @"pressed" : @"released";
@@ -32,7 +32,7 @@ void handle_event(EventHotKeyID hotKeyId, shortcut_manager* handler, bool is_pre
     }
 }
 
-void shortcut_manager::add_global_handler() {
+void shortcut_controller::add_global_handler() {
     std::vector<EventTypeSpec> event_types_pressed = {{kEventClassKeyboard, kEventHotKeyPressed}};
     InstallEventHandler(
         GetEventDispatcherTarget(),
@@ -40,7 +40,7 @@ void shortcut_manager::add_global_handler() {
             EventHotKeyID hotKeyId;
             GetEventParameter(inEvent, kEventParamDirectObject, typeEventHotKeyID, nil,
                               sizeof(EventHotKeyID), nil, &hotKeyId);
-            shortcut_manager* handler = (shortcut_manager*)inUserData;
+            shortcut_controller* handler = (shortcut_controller*)inUserData;
             handle_event(hotKeyId, handler, true);
             return noErr;
         },
@@ -54,7 +54,7 @@ void shortcut_manager::add_global_handler() {
             EventHotKeyID hotKeyId;
             GetEventParameter(inEvent, kEventParamDirectObject, typeEventHotKeyID, nil,
                               sizeof(EventHotKeyID), nil, &hotKeyId);
-            shortcut_manager* handler = (shortcut_manager*)inUserData;
+            shortcut_controller* handler = (shortcut_controller*)inUserData;
             handle_event(hotKeyId, handler, false);
             return noErr;
         },
@@ -63,7 +63,7 @@ void shortcut_manager::add_global_handler() {
 
 CGEventRef modifier_callback(CGEventTapProxy proxy, CGEventType type, CGEventRef cgEvent,
                              void* inUserData) {
-    shortcut_manager* handler = (shortcut_manager*)inUserData;
+    shortcut_controller* handler = (shortcut_controller*)inUserData;
     if (type == kCGEventFlagsChanged) {
         NSUInteger flags = CGEventGetFlags(cgEvent);
         if (!(flags & NSEventModifierFlagCommand) && handler->windowController.shown) {
@@ -83,7 +83,7 @@ CGEventRef modifier_callback(CGEventTapProxy proxy, CGEventType type, CGEventRef
     return cgEvent;
 }
 
-void shortcut_manager::add_modifier_event_tap() {
+void shortcut_controller::add_modifier_event_tap() {
     CGEventMask eventMask = CGEventMaskBit(kCGEventFlagsChanged) | CGEventMaskBit(kCGEventKeyDown);
     CFMachPortRef eventTap =
         CGEventTapCreate(kCGSessionEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault,
@@ -92,11 +92,11 @@ void shortcut_manager::add_modifier_event_tap() {
     CFRunLoopAddSource(CFRunLoopGetMain(), runLoopSource, kCFRunLoopCommonModes);
 }
 
-void shortcut_manager::set_native_command_tab_enabled(bool is_enabled) {
+void shortcut_controller::set_native_command_tab_enabled(bool is_enabled) {
     CGSSetSymbolicHotKeyEnabled(kCGCommandTab, is_enabled);
 }
 
-shortcut_manager::~shortcut_manager() {
+shortcut_controller::~shortcut_controller() {
     RemoveEventHandler(hotkey_pressed_handler);
     RemoveEventHandler(hotkey_released_handler);
 }

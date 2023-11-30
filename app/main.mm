@@ -1,12 +1,12 @@
 #import "AppDelegate.h"
 #import "Menu.h"
-#import "model/shortcut_manager.h"
+#import "controller/shortcut_controller.h"
 #import "util/log_util.h"
 #import <Cocoa/Cocoa.h>
 
 int main() {
     signal(SIGTERM, [](int sig) {
-        shortcut_manager::set_native_command_tab_enabled(true);
+        shortcut_controller::set_native_command_tab_enabled(true);
         exit(0);
     });
 

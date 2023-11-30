@@ -12,21 +12,21 @@
         windowController = [[WindowController alloc] initWithSize:size
                                                           padding:padding
                                                      innerPadding:innerPadding];
-        sh_manager = new shortcut_manager(windowController);
+        sh_controller = new shortcut_controller(windowController);
     }
     return self;
 }
 
 - (void)applicationWillFinishLaunching:(NSNotification*)notification {
-    shortcut_manager::set_native_command_tab_enabled(false);
-    sh_manager->register_hotkey(@"⌘⇥", "nextWindowShortcut");
-    sh_manager->register_hotkey(@"⌘", "holdShortcut");
-    sh_manager->add_global_handler();
-    sh_manager->add_modifier_event_tap();
+    shortcut_controller::set_native_command_tab_enabled(false);
+    sh_controller->register_hotkey(@"⌘⇥", "nextWindowShortcut");
+    sh_controller->register_hotkey(@"⌘", "holdShortcut");
+    sh_controller->add_global_handler();
+    sh_controller->add_modifier_event_tap();
 }
 
 - (void)applicationWillTerminate:(NSNotification*)notification {
-    sh_manager->set_native_command_tab_enabled(true);
+    sh_controller->set_native_command_tab_enabled(true);
 }
 
 @end

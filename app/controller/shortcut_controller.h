@@ -3,12 +3,12 @@
 #import <string>
 #import <unordered_map>
 
-class shortcut_manager {
+class shortcut_controller {
 public:
     WindowController* windowController;
 
-    shortcut_manager(WindowController* windowController);
-    ~shortcut_manager();
+    shortcut_controller(WindowController* windowController);
+    ~shortcut_controller();
     void register_hotkey(NSString* shortcutString, std::string action);
     void add_global_handler();
     void add_modifier_event_tap();
