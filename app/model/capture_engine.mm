@@ -31,16 +31,17 @@ struct program_info_t {
     GLint uniform[NUM_UNIFORMS];
 };
 
-capture_engine::capture_engine(NSOpenGLContext* context, NSRect frame, SCWindow* target_window) {
-    capture_delegate = [[ScreenCaptureDelegate alloc] init];
+capture_engine::capture_engine(NSOpenGLContext* context, NSRect frame, SCWindow* target_window,
+                               CaptureView* captureView) {
+    this->captureView = captureView;
+
     sc = new screen_capture();
     program = new program_info_t();
 
-    capture_delegate.sc = sc;
+    capture_delegate = [[ScreenCaptureDelegate alloc] init:captureView screenCapture:sc];
+    // capture_delegate.sc = sc;
 
     setup_shaders();
-
-    sc->context = context;
 
     sc->capture_engine = this;
 
@@ -187,7 +188,7 @@ void capture_engine::render() {
     if (!sc->prev) return;
 
     GLuint name;
-    CGLContextObj cgl_ctx = sc->context.CGLContextObj;
+    CGLContextObj cgl_ctx = captureView.openGLContext.CGLContextObj;
     IOSurfaceRef surface = (IOSurfaceRef)sc->prev;
 
     GLsizei width = (GLsizei)IOSurfaceGetWidth(surface);
@@ -239,9 +240,28 @@ void capture_engine::render() {
     glDisable(GL_TEXTURE_RECTANGLE);
 }
 
-static inline void screen_stream_video_update(struct screen_capture* sc,
-                                              CMSampleBufferRef sample_buffer) {
-    CVImageBufferRef image_buffer = CMSampleBufferGetImageBuffer(sample_buffer);
+@implementation ScreenCaptureDelegate
+
+- (instancetype)init:(CaptureView*)theCaptureView screenCapture:(screen_capture*)theSc {
+    self = [super init];
+    if (self) {
+        captureView = theCaptureView;
+        sc = theSc;
+    }
+    return self;
+}
+
+- (void)stream:(SCStream*)stream
+    didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
+                   ofType:(SCStreamOutputType)type {
+    if (type == SCStreamOutputTypeScreen) {
+        [self update:sampleBuffer];
+        [self drawView];
+    }
+}
+
+- (void)update:(CMSampleBufferRef)sampleBuffer {
+    CVImageBufferRef image_buffer = CMSampleBufferGetImageBuffer(sampleBuffer);
 
     CVPixelBufferLockBaseAddress(image_buffer, 0);
     IOSurfaceRef frame_surface = CVPixelBufferGetIOSurface(image_buffer);
@@ -264,29 +284,18 @@ static inline void screen_stream_video_update(struct screen_capture* sc,
     }
 }
 
-void draw_view(struct screen_capture* sc) {
-    CGLContextObj cgl_ctx = sc->context.CGLContextObj;
+- (void)drawView {
+    CGLContextObj cgl_ctx = captureView.openGLContext.CGLContextObj;
 
-    [sc->context makeCurrentContext];
+    [captureView.openGLContext makeCurrentContext];
     CGLLockContext(cgl_ctx);
 
     sc->capture_engine->tick();
     sc->capture_engine->render();
 
-    [sc->context flushBuffer];
+    [captureView.openGLContext flushBuffer];
 
     CGLUnlockContext(cgl_ctx);
-}
-
-@implementation ScreenCaptureDelegate
-
-- (void)stream:(SCStream*)stream
-    didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
-                   ofType:(SCStreamOutputType)type {
-    if (type == SCStreamOutputTypeScreen) {
-        screen_stream_video_update(self.sc, sampleBuffer);
-        draw_view(self.sc);
-    }
 }
 
 @end

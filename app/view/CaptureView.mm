@@ -140,45 +140,13 @@ struct program_info_t {
     [self.openGLContext setValues:&opacity forParameter:NSOpenGLCPSurfaceOpacity];
 #pragma clang diagnostic pop
 
-    cap_engine = new capture_engine(self.openGLContext, self.frame, targetWindow);
+    cap_engine = new capture_engine(self.openGLContext, self.frame, targetWindow, self);
 }
-
-// - (void)startCapture {
-//     if (hasStarted) return;
-
-//     if (!cap_engine->start_capture()) {
-//         custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"start capture failed");
-//     } else {
-//         hasStarted = true;
-//     }
-// }
-
-// - (void)stopCapture {
-//     if (!hasStarted) return;
-
-//     if (!cap_engine->stop_capture()) {
-//         custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"stop capture failed");
-//     } else {
-//         hasStarted = false;
-//     }
-// }
 
 - (void)startCapture {
     if (hasStarted) return;
 
-    dispatch_semaphore_t stream_start_completed = dispatch_semaphore_create(0);
-
-    __block BOOL success = false;
-    [disp startCaptureWithCompletionHandler:^(NSError* _Nullable error) {
-      success = (BOOL)(error == nil);
-      if (!success) {
-          custom_log(OS_LOG_TYPE_ERROR, @"capture-view", error.localizedFailureReason);
-      }
-      dispatch_semaphore_signal(stream_start_completed);
-    }];
-    dispatch_semaphore_wait(stream_start_completed, DISPATCH_TIME_FOREVER);
-
-    if (!success) {
+    if (!cap_engine->start_capture()) {
         custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"start capture failed");
     } else {
         hasStarted = true;
@@ -188,24 +156,56 @@ struct program_info_t {
 - (void)stopCapture {
     if (!hasStarted) return;
 
-    dispatch_semaphore_t stream_stop_completed = dispatch_semaphore_create(0);
-
-    __block BOOL success = false;
-    [disp stopCaptureWithCompletionHandler:^(NSError* _Nullable error) {
-      success = (BOOL)(error == nil);
-      if (!success) {
-          custom_log(OS_LOG_TYPE_ERROR, @"capture-view", error.localizedFailureReason);
-      }
-      dispatch_semaphore_signal(stream_stop_completed);
-    }];
-    dispatch_semaphore_wait(stream_stop_completed, DISPATCH_TIME_FOREVER);
-
-    if (!success) {
+    if (!cap_engine->stop_capture()) {
         custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"stop capture failed");
     } else {
         hasStarted = false;
     }
 }
+
+// - (void)startCapture {
+//     if (hasStarted) return;
+
+//     dispatch_semaphore_t stream_start_completed = dispatch_semaphore_create(0);
+
+//     __block BOOL success = false;
+//     [disp startCaptureWithCompletionHandler:^(NSError* _Nullable error) {
+//       success = (BOOL)(error == nil);
+//       if (!success) {
+//           custom_log(OS_LOG_TYPE_ERROR, @"capture-view", error.localizedFailureReason);
+//       }
+//       dispatch_semaphore_signal(stream_start_completed);
+//     }];
+//     dispatch_semaphore_wait(stream_start_completed, DISPATCH_TIME_FOREVER);
+
+//     if (!success) {
+//         custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"start capture failed");
+//     } else {
+//         hasStarted = true;
+//     }
+// }
+
+// - (void)stopCapture {
+//     if (!hasStarted) return;
+
+//     dispatch_semaphore_t stream_stop_completed = dispatch_semaphore_create(0);
+
+//     __block BOOL success = false;
+//     [disp stopCaptureWithCompletionHandler:^(NSError* _Nullable error) {
+//       success = (BOOL)(error == nil);
+//       if (!success) {
+//           custom_log(OS_LOG_TYPE_ERROR, @"capture-view", error.localizedFailureReason);
+//       }
+//       dispatch_semaphore_signal(stream_stop_completed);
+//     }];
+//     dispatch_semaphore_wait(stream_stop_completed, DISPATCH_TIME_FOREVER);
+
+//     if (!success) {
+//         custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"stop capture failed");
+//     } else {
+//         hasStarted = false;
+//     }
+// }
 
 - (void)update {
     [super update];
