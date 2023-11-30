@@ -1,4 +1,4 @@
-#import "private_apis/Accessiblity.h"
+#import "private_apis/AXUI.h"
 #import <Cocoa/Cocoa.h>
 
 class window_element {

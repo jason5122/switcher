@@ -1,4 +1,4 @@
-#import "private_apis/CGSSpace.h"
+#import "model/spaces.h"
 #import "view/MainView.h"
 #import <Cocoa/Cocoa.h>
 
@@ -8,7 +8,7 @@
     CGFloat innerPadding;
     MainView* mainView;
     AXUIElementRef axUiElement;
-    CGSSpace* space;
+    Space* space;
     int selectedIndex;
 }
 

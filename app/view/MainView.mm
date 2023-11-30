@@ -23,7 +23,7 @@
 }
 
 - (void)ahaha {
-    for (CGWindowID wid : get_all_window_ids()) {
+    for (CGWindowID wid : [Space getAllWindowIds]) {
         CaptureViewController* captureViewController =
             [[CaptureViewController alloc] initWithWindowId:wid
                                                        size:size

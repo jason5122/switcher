@@ -1,5 +1,5 @@
 #import "application.h"
-#import "private_apis/Accessiblity.h"
+#import "private_apis/AXUI.h"
 #import "util/log_util.h"
 
 application::application(NSRunningApplication* runningApp) {

@@ -1,4 +1,4 @@
-#import "private_apis/CGSHotKeys.h"
+#import "private_apis/CGS.h"
 #import "shortcut_manager.h"
 #import "util/log_util.h"
 #import <ShortcutRecorder/ShortcutRecorder.h>

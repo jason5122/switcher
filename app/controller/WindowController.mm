@@ -26,7 +26,7 @@
                                             innerPadding:theInnerPadding];
         self.window.contentView = mainView;
 
-        space = [[CGSSpace alloc] initWithLevel:1];
+        space = [[Space alloc] initWithLevel:1];
         [space addWindow:self.window];
     }
     return self;
