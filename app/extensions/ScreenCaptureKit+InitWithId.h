@@ -1,6 +1,6 @@
 #import <ScreenCaptureKit/ScreenCaptureKit.h>
 
-@interface SCWindow (Custom)
+@interface SCWindow (InitWithId)
 
 @property CGWindowID windowID;
 

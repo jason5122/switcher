@@ -1,7 +1,6 @@
 #import "WindowController.h"
 #import "controller/CaptureViewController.h"
 #import "extensions/NSWindow+ActuallyCenter.h"
-#import "extensions/ScreenCaptureKit.h"
 #import "model/spaces.h"
 #import "private_apis/Accessiblity.h"
 #import "private_apis/CGSSpace.h"
@@ -16,12 +15,11 @@
                 innerPadding:(CGFloat)theInnerPadding {
     self = [super init];
     if (self) {
-        _shown = false;
-        selectedIndex = 0;
-
         size = theSize;
         padding = thePadding;
         innerPadding = theInnerPadding;
+        _shown = false;
+        selectedIndex = 0;
 
         self.window = [[NSWindow alloc] initWithContentRect:NSZeroRect
                                                   styleMask:NSWindowStyleMaskFullSizeContentView

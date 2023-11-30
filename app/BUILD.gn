@@ -14,7 +14,7 @@ macos_app_bundle("app") {
     "controller/CaptureViewController.mm",
     "controller/WindowController.mm",
     "extensions/NSWindow+ActuallyCenter.m",
-    "extensions/ScreenCaptureKit.m",
+    "extensions/ScreenCaptureKit+InitWithId.m",
     "main.mm",
     "model/application.mm",
     "model/capture_engine.mm",

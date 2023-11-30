@@ -1,5 +1,5 @@
 #import "CaptureViewController.h"
-#import "extensions/ScreenCaptureKit.h"
+#import "extensions/ScreenCaptureKit+InitWithId.h"
 
 // TODO: maybe get rid of this and merge with CaptureView.mm?
 @implementation CaptureViewController

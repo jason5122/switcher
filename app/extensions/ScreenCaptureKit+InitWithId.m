@@ -1,6 +1,6 @@
-#import "ScreenCaptureKit.h"
+#import "ScreenCaptureKit+InitWithId.h"
 
-@implementation SCWindow (Custom)
+@implementation SCWindow (InitWithId)
 
 @dynamic windowID;
 

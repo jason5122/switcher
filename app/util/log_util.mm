@@ -1,9 +1,9 @@
 #import "log_util.h"
 
-NSString* bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
+NSString* gBundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
 
 void custom_logv(os_log_type_t type, NSString* category, NSString* format, va_list args) {
-    os_log_t customLog = os_log_create([bundleIdentifier UTF8String], [category UTF8String]);
+    os_log_t customLog = os_log_create([gBundleIdentifier UTF8String], [category UTF8String]);
     NSString* message = [[NSString alloc] initWithFormat:format arguments:args];
     os_log_with_type(customLog, type, "%{public}@", message);
 }
