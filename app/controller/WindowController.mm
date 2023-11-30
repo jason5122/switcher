@@ -12,7 +12,6 @@
         padding = thePadding;
         innerPadding = theInnerPadding;
         _shown = false;
-        selectedIndex = 0;
 
         self.window = [[NSWindow alloc] initWithContentRect:NSZeroRect
                                                   styleMask:NSWindowStyleMaskFullSizeContentView
@@ -44,7 +43,7 @@
     if (_shown) return;
     else _shown = true;
 
-    [mainView ahaha];
+    [mainView populateWithCurrentWindows];
 
     // TODO: why does this crash without a dispatch?
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0 * NSEC_PER_SEC), dispatch_get_main_queue(),
@@ -56,9 +55,7 @@
                        padding + innerPadding,
                    size.height + (padding + innerPadding) * 2);
     [self.window setContentSize:contentSize];
-
     [self.window actuallyCenter];
-
     [self.window makeKeyAndOrderFront:nil];
 }
 
@@ -67,11 +64,9 @@
     else _shown = false;
 
     [self.window orderOut:nil];
-    [mainView stopCaptureSubviews];
 
-    mainView.subviews = [NSArray array];
-    mainView->capture_controllers.clear();
-    mainView->selectedIndex = 0;
+    [mainView stopCaptureSubviews];
+    [mainView reset];
 }
 
 @end

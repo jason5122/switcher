@@ -7,9 +7,7 @@
     CGFloat padding;
     CGFloat innerPadding;
     MainView* mainView;
-    AXUIElementRef axUiElement;
     Space* space;
-    int selectedIndex;
 }
 
 @property(nonatomic, getter=isShown) bool shown;

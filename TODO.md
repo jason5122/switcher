@@ -10,6 +10,7 @@
 
 ### Fix
 
+- Crash when closing a capture window before hiding switcher
 - Memory leak
   - Use Instruments.app to measure
 - Recording icon sometimes gets stuck. Is this due to an hanging stream?
@@ -47,6 +48,7 @@
 
 ## Reach Goals
 
+- Full screen, live previews
 - Add _subtle_ shadows
 - Multithreading throughout app
   - `BackgroundWork.swift` in AltTab

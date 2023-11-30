@@ -22,7 +22,7 @@
     return self;
 }
 
-- (void)ahaha {
+- (void)populateWithCurrentWindows {
     for (CGWindowID wid : [Space getAllWindowIds]) {
         CaptureViewController* captureViewController =
             [[CaptureViewController alloc] initWithWindowId:wid
@@ -39,27 +39,10 @@
     }
 }
 
-- (void)addCaptureSubview:(window_element)window_element {
-    CaptureViewController* captureViewController =
-        [[CaptureViewController alloc] initWithWindow:window_element];
-
-    CGFloat x = padding;
-    CGFloat y = padding;
-    x += (size.width + padding + innerPadding) * self.subviews.count;
-    captureViewController.view.frameOrigin = CGPointMake(x, y);
-
-    [self addSubview:captureViewController.view];
-    capture_controllers.push_back(captureViewController);
-}
-
 - (void)startCaptureSubviews {
     for (CaptureViewController* controller : capture_controllers) {
         // dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
         //                ^{ [controller startCapture]; });
-        // for (int i = 0; i < 100; i++) {
-        //     [controller startCapture];
-        //     [controller stopCapture];
-        // }
         [controller startCapture];
     }
 }
@@ -85,6 +68,12 @@
     if (capture_controllers.empty()) return;
 
     // [capture_controllers[selectedIndex] focusWindow];
+}
+
+- (void)reset {
+    self.subviews = [NSArray array];
+    capture_controllers.clear();
+    selectedIndex = 0;
 }
 
 @end
