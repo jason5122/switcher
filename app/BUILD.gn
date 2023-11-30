@@ -17,7 +17,6 @@ macos_app_bundle("app") {
     "extensions/ScreenCaptureKit+InitWithId.m",
     "main.mm",
     "model/application.mm",
-    "model/capture_engine.mm",
     "model/shortcut_manager.mm",
     "model/spaces.mm",
     "model/window_element.mm",

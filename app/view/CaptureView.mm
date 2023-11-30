@@ -1,5 +1,4 @@
 #import "CaptureView.h"
-#import "model/capture_engine.h"
 #import "util/file_util.h"
 #import "util/log_util.h"
 #import "util/shader_util.h"
@@ -8,9 +7,35 @@
 #import <OpenGL/gl3.h>
 #import <pthread.h>
 
+enum { UNIFORM_MVP, UNIFORM_TEXTURE, NUM_UNIFORMS };
+enum { ATTRIB_VERTEX, ATTRIB_TEXCOORD, NUM_ATTRIBS };
+
+struct program_info_t {
+    GLuint id;
+    GLint uniform[NUM_UNIFORMS];
+};
+
+@interface ScreenCaptureDelegate : NSObject <SCStreamOutput> {
+    CaptureView* captureView;
+}
+
+- (instancetype)initWithCaptureView:(CaptureView*)captureView;
+
+@end
+
 // http://philjordan.eu/article/mixing-objective-c-c++-and-objective-c++
 @interface CaptureView () {
-    capture_engine* cap_engine;
+    ScreenCaptureDelegate* captureDelegate;
+    SCStream* disp;
+    SCStreamConfiguration* streamConfig;
+
+    program_info_t* program;
+    GLuint quadVAOId, quadVBOId;
+    bool quadInit;
+
+@public
+    IOSurfaceRef current, prev;
+    pthread_mutex_t mutex;
 }
 @end
 
@@ -65,6 +90,17 @@
                                        delegate:nil];
 
         pthread_mutex_init(&mutex, NULL);
+
+        captureDelegate = [[ScreenCaptureDelegate alloc] initWithCaptureView:self];
+
+        NSError* error = nil;
+        BOOL did_add_output = [disp addStreamOutput:captureDelegate
+                                               type:SCStreamOutputTypeScreen
+                                 sampleHandlerQueue:nil
+                                              error:&error];
+        if (!did_add_output) {
+            custom_log(OS_LOG_TYPE_ERROR, @"capture-engine", error.localizedFailureReason);
+        }
     }
     return self;
 }
@@ -81,28 +117,8 @@
     [self.openGLContext setValues:&opacity forParameter:NSOpenGLCPSurfaceOpacity];
 #pragma clang diagnostic pop
 
-    cap_engine = new capture_engine(self);
+    [self setupShaders];
 }
-
-// - (void)startCapture {
-//     if (hasStarted) return;
-
-//     if (!cap_engine->start_capture()) {
-//         custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"start capture failed");
-//     } else {
-//         hasStarted = true;
-//     }
-// }
-
-// - (void)stopCapture {
-//     if (!hasStarted) return;
-
-//     if (!cap_engine->stop_capture()) {
-//         custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"stop capture failed");
-//     } else {
-//         hasStarted = false;
-//     }
-// }
 
 - (void)startCapture {
     if (hasStarted) return;
@@ -279,6 +295,63 @@
     glDisableVertexAttribArray(ATTRIB_VERTEX);
     glDisableVertexAttribArray(ATTRIB_TEXCOORD);
     glDisable(GL_TEXTURE_RECTANGLE);
+}
+
+@end
+
+@implementation ScreenCaptureDelegate
+
+- (instancetype)initWithCaptureView:(CaptureView*)theCaptureView {
+    self = [super init];
+    if (self) {
+        captureView = theCaptureView;
+    }
+    return self;
+}
+
+- (void)stream:(SCStream*)stream
+    didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
+                   ofType:(SCStreamOutputType)type {
+    if (type == SCStreamOutputTypeScreen) {
+        [self update:sampleBuffer];
+        [self drawView];
+    }
+}
+
+- (void)update:(CMSampleBufferRef)sampleBuffer {
+    CVImageBufferRef image_buffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+
+    CVPixelBufferLockBaseAddress(image_buffer, 0);
+    IOSurfaceRef frame_surface = CVPixelBufferGetIOSurface(image_buffer);
+    CVPixelBufferUnlockBaseAddress(image_buffer, 0);
+
+    IOSurfaceRef prev_current = NULL;
+
+    if (frame_surface && !pthread_mutex_lock(&captureView->mutex)) {
+        prev_current = captureView->current;
+        captureView->current = frame_surface;
+        CFRetain(captureView->current);
+        IOSurfaceIncrementUseCount(captureView->current);
+
+        pthread_mutex_unlock(&captureView->mutex);
+    }
+
+    if (prev_current) {
+        IOSurfaceDecrementUseCount(prev_current);
+        CFRelease(prev_current);
+    }
+}
+
+- (void)drawView {
+    [captureView.openGLContext makeCurrentContext];
+    CGLLockContext(captureView.openGLContext.CGLContextObj);
+
+    [captureView tick];
+    [captureView render];
+
+    [captureView.openGLContext flushBuffer];
+
+    CGLUnlockContext(captureView.openGLContext.CGLContextObj);
 }
 
 @end
