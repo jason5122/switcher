@@ -4,8 +4,7 @@
 
 class applications {
 public:
-    applications();
-
-private:
     std::unordered_map<CGWindowID, window_element> window_map;
+
+    applications();
 };

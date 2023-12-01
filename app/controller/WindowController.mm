@@ -40,6 +40,9 @@
 
 - (void)focusSelectedIndex {
     CGWindowID wid = [self.window.contentView getSelectedWindowId];
+    if (apps.window_map.count(wid)) {
+        apps.window_map[wid].focus();
+    }
 }
 
 - (void)showWindow {

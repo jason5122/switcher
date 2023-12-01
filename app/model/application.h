@@ -4,11 +4,12 @@
 
 class application {
 public:
+    std::vector<window_element> windows;
+
     application(NSRunningApplication* runningApp);
-    NSString* localizedName();
+    NSString* name();
     bool is_xpc();
     void populate_initial_windows();
-    void append_windows(std::vector<window_element>& windows);
     void add_observer();
     static std::vector<application> get_running_applications();
 
@@ -16,5 +17,4 @@ private:
     NSRunningApplication* runningApp;
     ProcessSerialNumber psn;
     AXUIElementRef axUiElement;
-    std::vector<window_element> windows;
 };

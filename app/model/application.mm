@@ -12,7 +12,7 @@ application::application(NSRunningApplication* runningApp) {
     this->axUiElement = AXUIElementCreateApplication(runningApp.processIdentifier);
 }
 
-NSString* application::localizedName() {
+NSString* application::name() {
     return runningApp.localizedName;
 }
 
@@ -27,23 +27,24 @@ bool application::is_xpc() {
 
 void application::populate_initial_windows() {
     CFArrayRef windowList;
-    AXUIElementCopyAttributeValue(axUiElement, kAXWindowsAttribute, (CFTypeRef*)&windowList);
-    for (int i = 0; i < CFArrayGetCount(windowList); i++) {
-        AXUIElementRef windowRef = (AXUIElementRef)CFArrayGetValueAtIndex(windowList, i);
+    AXError err =
+        AXUIElementCopyAttributeValue(axUiElement, kAXWindowsAttribute, (CFTypeRef*)&windowList);
 
-        // TODO: handle minimized windows better
-        CFBooleanRef minimizedRef;
-        AXUIElementCopyAttributeValue(windowRef, kAXMinimizedAttribute, (CFTypeRef*)&minimizedRef);
-        bool is_minimized = CFBooleanGetValue(minimizedRef);
-        if (!is_minimized) {
-            windows.push_back(
-                window_element(runningApp.processIdentifier, windowRef, runningApp.icon));
+    if (err == kAXErrorSuccess) {
+        for (int i = 0; i < CFArrayGetCount(windowList); i++) {
+            AXUIElementRef windowRef = (AXUIElementRef)CFArrayGetValueAtIndex(windowList, i);
+
+            // TODO: handle minimized windows better
+            CFBooleanRef minimizedRef;
+            AXUIElementCopyAttributeValue(windowRef, kAXMinimizedAttribute,
+                                          (CFTypeRef*)&minimizedRef);
+            bool is_minimized = CFBooleanGetValue(minimizedRef);
+            if (!is_minimized) {
+                windows.push_back(
+                    window_element(runningApp.processIdentifier, windowRef, runningApp.icon));
+            }
         }
     }
-}
-
-void application::append_windows(std::vector<window_element>& windows) {
-    windows.insert(windows.end(), this->windows.begin(), this->windows.end());
 }
 
 void application::add_observer() {
