@@ -1,3 +1,4 @@
+#import "model/applications.h"
 #import "model/space.h"
 #import "view/MainView.h"
 #import <Cocoa/Cocoa.h>
@@ -9,6 +10,7 @@
     CGFloat titleTextPadding;
     MainView* mainView;
     space* sp;
+    applications apps;
 }
 
 @property(nonatomic, getter=isShown) bool shown;

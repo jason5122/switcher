@@ -67,10 +67,10 @@
     [capture_controllers[selectedIndex] highlight];
 }
 
-- (void)focusSelectedIndex {
-    if (capture_controllers.empty()) return;
+- (CGWindowID)getSelectedWindowId {
+    if (capture_controllers.empty()) return -1;
 
-    // [capture_controllers[selectedIndex] focusWindow];
+    return capture_controllers[selectedIndex].wid;
 }
 
 - (void)reset {

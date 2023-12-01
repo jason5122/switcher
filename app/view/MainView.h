@@ -20,7 +20,7 @@
 - (void)startCaptureSubviews;
 - (void)stopCaptureSubviews;
 - (void)cycleSelectedIndex;
-- (void)focusSelectedIndex;
+- (CGWindowID)getSelectedWindowId;
 - (void)reset;
 
 @end

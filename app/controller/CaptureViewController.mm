@@ -10,6 +10,8 @@
                 titleTextPadding:(CGFloat)titleTextPadding {
     self = [super init];
     if (self) {
+        _wid = wid;
+
         CGRect viewFrame = NSMakeRect(0, 0, size.width + innerPadding * 2,
                                       size.height + innerPadding * 2 + titleTextPadding);
         CGRect captureFrame =
@@ -47,10 +49,11 @@
         NSImage* icon = [[NSImage alloc] initWithIconRef:iconRef];
 #pragma clang diagnostic pop
 
-        CGFloat sideLength = 44;
         NSImageView* iconView = [NSImageView imageViewWithImage:icon];
-        iconView.image.size = NSMakeSize(sideLength, sideLength);
-        iconView.frame = NSMakeRect(size.width - (sideLength - 4), -4, sideLength, sideLength);
+        iconView.frameSize = icon.size;
+        iconView.frameOrigin = NSMakePoint(size.width - icon.size.width, 0);
+        // iconView.wantsLayer = true;
+        // iconView.layer.backgroundColor = NSColor.redColor.CGColor;
         [captureView addSubview:iconView];
 
         self.view = stackView;

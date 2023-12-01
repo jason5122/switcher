@@ -3,9 +3,10 @@
 #import <Cocoa/Cocoa.h>
 
 @interface CaptureViewController : NSViewController {
-@public
     CaptureView* captureView;
 }
+
+@property(nonatomic) CGWindowID wid;
 
 - (instancetype)initWithWindowId:(CGWindowID)wid
                             size:(CGSize)size

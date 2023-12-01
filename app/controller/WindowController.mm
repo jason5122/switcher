@@ -39,7 +39,7 @@
 }
 
 - (void)focusSelectedIndex {
-    // [self.window.contentView focusSelectedIndex];
+    CGWindowID wid = [self.window.contentView getSelectedWindowId];
 }
 
 - (void)showWindow {
