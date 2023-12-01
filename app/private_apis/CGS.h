@@ -34,3 +34,7 @@ extern "C" CGWindowLevel CGSGetWindowLevel(CGSConnectionID cid, CGWindowID wid,
 
 extern "C" CGError CGSCopyWindowProperty(CGSConnectionID cid, CGWindowID wid, CFStringRef key,
                                          CFStringRef* output);
+
+extern "C" CGError CGSGetWindowOwner(CGSConnectionID cid, CGWindowID wid,
+                                     CGSConnectionID* outOwner);
+extern "C" CGError CGSGetConnectionPSN(CGSConnectionID cid, ProcessSerialNumber* psn);

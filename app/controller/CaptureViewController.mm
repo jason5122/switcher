@@ -28,8 +28,30 @@
         titleText.frameOrigin = CGPointMake(innerPadding, 5);
         titleText.frameSize = CGSizeMake(size.width, 20);
         titleText.alignment = NSTextAlignmentCenter;
-        titleText.font = [NSFont systemFontOfSize:15];
+        // titleText.font = [NSFont systemFontOfSize:15];
+        titleText.cell.lineBreakMode = NSLineBreakByTruncatingTail;
         [stackView addSubview:titleText];
+
+        CGSConnectionID elementConnection;
+        CGSGetWindowOwner(_CGSDefaultConnection(), wid, &elementConnection);
+        ProcessSerialNumber psn = ProcessSerialNumber();
+        CGSGetConnectionPSN(elementConnection, &psn);
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        FSRef fsRef;
+        GetProcessBundleLocation(&psn, &fsRef);
+        IconRef iconRef;
+        GetIconRefFromFileInfo(&fsRef, 0, NULL, 0, NULL, kIconServicesNormalUsageFlag, &iconRef,
+                               NULL);
+        NSImage* icon = [[NSImage alloc] initWithIconRef:iconRef];
+#pragma clang diagnostic pop
+
+        CGFloat sideLength = 44;
+        NSImageView* iconView = [NSImageView imageViewWithImage:icon];
+        iconView.image.size = NSMakeSize(sideLength, sideLength);
+        iconView.frame = NSMakeRect(size.width - (sideLength - 4), -4, sideLength, sideLength);
+        [captureView addSubview:iconView];
 
         self.view = stackView;
     }
@@ -46,7 +68,7 @@
 
 - (void)highlight {
     self.view.layer.backgroundColor =
-        [NSColor colorWithCalibratedRed:0 green:0 blue:0 alpha:0.15f].CGColor;
+        [NSColor colorWithCalibratedRed:0 green:0 blue:0 alpha:0.1f].CGColor;
 }
 
 - (void)unhighlight {
