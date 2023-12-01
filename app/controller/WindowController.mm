@@ -5,12 +5,14 @@
 
 - (instancetype)initWithSize:(CGSize)theSize
                      padding:(CGFloat)thePadding
-                innerPadding:(CGFloat)theInnerPadding {
+                innerPadding:(CGFloat)theInnerPadding
+            titleTextPadding:(CGFloat)theTitleTextPadding {
     self = [super init];
     if (self) {
         size = theSize;
         padding = thePadding;
         innerPadding = theInnerPadding;
+        titleTextPadding = theTitleTextPadding;
         _shown = false;
 
         self.window = [[NSWindow alloc] initWithContentRect:NSZeroRect
@@ -22,7 +24,8 @@
 
         mainView = [[MainView alloc] initWithCaptureSize:theSize
                                                  padding:thePadding
-                                            innerPadding:theInnerPadding];
+                                            innerPadding:theInnerPadding
+                                        titleTextPadding:theTitleTextPadding];
         self.window.contentView = mainView;
 
         sp = new space(1);
@@ -53,7 +56,7 @@
     NSSize contentSize =
         NSMakeSize((size.width + padding + innerPadding) * self.window.contentView.subviews.count +
                        padding + innerPadding,
-                   size.height + (padding + innerPadding) * 2);
+                   size.height + (padding + innerPadding) * 2 + titleTextPadding);
     [self.window setContentSize:contentSize];
     [self.window actuallyCenter];
     [self.window makeKeyAndOrderFront:nil];

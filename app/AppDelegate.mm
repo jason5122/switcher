@@ -8,10 +8,12 @@
         CGSize size = CGSizeMake(280, 175);
         CGFloat padding = 20;
         CGFloat innerPadding = 15;
+        CGFloat titleTextPadding = 15;
 
         windowController = [[WindowController alloc] initWithSize:size
                                                           padding:padding
-                                                     innerPadding:innerPadding];
+                                                     innerPadding:innerPadding
+                                                 titleTextPadding:titleTextPadding];
         sh_controller = new shortcut_controller(windowController);
     }
     return self;

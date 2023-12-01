@@ -6,6 +6,7 @@
     CGSize size;
     CGFloat padding;
     CGFloat innerPadding;
+    CGFloat titleTextPadding;
     MainView* mainView;
     space* sp;
 }
@@ -14,7 +15,8 @@
 
 - (instancetype)initWithSize:(CGSize)size
                      padding:(CGFloat)padding
-                innerPadding:(CGFloat)innerPadding;
+                innerPadding:(CGFloat)innerPadding
+            titleTextPadding:(CGFloat)titleTextPadding;
 - (void)cycleSelectedIndex;
 - (void)focusSelectedIndex;
 - (void)showWindow;

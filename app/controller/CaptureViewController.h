@@ -9,8 +9,8 @@
 
 - (instancetype)initWithWindowId:(CGWindowID)wid
                             size:(CGSize)size
-                    innerPadding:(CGFloat)innerPadding;
-- (instancetype)initWithWindow:(window_element)window_element;
+                    innerPadding:(CGFloat)innerPadding
+                titleTextPadding:(CGFloat)theTitleTextPadding;
 - (void)startCapture;
 - (void)stopCapture;
 - (void)highlight;

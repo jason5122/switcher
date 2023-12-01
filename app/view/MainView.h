@@ -7,14 +7,15 @@
     CGSize size;
     CGFloat padding;
     CGFloat innerPadding;
+    CGFloat titleTextPadding;
     int selectedIndex;
     std::vector<CaptureViewController*> capture_controllers;
 }
 
 - (instancetype)initWithCaptureSize:(CGSize)size
                             padding:(CGFloat)padding
-                       innerPadding:(CGFloat)innerPadding;
-
+                       innerPadding:(CGFloat)innerPadding
+                   titleTextPadding:(CGFloat)titleTextPadding;
 - (void)populateWithCurrentWindows;
 - (void)startCaptureSubviews;
 - (void)stopCaptureSubviews;

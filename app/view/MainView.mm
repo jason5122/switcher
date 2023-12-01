@@ -6,12 +6,14 @@
 
 - (instancetype)initWithCaptureSize:(CGSize)theSize
                             padding:(CGFloat)thePadding
-                       innerPadding:(CGFloat)theInnerPadding {
+                       innerPadding:(CGFloat)theInnerPadding
+                   titleTextPadding:(CGFloat)theTitleTextPadding {
     self = [super init];
     if (self) {
         size = theSize;
         padding = thePadding;
         innerPadding = theInnerPadding;
+        titleTextPadding = theTitleTextPadding;
         selectedIndex = 0;
 
         self.material = NSVisualEffectMaterialHUDWindow;
@@ -27,7 +29,8 @@
         CaptureViewController* captureViewController =
             [[CaptureViewController alloc] initWithWindowId:wid
                                                        size:size
-                                               innerPadding:innerPadding];
+                                               innerPadding:innerPadding
+                                           titleTextPadding:titleTextPadding];
 
         CGFloat x = padding;
         CGFloat y = padding;
