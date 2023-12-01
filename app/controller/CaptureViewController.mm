@@ -1,4 +1,5 @@
 #import "CaptureViewController.h"
+#import "private_apis/CGS.h"
 
 // TODO: maybe get rid of this and merge with CaptureView.mm?
 @implementation CaptureViewController
@@ -51,6 +52,15 @@
 
         captureView = [[CaptureView alloc] initWithFrame:captureFrame windowId:wid];
         [stackView addSubview:captureView];
+
+        CFStringRef title;
+        CGSCopyWindowProperty(_CGSDefaultConnection(), wid, CFSTR("kCGSWindowTitle"), &title);
+        NSTextField* titleText = [NSTextField labelWithString:(__bridge NSString*)title];
+        titleText.frameOrigin = CGPointMake(innerPadding, 0);
+        titleText.frameSize = CGSizeMake(size.width, titleText.frame.size.height);
+        titleText.alignment = NSTextAlignmentCenter;
+        [stackView addSubview:titleText];
+
         self.view = stackView;
     }
     return self;
