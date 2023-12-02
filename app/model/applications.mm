@@ -32,26 +32,12 @@ void applications::add_app(NSRunningApplication* runningApp) {
     }
 }
 
-void applications::add_window_ref(AXUIElementRef callbackWindowRef) {
-    pid_t pid;
-    AXUIElementGetPid(callbackWindowRef, &pid);
-    AXUIElementRef axUiElement = AXUIElementCreateApplication(pid);
+void applications::add_window_ref(AXUIElementRef windowRef) {
+    CGWindowID wid = CGWindowID();
+    _AXUIElementGetWindow(windowRef, &wid);
 
-    CFArrayRef windowList;
-    AXUIElementCopyAttributeValue(axUiElement, kAXWindowsAttribute, (CFTypeRef*)&windowList);
-
-    for (int i = 0; i < CFArrayGetCount(windowList); i++) {
-        AXUIElementRef windowRef = (AXUIElementRef)CFArrayGetValueAtIndex(windowList, i);
-
-        if (CFHash(callbackWindowRef) == CFHash(windowRef)) {
-            CGWindowID wid = CGWindowID();
-            _AXUIElementGetWindow(windowRef, &wid);
-
-            window_map[wid] = window_element(windowRef);
-            window_ref_map[CFHash(windowRef)] = wid;
-            return;
-        }
-    }
+    window_map[wid] = window_element(windowRef);
+    window_ref_map[CFHash(windowRef)] = wid;
 }
 
 void applications::remove_window_ref(AXUIElementRef windowRef) {
@@ -64,7 +50,7 @@ void observer_callback(AXObserverRef observer, AXUIElementRef windowRef,
     applications* apps = (applications*)inUserData;
 
     if (CFEqual(notificationName, kAXWindowCreatedNotification)) {
-        apps->add_window_ref(windowRef);
+        apps->add_window_ref((AXUIElementRef)CFRetain(windowRef));
     } else if (CFEqual(notificationName, kAXUIElementDestroyedNotification)) {
         apps->remove_window_ref(windowRef);
     }

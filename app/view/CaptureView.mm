@@ -42,7 +42,7 @@ struct program_info_t {
 }
 
 @property(nonatomic, getter=didQuadInit) bool quadInit;
-    
+
 @end
 
 @implementation CaptureView
