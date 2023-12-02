@@ -66,12 +66,21 @@ void applications::SHIT(AXUIElementRef inRef) {
     // custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"%s", s.c_str());
 
     custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"before %lu", CFHash(refs.back()));
-    ay = refs.back();
+    set_ay(refs.back());
 
     // _SLPSSetFrontProcessWithOptions(&finalPsn, 0, kSLPSNoWindows);
     // AXUIElementPerformAction(refs.back(), kAXRaiseAction);
 
     // custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"%d", window_map.size());
+}
+
+void applications::set_ay(AXUIElementRef newAy) {
+    ay = newAy;
+}
+
+void applications::goddamnit(AXUIElementRef windowRef) {
+    custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"ugh %lu", CFHash(windowRef));
+    ay = windowRef;
 }
 
 void observer_callback(AXObserverRef observer, AXUIElementRef windowRef,
@@ -97,6 +106,9 @@ void observer_callback(AXObserverRef observer, AXUIElementRef windowRef,
 
         // apps->aaa.push_back(windowRef);
         // apps->ay = windowRef;
+        // apps->SHIT(nullptr);
+        // apps->set_ay(windowRef);
+        apps->goddamnit(windowRef);
 
         apps->window_map[wid] = window_element(windowRef);
         apps->ref_map[wid] = windowRef;
