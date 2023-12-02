@@ -16,6 +16,6 @@ window_element::window_element(AXUIElementRef windowRef) {
 
 void window_element::focus() {
     // https://github.com/koekeishiya/yabai/issues/1772#issuecomment-1649919480
-    // _SLPSSetFrontProcessWithOptions(&psn, 0, kSLPSNoWindows);
+    _SLPSSetFrontProcessWithOptions(&psn, 0, kSLPSNoWindows);
     AXUIElementPerformAction(windowRef, kAXRaiseAction);
 }

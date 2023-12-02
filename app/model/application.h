@@ -5,14 +5,14 @@
 class application {
 public:
     std::vector<window_element> windows;
+    AXUIElementRef axUiElement;
+    NSRunningApplication* runningApp;
 
     application(NSRunningApplication* runningApp);
     NSString* name();
     bool is_xpc();
     void populate_initial_windows();
 
-    // private:
-    NSRunningApplication* runningApp;
+private:
     ProcessSerialNumber psn;
-    AXUIElementRef axUiElement;
 };

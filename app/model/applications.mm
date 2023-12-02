@@ -1,12 +1,8 @@
 #import "applications.h"
-#import "private_apis/SkyLight.h"
-#import "util/log_util.h"
 
 applications::applications() {
     for (NSRunningApplication* runningApp in NSWorkspace.sharedWorkspace.runningApplications) {
         application app = application(runningApp);
-
-        if (![app.name() isEqual:@"Sublime Text"]) continue;
 
         if (!app.is_xpc() &&
             runningApp.activationPolicy != NSApplicationActivationPolicyProhibited) {
@@ -14,80 +10,38 @@ applications::applications() {
             add_observer(app);
 
             for (const window_element& window : app.windows) {
-                // custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"%@", app.name());
                 window_map[window.wid] = window;
                 window_ref_map[CFHash(window.windowRef)] = window.wid;
-
-                aaa.push_back(window.windowRef);
             }
         }
     }
-
-    // custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"%d", window_map.size());
 }
 
-void applications::SHIT(AXUIElementRef inRef) {
-    std::vector<AXUIElementRef> refs;
-    // ProcessSerialNumber finalPsn;
+void applications::add_window_ref(AXUIElementRef callbackWindowRef) {
+    pid_t pid;
+    AXUIElementGetPid(callbackWindowRef, &pid);
+    AXUIElementRef axUiElement = AXUIElementCreateApplication(pid);
 
-    for (NSRunningApplication* runningApp in NSWorkspace.sharedWorkspace.runningApplications) {
-        if (![runningApp.localizedName isEqual:@"Sublime Text"]) continue;
+    CFArrayRef windowList;
+    AXUIElementCopyAttributeValue(axUiElement, kAXWindowsAttribute, (CFTypeRef*)&windowList);
 
-        AXUIElementRef axUiElement = AXUIElementCreateApplication(runningApp.processIdentifier);
+    for (int i = 0; i < CFArrayGetCount(windowList); i++) {
+        AXUIElementRef windowRef = (AXUIElementRef)CFArrayGetValueAtIndex(windowList, i);
 
-        AXUIElementCreateApplication(runningApp.processIdentifier);
-        CFArrayRef windowList;
-        AXUIElementCopyAttributeValue(axUiElement, kAXWindowsAttribute, (CFTypeRef*)&windowList);
+        if (CFHash(callbackWindowRef) == CFHash(windowRef)) {
+            CGWindowID wid = CGWindowID();
+            _AXUIElementGetWindow(windowRef, &wid);
 
-        for (int i = 0; i < CFArrayGetCount(windowList); i++) {
-            AXUIElementRef windowRef = (AXUIElementRef)CFArrayGetValueAtIndex(windowList, i);
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-            ProcessSerialNumber psn;
-            GetProcessForPID(runningApp.processIdentifier, &psn);
-#pragma clang diagnostic pop
-
-            CFBooleanRef minimizedRef;
-            AXUIElementCopyAttributeValue(windowRef, kAXMinimizedAttribute,
-                                          (CFTypeRef*)&minimizedRef);
-            bool is_minimized = CFBooleanGetValue(minimizedRef);
-            if (!is_minimized) {
-                refs.push_back(windowRef);
-            }
+            window_map[wid] = window_element(windowRef);
+            window_ref_map[CFHash(windowRef)] = wid;
+            return;
         }
     }
-
-    // std::string s = "[";
-    // for (AXUIElementRef ref : refs) {
-    //     s += std::to_string(CFHash(ref)) + ", ";
-    // }
-    // s += ']';
-    // custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"%s", s.c_str());
-
-    // custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"before %lu", CFHash(refs.back()));
-    // set_ay(refs.back());
-
-    for (AXUIElementRef a : refs) {
-        if (CFHash(inRef) == CFHash(a)) {
-            set_ay(a);
-        }
-    }
-
-    // _SLPSSetFrontProcessWithOptions(&finalPsn, 0, kSLPSNoWindows);
-    // AXUIElementPerformAction(refs.back(), kAXRaiseAction);
-
-    // custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"%d", window_map.size());
 }
 
-void applications::set_ay(AXUIElementRef newAy) {
-    ay = newAy;
-}
-
-void applications::goddamnit(void* arf) {
-    AXUIElementRef windowRef = (AXUIElementRef)arf;
-    custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"ugh %lu", CFHash(windowRef));
-    ay = windowRef;
+void applications::remove_window_ref(AXUIElementRef windowRef) {
+    window_map.erase(window_ref_map[CFHash(windowRef)]);
+    window_ref_map.erase(CFHash(windowRef));
 }
 
 void observer_callback(AXObserverRef observer, AXUIElementRef windowRef,
@@ -95,35 +49,9 @@ void observer_callback(AXObserverRef observer, AXUIElementRef windowRef,
     applications* apps = (applications*)inUserData;
 
     if (CFEqual(notificationName, kAXWindowCreatedNotification)) {
-        CGWindowID wid = CGWindowID();
-        _AXUIElementGetWindow(windowRef, &wid);
-
-        CFStringRef titleRef;
-        CFStringRef roleRef;
-        CFStringRef subroleRef;
-        AXUIElementCopyAttributeValue(windowRef, kAXTitleAttribute, (CFTypeRef*)&titleRef);
-        AXUIElementCopyAttributeValue(windowRef, kAXRoleAttribute, (CFTypeRef*)&roleRef);
-        AXUIElementCopyAttributeValue(windowRef, kAXSubroleAttribute, (CFTypeRef*)&subroleRef);
-        NSString* title = (__bridge NSString*)titleRef;
-        NSString* role = (__bridge NSString*)roleRef;
-        NSString* subrole = (__bridge NSString*)subroleRef;
-        if (![subrole isEqual:@"AXStandardWindow"]) return;
-        custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"%@ %@ %@ %lu", title, role, subrole,
-                   CFHash(windowRef));
-
-        // apps->aaa.push_back(windowRef);
-        // apps->ay = windowRef;
-        // apps->SHIT(nullptr);
-        apps->SHIT(windowRef);
-        // apps->set_ay(windowRef);
-        // apps->goddamnit(&windowRef);
-
-        apps->window_map[wid] = window_element(windowRef);
-        apps->ref_map[wid] = windowRef;
-        apps->window_ref_map[CFHash(windowRef)] = wid;
+        apps->add_window_ref(windowRef);
     } else if (CFEqual(notificationName, kAXUIElementDestroyedNotification)) {
-        apps->window_map.erase(apps->window_ref_map[CFHash(windowRef)]);
-        apps->window_ref_map.erase(CFHash(windowRef));
+        apps->remove_window_ref(windowRef);
     }
 }
 

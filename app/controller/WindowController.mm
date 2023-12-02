@@ -1,8 +1,6 @@
 #import "WindowController.h"
 #import "extensions/NSWindow+ActuallyCenter.h"
 #import "model/space.h"
-#import "private_apis/SkyLight.h"
-#import "util/log_util.h"
 
 @implementation WindowController
 
@@ -44,33 +42,7 @@
 - (void)focusSelectedIndex {
     CGWindowID wid = [self.window.contentView getSelectedWindowId];
     if (apps.window_map.count(wid)) {
-        // apps.window_map[wid].focus();
-
-        // _SLPSSetFrontProcessWithOptions(&apps.window_map[wid].psn, 0, kSLPSNoWindows);
-        // AXUIElementPerformAction(apps.finalRef, kAXRaiseAction);
-
-        // AXUIElementPerformAction(apps.aaa.back(), kAXRaiseAction);
-
-        // apps.SHIT(nullptr);
-
-        if (apps.ay == nullptr) {
-            custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @":(");
-        } else {
-            custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"after: %lu", CFHash(apps.ay));
-            AXUIElementPerformAction(apps.ay, kAXRaiseAction);
-        }
-
-        // std::string s = "yes [";
-        // for (const auto& [wid, win_el] : apps.window_map) {
-        //     // custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"%u -> [%lu, {%u %u}]", wid,
-        //     //            CFHash(apps.window_map[wid].windowRef),
-        //     //            apps.window_map[wid].psn.highLongOfPSN,
-        //     //            apps.window_map[wid].psn.lowLongOfPSN);
-        //     // CFHash(apps.window_map[wid].windowRef);
-        //     s += std::to_string(CFHash(apps.ref_map[wid])) + ", ";
-        // }
-        // s += ']';
-        // custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"%s", s.c_str());
+        apps.window_map[wid].focus();
     }
 }
 
@@ -78,13 +50,17 @@
     if (_shown) return;
     else _shown = true;
 
-    // custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"window_map %d", apps.window_map.size());
-    // custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"window_ref_map %d",
-    //            apps.window_ref_map.size());
-
     std::vector<CGWindowID> window_ids;
     for (CGWindowID windowId : space::get_all_window_ids()) {
-        if (apps.window_map.count(windowId)) window_ids.push_back(windowId);
+        if (apps.window_map.count(windowId)) {
+            CFStringRef subroleRef;
+            AXUIElementCopyAttributeValue(apps.window_map[windowId].windowRef, kAXSubroleAttribute,
+                                          (CFTypeRef*)&subroleRef);
+            NSString* subrole = (__bridge NSString*)subroleRef;
+            if ([subrole isEqual:@"AXStandardWindow"]) {
+                window_ids.push_back(windowId);
+            }
+        }
     }
     [mainView populateWithWindowIds:window_ids];
 
