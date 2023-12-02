@@ -46,13 +46,19 @@
     }
 }
 
-- (void)showWindow {
+- (void)showWindow:(bool)onlyActiveApp {
     if (_shown) return;
     else _shown = true;
+
+    pid_t frontmost_pid = NSWorkspace.sharedWorkspace.frontmostApplication.processIdentifier;
 
     std::vector<CGWindowID> window_ids;
     for (CGWindowID windowId : space::get_all_window_ids()) {
         if (apps.window_map.count(windowId)) {
+            pid_t pid;
+            AXUIElementGetPid(apps.window_map[windowId].windowRef, &pid);
+            if (onlyActiveApp && pid != frontmost_pid) continue;
+
             CFStringRef subroleRef;
             AXUIElementCopyAttributeValue(apps.window_map[windowId].windowRef, kAXSubroleAttribute,
                                           (CFTypeRef*)&subroleRef);

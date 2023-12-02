@@ -21,6 +21,7 @@ private:
     FourCharCode signature = (FourCharCode)'1234';  // TODO: change to something else
     std::unordered_map<std::string, UInt32> global_hotkey_map = {
         {"nextWindowShortcut", 0},
-        {"holdShortcut", 1},
+        {"nextWindowShortcutActiveApp", 1},
+        {"holdShortcut", 2},
     };
 };
