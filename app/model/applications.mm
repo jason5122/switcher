@@ -2,17 +2,31 @@
 
 applications::applications() {
     for (NSRunningApplication* runningApp in NSWorkspace.sharedWorkspace.runningApplications) {
-        application app = application(runningApp);
+        add_app(runningApp);
+    }
 
-        if (!app.is_xpc() &&
-            runningApp.activationPolicy != NSApplicationActivationPolicyProhibited) {
-            app.populate_initial_windows();
-            add_observer(app);
+    // FIXME: why is this so slow?
+    NSNotificationCenter* notifCenter = NSWorkspace.sharedWorkspace.notificationCenter;
+    [notifCenter addObserverForName:NSWorkspaceDidLaunchApplicationNotification
+                             object:nil
+                              queue:NSOperationQueue.mainQueue
+                         usingBlock:^(NSNotification* notification) {
+                           NSRunningApplication* runningApp =
+                               [notification.userInfo objectForKey:@"NSWorkspaceApplicationKey"];
+                           add_app(runningApp);
+                         }];
+}
 
-            for (const window_element& window : app.windows) {
-                window_map[window.wid] = window;
-                window_ref_map[CFHash(window.windowRef)] = window.wid;
-            }
+void applications::add_app(NSRunningApplication* runningApp) {
+    application app = application(runningApp);
+
+    if (!app.is_xpc() && runningApp.activationPolicy != NSApplicationActivationPolicyProhibited) {
+        app.populate_initial_windows();
+        add_observer(app);
+
+        for (const window_element& window : app.windows) {
+            window_map[window.wid] = window;
+            window_ref_map[CFHash(window.windowRef)] = window.wid;
         }
     }
 }

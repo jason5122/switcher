@@ -13,5 +13,6 @@ public:
     void remove_window_ref(AXUIElementRef windowRef);
 
 private:
+    void add_app(NSRunningApplication* runningApp);
     void add_observer(application& app);
 };
