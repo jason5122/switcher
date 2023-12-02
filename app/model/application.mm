@@ -40,8 +40,6 @@ void application::populate_initial_windows() {
                                           (CFTypeRef*)&minimizedRef);
             bool is_minimized = CFBooleanGetValue(minimizedRef);
             if (!is_minimized) {
-                // windows.push_back(
-                //     window_element(runningApp.processIdentifier, windowRef, runningApp.icon));
                 windows.push_back(windowRef);
             }
         }

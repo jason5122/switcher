@@ -16,7 +16,7 @@
                             padding:(CGFloat)padding
                        innerPadding:(CGFloat)innerPadding
                    titleTextPadding:(CGFloat)titleTextPadding;
-- (void)populateWithCurrentWindows;
+- (void)populateWithWindowIds:(std::vector<CGWindowID>)windowIds;
 - (void)startCaptureSubviews;
 - (void)stopCaptureSubviews;
 - (void)cycleSelectedIndex;

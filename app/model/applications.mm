@@ -5,6 +5,8 @@ applications::applications() {
     for (NSRunningApplication* runningApp in NSWorkspace.sharedWorkspace.runningApplications) {
         application app = application(runningApp);
 
+        if (![app.name() isEqual:@"Sublime Text"]) continue;
+
         if (!app.is_xpc() &&
             runningApp.activationPolicy != NSApplicationActivationPolicyProhibited) {
             app.populate_initial_windows();
@@ -13,11 +15,7 @@ applications::applications() {
             for (const window_element& window : app.windows) {
                 // custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"%@", app.name());
                 window_map[window.wid] = window;
-                // window_ref_map[window.windowRef] = window;
-                // window_refs.push_back(window.windowRef);
-                window_refs.insert(CFHash(window.windowRef));
-
-                custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"%d", window.windowRef);
+                window_ref_map[CFHash(window.windowRef)] = window.wid;
             }
         }
     }
@@ -32,17 +30,25 @@ void observer_callback(AXObserverRef observer, AXUIElementRef windowRef,
     if (CFEqual(notificationName, kAXWindowCreatedNotification)) {
         CGWindowID wid = CGWindowID();
         _AXUIElementGetWindow(windowRef, &wid);
-        custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"window created wid: %d", wid);
 
-        // window_element window = window_element(windowRef);
-        // custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"%d", window.wid);
-        // custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"%d",
-        // apps->window_map.size());
+        CFStringRef titleRef;
+        CFStringRef roleRef;
+        CFStringRef subroleRef;
+        AXUIElementCopyAttributeValue(windowRef, kAXTitleAttribute, (CFTypeRef*)&titleRef);
+        AXUIElementCopyAttributeValue(windowRef, kAXRoleAttribute, (CFTypeRef*)&roleRef);
+        AXUIElementCopyAttributeValue(windowRef, kAXSubroleAttribute, (CFTypeRef*)&subroleRef);
+        NSString* title = (__bridge NSString*)titleRef;
+        NSString* role = (__bridge NSString*)roleRef;
+        NSString* subrole = (__bridge NSString*)subroleRef;
+        if (![subrole isEqual:@"AXStandardWindow"]) return;
+        custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"%@ %@ %@ %lu", title, role, subrole,
+                   CFHash(windowRef));
 
-        // apps->window_map[wid] = window;
-        apps->window_refs.insert(CFHash(windowRef));
+        apps->window_map[wid] = window_element(windowRef);
+        apps->window_ref_map[CFHash(windowRef)] = wid;
     } else if (CFEqual(notificationName, kAXUIElementDestroyedNotification)) {
-        apps->window_refs.erase(CFHash(windowRef));
+        apps->window_map.erase(apps->window_ref_map[CFHash(windowRef)]);
+        apps->window_ref_map.erase(CFHash(windowRef));
     }
 }
 

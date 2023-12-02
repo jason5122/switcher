@@ -1,5 +1,6 @@
 #import "WindowController.h"
 #import "extensions/NSWindow+ActuallyCenter.h"
+#import "model/space.h"
 #import "util/log_util.h"
 
 @implementation WindowController
@@ -50,13 +51,22 @@
     if (_shown) return;
     else _shown = true;
 
-    // for (const auto& [wid, win_el] : apps.window_map) {
-    //     custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"%d -> [%d, %d]", wid, win_el.wid,
-    //                win_el.psn);
-    // }
-    custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"size %d", apps.window_refs.size());
+    for (const auto& [wid, win_el] : apps.window_map) {
+        // custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"%u -> [%lu, {%u %u}]", wid,
+        //            CFHash(apps.window_map[wid].windowRef),
+        //            apps.window_map[wid].psn.highLongOfPSN,
+        //            apps.window_map[wid].psn.lowLongOfPSN);
+        // CFHash(apps.window_map[wid].windowRef);
+    }
+    custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"window_map %d", apps.window_map.size());
+    custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"window_ref_map %d",
+               apps.window_ref_map.size());
 
-    [mainView populateWithCurrentWindows];
+    std::vector<CGWindowID> window_ids;
+    for (CGWindowID windowId : space::get_all_window_ids()) {
+        if (apps.window_map.count(windowId)) window_ids.push_back(windowId);
+    }
+    [mainView populateWithWindowIds:window_ids];
 
     // TODO: why does this crash without a dispatch?
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0 * NSEC_PER_SEC), dispatch_get_main_queue(),
