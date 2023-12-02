@@ -69,10 +69,6 @@
         }
     }
     [mainView populateWithWindowIds:window_ids];
-
-    // TODO: why does this crash without a dispatch?
-    // dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0 * NSEC_PER_SEC), dispatch_get_main_queue(),
-    //                ^{ [mainView startCaptureSubviews]; });
     [mainView startCaptureSubviews];
 
     NSSize contentSize =

@@ -42,7 +42,7 @@ struct program_info_t {
 }
 
 @property(nonatomic, getter=didQuadInit) bool quadInit;
-
+    
 @end
 
 @implementation CaptureView
@@ -76,7 +76,6 @@ struct program_info_t {
 
     self = [super initWithFrame:frame pixelFormat:pf];
     if (self) {
-        _started = false;
         _quadInit = false;
 
         startedSem = dispatch_semaphore_create(0);
@@ -130,8 +129,6 @@ struct program_info_t {
 }
 
 - (void)startCapture {
-    if (_started) return;
-
     dispatch_semaphore_t stream_start_completed = dispatch_semaphore_create(0);
 
     __block BOOL success = false;
@@ -147,15 +144,12 @@ struct program_info_t {
     if (!success) {
         custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"start capture failed");
     } else {
-        _started = true;
         dispatch_semaphore_signal(startedSem);
     }
 }
 
 - (void)stopCapture {
     dispatch_semaphore_wait(startedSem, DISPATCH_TIME_FOREVER);
-
-    if (!_started) return;
 
     dispatch_semaphore_t stream_stop_completed = dispatch_semaphore_create(0);
 
@@ -171,8 +165,6 @@ struct program_info_t {
 
     if (!success) {
         custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"stop capture failed");
-    } else {
-        _started = false;
     }
 }
 
