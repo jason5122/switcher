@@ -33,15 +33,7 @@ void application::populate_initial_windows() {
     if (err == kAXErrorSuccess) {
         for (int i = 0; i < CFArrayGetCount(windowList); i++) {
             AXUIElementRef windowRef = (AXUIElementRef)CFArrayGetValueAtIndex(windowList, i);
-
-            // TODO: handle minimized windows better
-            CFBooleanRef minimizedRef;
-            AXUIElementCopyAttributeValue(windowRef, kAXMinimizedAttribute,
-                                          (CFTypeRef*)&minimizedRef);
-            bool is_minimized = CFBooleanGetValue(minimizedRef);
-            if (!is_minimized) {
-                windows.push_back(windowRef);
-            }
+            windows.push_back(windowRef);
         }
     }
 }
