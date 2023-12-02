@@ -1,4 +1,5 @@
 #import "applications.h"
+#import "private_apis/SkyLight.h"
 #import "util/log_util.h"
 
 applications::applications() {
@@ -16,9 +17,59 @@ applications::applications() {
                 // custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"%@", app.name());
                 window_map[window.wid] = window;
                 window_ref_map[CFHash(window.windowRef)] = window.wid;
+
+                aaa.push_back(window.windowRef);
             }
         }
     }
+
+    // custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"%d", window_map.size());
+}
+
+void applications::SHIT(AXUIElementRef inRef) {
+    std::vector<AXUIElementRef> refs;
+    // ProcessSerialNumber finalPsn;
+
+    for (NSRunningApplication* runningApp in NSWorkspace.sharedWorkspace.runningApplications) {
+        if (![runningApp.localizedName isEqual:@"Sublime Text"]) continue;
+
+        AXUIElementRef axUiElement = AXUIElementCreateApplication(runningApp.processIdentifier);
+
+        AXUIElementCreateApplication(runningApp.processIdentifier);
+        CFArrayRef windowList;
+        AXUIElementCopyAttributeValue(axUiElement, kAXWindowsAttribute, (CFTypeRef*)&windowList);
+
+        for (int i = 0; i < CFArrayGetCount(windowList); i++) {
+            AXUIElementRef windowRef = (AXUIElementRef)CFArrayGetValueAtIndex(windowList, i);
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+            ProcessSerialNumber psn;
+            GetProcessForPID(runningApp.processIdentifier, &psn);
+#pragma clang diagnostic pop
+
+            CFBooleanRef minimizedRef;
+            AXUIElementCopyAttributeValue(windowRef, kAXMinimizedAttribute,
+                                          (CFTypeRef*)&minimizedRef);
+            bool is_minimized = CFBooleanGetValue(minimizedRef);
+            if (!is_minimized) {
+                refs.push_back(windowRef);
+            }
+        }
+    }
+
+    // std::string s = "[";
+    // for (AXUIElementRef ref : refs) {
+    //     s += std::to_string(CFHash(ref)) + ", ";
+    // }
+    // s += ']';
+    // custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"%s", s.c_str());
+
+    custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"before %lu", CFHash(refs.back()));
+    ay = refs.back();
+
+    // _SLPSSetFrontProcessWithOptions(&finalPsn, 0, kSLPSNoWindows);
+    // AXUIElementPerformAction(refs.back(), kAXRaiseAction);
 
     // custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"%d", window_map.size());
 }
@@ -44,7 +95,11 @@ void observer_callback(AXObserverRef observer, AXUIElementRef windowRef,
         custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"%@ %@ %@ %lu", title, role, subrole,
                    CFHash(windowRef));
 
+        // apps->aaa.push_back(windowRef);
+        // apps->ay = windowRef;
+
         apps->window_map[wid] = window_element(windowRef);
+        apps->ref_map[wid] = windowRef;
         apps->window_ref_map[CFHash(windowRef)] = wid;
     } else if (CFEqual(notificationName, kAXUIElementDestroyedNotification)) {
         apps->window_map.erase(apps->window_ref_map[CFHash(windowRef)]);
