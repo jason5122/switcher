@@ -14,7 +14,7 @@ public:
     applications();
     void SHIT(AXUIElementRef inRef);
     void set_ay(AXUIElementRef newAy);
-    void goddamnit(AXUIElementRef windowRef);
+    void goddamnit(void* arf);
 
 private:
     void add_observer(application& app);

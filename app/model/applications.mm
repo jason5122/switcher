@@ -65,8 +65,14 @@ void applications::SHIT(AXUIElementRef inRef) {
     // s += ']';
     // custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"%s", s.c_str());
 
-    custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"before %lu", CFHash(refs.back()));
-    set_ay(refs.back());
+    // custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"before %lu", CFHash(refs.back()));
+    // set_ay(refs.back());
+
+    for (AXUIElementRef a : refs) {
+        if (CFHash(inRef) == CFHash(a)) {
+            set_ay(a);
+        }
+    }
 
     // _SLPSSetFrontProcessWithOptions(&finalPsn, 0, kSLPSNoWindows);
     // AXUIElementPerformAction(refs.back(), kAXRaiseAction);
@@ -78,7 +84,8 @@ void applications::set_ay(AXUIElementRef newAy) {
     ay = newAy;
 }
 
-void applications::goddamnit(AXUIElementRef windowRef) {
+void applications::goddamnit(void* arf) {
+    AXUIElementRef windowRef = (AXUIElementRef)arf;
     custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"ugh %lu", CFHash(windowRef));
     ay = windowRef;
 }
@@ -107,8 +114,9 @@ void observer_callback(AXObserverRef observer, AXUIElementRef windowRef,
         // apps->aaa.push_back(windowRef);
         // apps->ay = windowRef;
         // apps->SHIT(nullptr);
+        apps->SHIT(windowRef);
         // apps->set_ay(windowRef);
-        apps->goddamnit(windowRef);
+        // apps->goddamnit(&windowRef);
 
         apps->window_map[wid] = window_element(windowRef);
         apps->ref_map[wid] = windowRef;

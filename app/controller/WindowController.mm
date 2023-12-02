@@ -57,7 +57,7 @@
             custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @":(");
         } else {
             custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"after: %lu", CFHash(apps.ay));
-            // AXUIElementPerformAction(apps.ay, kAXRaiseAction);
+            AXUIElementPerformAction(apps.ay, kAXRaiseAction);
         }
 
         // std::string s = "yes [";
