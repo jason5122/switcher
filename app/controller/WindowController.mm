@@ -50,10 +50,11 @@
     if (_shown) return;
     else _shown = true;
 
-    for (const auto& [wid, win_el] : apps.window_map) {
-        custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"%d -> [%d, %d]", wid, win_el.wid,
-                   win_el.psn);
-    }
+    // for (const auto& [wid, win_el] : apps.window_map) {
+    //     custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"%d -> [%d, %d]", wid, win_el.wid,
+    //                win_el.psn);
+    // }
+    custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"size %d", apps.window_refs.size());
 
     [mainView populateWithCurrentWindows];
 
