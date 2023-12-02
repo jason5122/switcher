@@ -21,8 +21,8 @@
         stackView.wantsLayer = true;
         stackView.layer.cornerRadius = 9.0;
 
-        captureView = [[CaptureView alloc] initWithFrame:captureFrame windowId:wid];
-        [stackView addSubview:captureView];
+        _captureView = [[CaptureView alloc] initWithFrame:captureFrame windowId:wid];
+        [stackView addSubview:_captureView];
 
         CFStringRef title;
         CGSCopyWindowProperty(_CGSDefaultConnection(), wid, CFSTR("kCGSWindowTitle"), &title);
@@ -54,19 +54,11 @@
         iconView.frameOrigin = NSMakePoint(size.width - icon.size.width, 0);
         // iconView.wantsLayer = true;
         // iconView.layer.backgroundColor = NSColor.redColor.CGColor;
-        [captureView addSubview:iconView];
+        [_captureView addSubview:iconView];
 
         self.view = stackView;
     }
     return self;
-}
-
-- (void)startCapture {
-    [captureView startCapture];
-}
-
-- (void)stopCapture {
-    [captureView stopCapture];
 }
 
 - (void)highlight {

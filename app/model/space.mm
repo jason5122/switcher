@@ -17,23 +17,22 @@ std::vector<CGWindowID> space::get_all_window_ids() {
     std::vector<CGWindowID> result;
     CFArrayRef screenDicts = CGSCopyManagedDisplaySpaces(_CGSDefaultConnection());
     for (NSDictionary* screen in (__bridge NSArray*)screenDicts) {
-        for (NSDictionary* sp in screen[@"Spaces"]) {
-            CGSSpaceID spaceId = [sp[@"id64"] intValue];
-            int setTags = 0;
-            int clearTags = 0;
-            NSArray* windowIds = (__bridge NSArray*)CGSCopyWindowsWithOptionsAndTags(
-                _CGSDefaultConnection(), 0, (__bridge CFArrayRef) @[ @(spaceId) ], 2, &setTags,
-                &clearTags);
+        NSDictionary* sp = screen[@"Current Space"];
+        CGSSpaceID spaceId = [sp[@"id64"] intValue];
+        int setTags = 0;
+        int clearTags = 0;
+        NSArray* windowIds = (__bridge NSArray*)CGSCopyWindowsWithOptionsAndTags(
+            _CGSDefaultConnection(), 0, (__bridge CFArrayRef) @[ @(spaceId) ], 2, &setTags,
+            &clearTags);
 
-            for (int i = 0; i < windowIds.count; i++) {
-                // https://stackoverflow.com/a/74696817/14698275
-                id cfNumber = [windowIds objectAtIndex:i];
-                CGWindowID wid = [((NSNumber*)cfNumber) intValue];
-                CGWindowLevel level;
-                CGSGetWindowLevel(_CGSDefaultConnection(), wid, &level);
-                if (level == CGWindowLevelForKey(kCGNormalWindowLevelKey)) {
-                    result.push_back(wid);
-                }
+        for (int i = 0; i < windowIds.count; i++) {
+            // https://stackoverflow.com/a/74696817/14698275
+            id cfNumber = [windowIds objectAtIndex:i];
+            CGWindowID wid = [((NSNumber*)cfNumber) intValue];
+            CGWindowLevel level;
+            CGSGetWindowLevel(_CGSDefaultConnection(), wid, &level);
+            if (level == CGWindowLevelForKey(kCGNormalWindowLevelKey)) {
+                result.push_back(wid);
             }
         }
     }

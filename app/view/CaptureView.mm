@@ -33,12 +33,16 @@ struct program_info_t {
 
     program_info_t* program;
     GLuint quadVAOId, quadVBOId;
-    bool quadInit;
+
+    dispatch_semaphore_t startedSem;
 
 @public
     IOSurfaceRef current, prev;
     pthread_mutex_t mutex;
 }
+
+@property(nonatomic, getter=didQuadInit) bool quadInit;
+
 @end
 
 @implementation CaptureView
@@ -72,8 +76,10 @@ struct program_info_t {
 
     self = [super initWithFrame:frame pixelFormat:pf];
     if (self) {
-        hasStarted = false;
-        quadInit = false;
+        _started = false;
+        _quadInit = false;
+
+        startedSem = dispatch_semaphore_create(0);
 
         program = new program_info_t();
 
@@ -124,7 +130,7 @@ struct program_info_t {
 }
 
 - (void)startCapture {
-    if (hasStarted) return;
+    if (_started) return;
 
     dispatch_semaphore_t stream_start_completed = dispatch_semaphore_create(0);
 
@@ -141,12 +147,15 @@ struct program_info_t {
     if (!success) {
         custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"start capture failed");
     } else {
-        hasStarted = true;
+        _started = true;
+        dispatch_semaphore_signal(startedSem);
     }
 }
 
 - (void)stopCapture {
-    if (!hasStarted) return;
+    dispatch_semaphore_wait(startedSem, DISPATCH_TIME_FOREVER);
+
+    if (!_started) return;
 
     dispatch_semaphore_t stream_stop_completed = dispatch_semaphore_create(0);
 
@@ -163,7 +172,7 @@ struct program_info_t {
     if (!success) {
         custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"stop capture failed");
     } else {
-        hasStarted = false;
+        _started = false;
     }
 }
 
@@ -225,7 +234,7 @@ struct program_info_t {
     glVertexAttribPointer(ATTRIB_TEXCOORD, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat),
                           (const GLvoid*)(2 * sizeof(GLfloat)));
 
-    quadInit = true;
+    _quadInit = true;
 }
 
 - (void)tick {
@@ -269,7 +278,7 @@ struct program_info_t {
     glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    if (!quadInit) [self initQuad:surface];
+    if (!_quadInit) [self initQuad:surface];
 
     glUseProgram(program->id);
 
