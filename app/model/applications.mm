@@ -2,10 +2,11 @@
 
 applications::applications() {
     for (NSRunningApplication* runningApp in NSWorkspace.sharedWorkspace.runningApplications) {
-        add_app(runningApp);
+        if (runningApp.activationPolicy == NSApplicationActivationPolicyRegular) {
+            add_app(runningApp);
+        }
     }
 
-    // FIXME: why is this so slow?
     NSNotificationCenter* notifCenter = NSWorkspace.sharedWorkspace.notificationCenter;
     [notifCenter addObserverForName:NSWorkspaceDidLaunchApplicationNotification
                              object:nil
@@ -20,7 +21,7 @@ applications::applications() {
 void applications::add_app(NSRunningApplication* runningApp) {
     application app = application(runningApp);
 
-    if (!app.is_xpc() && runningApp.activationPolicy != NSApplicationActivationPolicyProhibited) {
+    if (!app.is_xpc()) {
         app.populate_initial_windows();
         add_observer(app);
 
