@@ -40,29 +40,10 @@ void application::populate_initial_windows() {
                                           (CFTypeRef*)&minimizedRef);
             bool is_minimized = CFBooleanGetValue(minimizedRef);
             if (!is_minimized) {
-                windows.push_back(
-                    window_element(runningApp.processIdentifier, windowRef, runningApp.icon));
+                // windows.push_back(
+                //     window_element(runningApp.processIdentifier, windowRef, runningApp.icon));
+                windows.push_back(windowRef);
             }
         }
     }
-}
-
-void application::add_observer() {
-    AXObserverRef axObserver;
-
-    // WARNING: starting SCStream triggers kAXWindowCreatedNotification (one per captured window)
-    AXObserverCreate(
-        runningApp.processIdentifier,
-        [](AXObserverRef observer, AXUIElementRef element, CFStringRef notificationName,
-           void* refCon) {
-            CGWindowID wid = CGWindowID();
-            _AXUIElementGetWindow(element, &wid);
-            if (CFEqual(notificationName, kAXWindowCreatedNotification)) {
-                custom_log(OS_LOG_TYPE_DEFAULT, @"application", @"window created: %d", wid);
-            }
-        },
-        &axObserver);
-    AXObserverAddNotification(axObserver, axUiElement, kAXWindowCreatedNotification, nil);
-    CFRunLoopAddSource(CFRunLoopGetMain(), AXObserverGetRunLoopSource(axObserver),
-                       kCFRunLoopDefaultMode);
 }

@@ -1,5 +1,6 @@
 #import "WindowController.h"
 #import "extensions/NSWindow+ActuallyCenter.h"
+#import "util/log_util.h"
 
 @implementation WindowController
 
@@ -48,6 +49,11 @@
 - (void)showWindow {
     if (_shown) return;
     else _shown = true;
+
+    for (const auto& [wid, win_el] : apps.window_map) {
+        custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"%d -> [%d, %d]", wid, win_el.wid,
+                   win_el.psn);
+    }
 
     [mainView populateWithCurrentWindows];
 

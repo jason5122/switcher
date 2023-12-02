@@ -9,10 +9,10 @@ public:
 
     window_element();
     window_element(pid_t app_pid, AXUIElementRef windowRef, NSImage* icon);
+    window_element(AXUIElementRef windowRef);
     void focus();
 
-private:
-    pid_t app_pid;
+// private:
     AXUIElementRef windowRef;
     ProcessSerialNumber psn;
 };
