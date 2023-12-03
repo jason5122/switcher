@@ -13,7 +13,6 @@
 - Crash when closing a capture window before hiding switcher
 - Memory leak
   - Use Instruments.app to measure
-- Recording icon sometimes gets stuck. Is this due to an hanging stream?
 - Prevent window from ever gaining focus on click
   - Still allow click actions
 - Remove Sonoma recording icon?

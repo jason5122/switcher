@@ -126,6 +126,8 @@ struct program_info_t {
 #pragma clang diagnostic pop
 
     [self setupShaders];
+
+    [self startCapture];
 }
 
 - (void)startCapture {
