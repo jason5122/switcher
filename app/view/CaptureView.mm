@@ -34,8 +34,6 @@ struct program_info_t {
     program_info_t* program;
     GLuint quadVAOId, quadVBOId;
 
-    dispatch_semaphore_t startedSem;
-
 @public
     IOSurfaceRef current, prev;
     pthread_mutex_t mutex;
@@ -77,8 +75,6 @@ struct program_info_t {
     self = [super initWithFrame:frame pixelFormat:pf];
     if (self) {
         _quadInit = false;
-
-        startedSem = dispatch_semaphore_create(0);
 
         program = new program_info_t();
 
@@ -145,14 +141,10 @@ struct program_info_t {
 
     if (!success) {
         custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"start capture failed");
-    } else {
-        dispatch_semaphore_signal(startedSem);
     }
 }
 
 - (void)stopCapture {
-    dispatch_semaphore_wait(startedSem, DISPATCH_TIME_FOREVER);
-
     dispatch_semaphore_t stream_stop_completed = dispatch_semaphore_create(0);
 
     __block BOOL success = false;
