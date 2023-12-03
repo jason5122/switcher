@@ -5,7 +5,6 @@
 - (instancetype)init {
     self = [super init];
     if (self) {
-        // CGSize size = CGSizeMake(280, 175);
         CGSize size = CGSizeMake(160, 100);
         CGFloat padding = 20;
         CGFloat innerPadding = 15;

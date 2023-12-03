@@ -24,10 +24,7 @@ void shortcut_controller::register_hotkey(NSString* shortcutString, std::string 
 void handle_event(EventHotKeyID hotKeyId, shortcut_controller* handler, bool is_pressed) {
     if (!is_pressed) return;
 
-    NSString* state = is_pressed ? @"pressed" : @"released";
-
     if (hotKeyId.id == 0) {
-        // custom_log(OS_LOG_TYPE_DEFAULT, @"shortcut-manager", @"nextWindowShortcut %@", state);
         [handler->windowController showWindow:false];
         [handler->windowController cycleSelectedIndex];
     } else if (hotKeyId.id == 1) {
@@ -71,7 +68,6 @@ CGEventRef modifier_callback(CGEventTapProxy proxy, CGEventType type, CGEventRef
     if (type == kCGEventFlagsChanged) {
         NSUInteger flags = CGEventGetFlags(cgEvent);
         if (!(flags & NSEventModifierFlagCommand) && handler->windowController.shown) {
-            // custom_log(OS_LOG_TYPE_DEFAULT, @"shortcut-manager", @"⌘ released");
             [handler->windowController focusSelectedIndex];
             [handler->windowController hideWindow];
         }
@@ -79,7 +75,6 @@ CGEventRef modifier_callback(CGEventTapProxy proxy, CGEventType type, CGEventRef
         CGKeyCode keycode =
             (CGKeyCode)CGEventGetIntegerValueField(cgEvent, kCGKeyboardEventKeycode);
         if (keycode == handler->cancelKey.carbonKeyCode && handler->windowController.shown) {
-            // custom_log(OS_LOG_TYPE_DEFAULT, @"shortcut-manager", @"escape pressed");
             [handler->windowController hideWindow];
             return nil;
         }
