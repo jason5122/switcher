@@ -1,13 +1,15 @@
 #import "controller/WindowController.h"
 #import <Carbon/Carbon.h>
+#import <ShortcutRecorder/ShortcutRecorder.h>
 #import <string>
 #import <unordered_map>
 
 class shortcut_controller {
 public:
     WindowController* windowController;
+    SRShortcut* cancelKey;
 
-    shortcut_controller(WindowController* windowController);
+    shortcut_controller(WindowController* windowController, NSString* cancelKeyString);
     ~shortcut_controller();
     void register_hotkey(NSString* shortcutString, std::string action);
     void add_global_handler();

@@ -1,11 +1,12 @@
 #import "private_apis/CGS.h"
 #import "shortcut_controller.h"
 #import "util/log_util.h"
-#import <ShortcutRecorder/ShortcutRecorder.h>
 #import <vector>
 
-shortcut_controller::shortcut_controller(WindowController* windowController) {
+shortcut_controller::shortcut_controller(WindowController* windowController,
+                                         NSString* cancelKeyString) {
     this->windowController = windowController;
+    cancelKey = [SRShortcut shortcutWithKeyEquivalent:cancelKeyString];
 }
 
 void shortcut_controller::register_hotkey(NSString* shortcutString, std::string action) {
@@ -77,7 +78,7 @@ CGEventRef modifier_callback(CGEventTapProxy proxy, CGEventType type, CGEventRef
     } else if (type == kCGEventKeyDown) {
         CGKeyCode keycode =
             (CGKeyCode)CGEventGetIntegerValueField(cgEvent, kCGKeyboardEventKeycode);
-        if (keycode == 53 && handler->windowController.shown) {
+        if (keycode == handler->cancelKey.carbonKeyCode && handler->windowController.shown) {
             // custom_log(OS_LOG_TYPE_DEFAULT, @"shortcut-manager", @"escape pressed");
             [handler->windowController hideWindow];
             return nil;

@@ -15,7 +15,7 @@
                                                           padding:padding
                                                      innerPadding:innerPadding
                                                  titleTextPadding:titleTextPadding];
-        sh_controller = new shortcut_controller(windowController);
+        sh_controller = new shortcut_controller(windowController, @"⎋");
     }
     return self;
 }
