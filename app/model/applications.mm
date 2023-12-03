@@ -2,7 +2,8 @@
 
 applications::applications() {
     for (NSRunningApplication* runningApp in NSWorkspace.sharedWorkspace.runningApplications) {
-        if (runningApp.activationPolicy == NSApplicationActivationPolicyRegular) {
+        if (runningApp.activationPolicy == NSApplicationActivationPolicyRegular ||
+            runningApp.activationPolicy == NSApplicationActivationPolicyAccessory) {
             add_app(runningApp);
         }
     }

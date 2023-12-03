@@ -5,7 +5,7 @@
 - (instancetype)init {
     self = [super initWithTitle:@"Main Menu"];
     if (self) {
-        NSString* appName = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"];
+        NSString* appName = [NSBundle.mainBundle.infoDictionary objectForKey:@"CFBundleName"];
 
         NSMenuItem* appMenu = [[NSMenuItem alloc] init];
         appMenu.submenu = [[NSMenu alloc] init];

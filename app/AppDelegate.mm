@@ -1,4 +1,5 @@
 #import "AppDelegate.h"
+#import "util/log_util.h"
 
 @implementation AppDelegate
 
@@ -27,10 +28,36 @@
     sh_controller->register_hotkey(@"⌘", "holdShortcut");
     sh_controller->add_global_handler();
     sh_controller->add_modifier_event_tap();
+
+    statusBarItem = [NSStatusBar.systemStatusBar statusItemWithLength:NSVariableStatusItemLength];
+    statusBarItem.button.image = [NSImage imageWithSystemSymbolName:@"star.fill"
+                                           accessibilityDescription:@"Status bar icon"];
+
+    NSString* appName = [NSBundle.mainBundle.infoDictionary objectForKey:@"CFBundleName"];
+    NSMenu* statusBarMenu = [[NSMenu alloc] init];
+    [statusBarMenu addItemWithTitle:[NSString stringWithFormat:@"About %@", appName]
+                             action:@selector(showAboutPanel)
+                      keyEquivalent:@""];
+    [statusBarMenu addItem:[NSMenuItem separatorItem]];
+    [statusBarMenu addItemWithTitle:@"hey" action:@selector(sayHello) keyEquivalent:@""];
+    [statusBarMenu addItem:[NSMenuItem separatorItem]];
+    [statusBarMenu addItemWithTitle:[NSString stringWithFormat:@"Quit %@", appName]
+                             action:@selector(terminate:)
+                      keyEquivalent:@"q"];
+    statusBarItem.menu = statusBarMenu;
 }
 
 - (void)applicationWillTerminate:(NSNotification*)notification {
     sh_controller->set_native_command_tab_enabled(true);
+}
+
+- (void)showAboutPanel {
+    [NSApplication.sharedApplication orderFrontStandardAboutPanel:statusBarItem];
+    [NSApplication.sharedApplication activateIgnoringOtherApps:true];
+}
+
+- (void)sayHello {
+    custom_log(OS_LOG_TYPE_DEFAULT, @"app-delegate", @"heyo");
 }
 
 @end

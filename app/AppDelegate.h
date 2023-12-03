@@ -5,6 +5,7 @@
 @interface AppDelegate : NSObject <NSApplicationDelegate> {
     WindowController* windowController;
     shortcut_controller* sh_controller;
+    NSStatusItem* statusBarItem;
 }
 
 @end

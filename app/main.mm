@@ -15,11 +15,10 @@ int main() {
     });
 
     @autoreleasepool {
-        NSApplication* app = [NSApplication sharedApplication];
+        NSApplication* app = NSApplication.sharedApplication;
         AppDelegate* appDelegate = [[AppDelegate alloc] init];
 
-        app.activationPolicy = NSApplicationActivationPolicyRegular;
-        // app.activationPolicy = NSApplicationActivationPolicyAccessory;
+        app.activationPolicy = NSApplicationActivationPolicyAccessory;
         app.mainMenu = [[Menu alloc] init];
         app.delegate = appDelegate;
 
