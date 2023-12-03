@@ -10,7 +10,6 @@ macos_app_bundle("app") {
 
   sources = [
     "AppDelegate.mm",
-    "Menu.m",
     "controller/CaptureViewController.mm",
     "controller/WindowController.mm",
     "controller/shortcut_controller.mm",

@@ -1,5 +1,4 @@
 #import "AppDelegate.h"
-#import "Menu.h"
 #import "controller/shortcut_controller.h"
 #import "util/log_util.h"
 #import <Cocoa/Cocoa.h>
@@ -19,7 +18,6 @@ int main() {
         AppDelegate* appDelegate = [[AppDelegate alloc] init];
 
         app.activationPolicy = NSApplicationActivationPolicyAccessory;
-        app.mainMenu = [[Menu alloc] init];
         app.delegate = appDelegate;
 
         [app run];
