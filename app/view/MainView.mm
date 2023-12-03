@@ -41,13 +41,6 @@
     }
 }
 
-- (void)startCaptureSubviews {
-    // for (CaptureViewController* controller : capture_controllers) {
-    //     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0),
-    //                    ^{ [controller.captureView startCapture]; });
-    // }
-}
-
 - (void)stopCaptureSubviews {
     for (CaptureViewController* controller : capture_controllers) {
         [controller.captureView stopCapture];

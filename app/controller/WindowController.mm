@@ -69,8 +69,6 @@
         }
     }
     [mainView populateWithWindowIds:window_ids];
-    // FIXME: capture sometimes does not startCaptureSubviews
-    // [mainView startCaptureSubviews];
 
     NSSize contentSize =
         NSMakeSize((size.width + padding + innerPadding) * self.window.contentView.subviews.count +
