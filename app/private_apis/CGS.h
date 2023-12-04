@@ -3,7 +3,7 @@
 typedef size_t CGSSpaceID;
 typedef int CGSConnectionID;
 
-extern "C" CGSConnectionID _CGSDefaultConnection();
+extern "C" CGSConnectionID CGSMainConnectionID();
 extern "C" CGSSpaceID CGSSpaceCreate(CGSConnectionID cid, int unknown, CFDictionaryRef options);
 extern "C" void CGSSpaceDestroy(CGSConnectionID cid, CGSSpaceID sid);
 extern "C" void CGSSpaceSetAbsoluteLevel(CGSConnectionID cid, CGSSpaceID space, int level);
@@ -38,3 +38,5 @@ extern "C" CGError CGSCopyWindowProperty(CGSConnectionID cid, CGWindowID wid, CF
 extern "C" CGError CGSGetWindowOwner(CGSConnectionID cid, CGWindowID wid,
                                      CGSConnectionID* outOwner);
 extern "C" CGError CGSGetConnectionPSN(CGSConnectionID cid, ProcessSerialNumber* psn);
+
+extern "C" CGSSpaceID CGSGetActiveSpace(CGSConnectionID cid);

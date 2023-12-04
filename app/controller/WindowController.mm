@@ -53,7 +53,7 @@
     pid_t frontmost_pid = NSWorkspace.sharedWorkspace.frontmostApplication.processIdentifier;
 
     std::vector<CGWindowID> window_ids;
-    for (CGWindowID windowId : space::get_all_window_ids()) {
+    for (CGWindowID windowId : space::get_all_window_ids_new()) {
         if (apps.window_map.count(windowId)) {
             pid_t pid;
             AXUIElementGetPid(apps.window_map[windowId].windowRef, &pid);

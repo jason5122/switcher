@@ -24,7 +24,7 @@
     statusBarItem.button.image = [NSImage imageWithSystemSymbolName:@"star.fill"
                                            accessibilityDescription:@"Status bar icon"];
 
-    NSString* appName = [NSBundle.mainBundle.infoDictionary objectForKey:@"CFBundleName"];
+    NSString* appName = NSBundle.mainBundle.infoDictionary[@"CFBundleName"];
     NSMenu* statusBarMenu = [[NSMenu alloc] init];
     [statusBarMenu addItemWithTitle:[NSString stringWithFormat:@"About %@", appName]
                              action:@selector(showAboutPanel)

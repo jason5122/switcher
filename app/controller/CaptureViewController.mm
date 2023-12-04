@@ -25,7 +25,7 @@
         [stackView addSubview:_captureView];
 
         CFStringRef title;
-        CGSCopyWindowProperty(_CGSDefaultConnection(), wid, CFSTR("kCGSWindowTitle"), &title);
+        CGSCopyWindowProperty(CGSMainConnectionID(), wid, CFSTR("kCGSWindowTitle"), &title);
         NSTextField* titleText = [NSTextField labelWithString:(__bridge NSString*)title];
         titleText.frameOrigin = CGPointMake(innerPadding, 5);
         titleText.frameSize = CGSizeMake(size.width, 20);
@@ -35,7 +35,7 @@
         [stackView addSubview:titleText];
 
         CGSConnectionID elementConnection;
-        CGSGetWindowOwner(_CGSDefaultConnection(), wid, &elementConnection);
+        CGSGetWindowOwner(CGSMainConnectionID(), wid, &elementConnection);
         ProcessSerialNumber psn = ProcessSerialNumber();
         CGSGetConnectionPSN(elementConnection, &psn);
 

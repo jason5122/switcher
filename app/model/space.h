@@ -3,11 +3,12 @@
 #import <vector>
 
 class space {
-    CGSSpaceID identifier;
+    CGSSpaceID spaceId;
 
 public:
     space(int level);
     ~space();
     void add_window(NSWindow* window);
+    static std::vector<CGWindowID> get_all_window_ids_new();
     static std::vector<CGWindowID> get_all_window_ids();
 };

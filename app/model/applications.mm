@@ -14,7 +14,7 @@ applications::applications() {
                               queue:NSOperationQueue.mainQueue
                          usingBlock:^(NSNotification* notification) {
                            NSRunningApplication* runningApp =
-                               [notification.userInfo objectForKey:@"NSWorkspaceApplicationKey"];
+                               notification.userInfo[@"NSWorkspaceApplicationKey"];
                            add_app(runningApp);
                          }];
 }
