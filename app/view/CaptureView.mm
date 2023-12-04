@@ -35,10 +35,6 @@ struct program_info_t {
     GLuint quadVAOId, quadVBOId;
 
     dispatch_semaphore_t startedSem;
-
-@public
-    IOSurfaceRef current, prev;
-    pthread_mutex_t mutex;
 }
 
 @property(nonatomic, getter=didQuadInit) bool quadInit;
@@ -96,8 +92,6 @@ struct program_info_t {
         disp = [[SCStream alloc] initWithFilter:contentFilter
                                   configuration:streamConfig
                                        delegate:nil];
-
-        pthread_mutex_init(&mutex, NULL);
 
         captureDelegate = [[ScreenCaptureDelegate alloc] initWithCaptureView:self];
 
@@ -232,28 +226,11 @@ struct program_info_t {
     _quadInit = true;
 }
 
-- (void)tick {
-    if (!current) return;
+- (void)render:(IOSurfaceRef)surface {
+    if (!surface) return;
 
-    IOSurfaceRef prevPrev = prev;
-    if (pthread_mutex_lock(&mutex)) return;
-    prev = current;
-    current = NULL;
-    pthread_mutex_unlock(&mutex);
-
-    if (prevPrev == prev) return;
-
-    if (prevPrev) {
-        IOSurfaceDecrementUseCount(prevPrev);
-        CFRelease(prevPrev);
-    }
-}
-
-- (void)render {
-    if (!prev) return;
-
-    GLuint name;
-    IOSurfaceRef surface = prev;
+    [self.openGLContext makeCurrentContext];
+    CGLLockContext(self.openGLContext.CGLContextObj);
 
     GLsizei width = (GLsizei)IOSurfaceGetWidth(surface);
     GLsizei height = (GLsizei)IOSurfaceGetHeight(surface);
@@ -262,6 +239,7 @@ struct program_info_t {
     glClearColor(0, 0, 0, 0);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    GLuint name;
     glGenTextures(1, &name);
 
     glBindTexture(GL_TEXTURE_RECTANGLE, name);
@@ -304,6 +282,9 @@ struct program_info_t {
     glDisable(GL_TEXTURE_RECTANGLE);
 
     glDeleteTextures(1, &name);
+
+    [self.openGLContext flushBuffer];
+    CGLUnlockContext(self.openGLContext.CGLContextObj);
 }
 
 @end
@@ -322,45 +303,19 @@ struct program_info_t {
     didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
                    ofType:(SCStreamOutputType)type {
     if (type == SCStreamOutputTypeScreen) {
-        [self update:sampleBuffer];
-        [self drawView];
+        IOSurfaceRef surface = [self createFrame:sampleBuffer];
+        [captureView render:surface];
     }
 }
 
-- (void)update:(CMSampleBufferRef)sampleBuffer {
+- (IOSurfaceRef)createFrame:(CMSampleBufferRef)sampleBuffer {
     CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
 
     CVPixelBufferLockBaseAddress(imageBuffer, 0);
     IOSurfaceRef frameSurface = CVPixelBufferGetIOSurface(imageBuffer);
     CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
 
-    IOSurfaceRef prevCurrent = NULL;
-
-    if (frameSurface && !pthread_mutex_lock(&captureView->mutex)) {
-        prevCurrent = captureView->current;
-        captureView->current = frameSurface;
-        CFRetain(captureView->current);
-        IOSurfaceIncrementUseCount(captureView->current);
-
-        pthread_mutex_unlock(&captureView->mutex);
-    }
-
-    if (prevCurrent) {
-        IOSurfaceDecrementUseCount(prevCurrent);
-        CFRelease(prevCurrent);
-    }
-}
-
-- (void)drawView {
-    [captureView.openGLContext makeCurrentContext];
-    CGLLockContext(captureView.openGLContext.CGLContextObj);
-
-    [captureView tick];
-    [captureView render];
-
-    [captureView.openGLContext flushBuffer];
-
-    CGLUnlockContext(captureView.openGLContext.CGLContextObj);
+    return frameSurface;
 }
 
 @end
