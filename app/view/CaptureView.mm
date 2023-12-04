@@ -235,17 +235,17 @@ struct program_info_t {
 - (void)tick {
     if (!current) return;
 
-    IOSurfaceRef prev_prev = prev;
+    IOSurfaceRef prevPrev = prev;
     if (pthread_mutex_lock(&mutex)) return;
     prev = current;
     current = NULL;
     pthread_mutex_unlock(&mutex);
 
-    if (prev_prev == prev) return;
+    if (prevPrev == prev) return;
 
-    if (prev_prev) {
-        IOSurfaceDecrementUseCount(prev_prev);
-        CFRelease(prev_prev);
+    if (prevPrev) {
+        IOSurfaceDecrementUseCount(prevPrev);
+        CFRelease(prevPrev);
     }
 }
 
@@ -328,26 +328,26 @@ struct program_info_t {
 }
 
 - (void)update:(CMSampleBufferRef)sampleBuffer {
-    CVImageBufferRef image_buffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+    CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
 
-    CVPixelBufferLockBaseAddress(image_buffer, 0);
-    IOSurfaceRef frame_surface = CVPixelBufferGetIOSurface(image_buffer);
-    CVPixelBufferUnlockBaseAddress(image_buffer, 0);
+    CVPixelBufferLockBaseAddress(imageBuffer, 0);
+    IOSurfaceRef frameSurface = CVPixelBufferGetIOSurface(imageBuffer);
+    CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
 
-    IOSurfaceRef prev_current = NULL;
+    IOSurfaceRef prevCurrent = NULL;
 
-    if (frame_surface && !pthread_mutex_lock(&captureView->mutex)) {
-        prev_current = captureView->current;
-        captureView->current = frame_surface;
+    if (frameSurface && !pthread_mutex_lock(&captureView->mutex)) {
+        prevCurrent = captureView->current;
+        captureView->current = frameSurface;
         CFRetain(captureView->current);
         IOSurfaceIncrementUseCount(captureView->current);
 
         pthread_mutex_unlock(&captureView->mutex);
     }
 
-    if (prev_current) {
-        IOSurfaceDecrementUseCount(prev_current);
-        CFRelease(prev_current);
+    if (prevCurrent) {
+        IOSurfaceDecrementUseCount(prevCurrent);
+        CFRelease(prevCurrent);
     }
 }
 
