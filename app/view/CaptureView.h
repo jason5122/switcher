@@ -2,7 +2,7 @@
 
 @interface CaptureView : NSOpenGLView
 
-- (id)initWithFrame:(NSRect)frame windowId:(CGWindowID)wid;
+- (instancetype)initWithFrame:(NSRect)frame windowId:(CGWindowID)wid;
 - (void)startCapture;
 - (void)stopCapture;
 

@@ -47,7 +47,7 @@ struct program_info_t {
 
 @implementation CaptureView
 
-- (id)initWithFrame:(NSRect)frame windowId:(CGWindowID)wid {
+- (instancetype)initWithFrame:(NSRect)frame windowId:(CGWindowID)wid {
     NSOpenGLPixelFormatAttribute attribs[] = {
         NSOpenGLPFAAllowOfflineRenderers,
         NSOpenGLPFAAccelerated,
@@ -107,7 +107,7 @@ struct program_info_t {
                                  sampleHandlerQueue:nil
                                               error:&error];
         if (!did_add_output) {
-            custom_log(OS_LOG_TYPE_ERROR, @"capture-engine", error.localizedFailureReason);
+            custom_log(OS_LOG_TYPE_ERROR, @"capture-view", error.localizedFailureReason);
         }
     }
     return self;

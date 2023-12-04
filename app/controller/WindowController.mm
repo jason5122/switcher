@@ -69,6 +69,7 @@
         }
     }
     [mainView populateWithWindowIds:window_ids];
+    [mainView startCaptureSubviews];
 
     NSSize contentSize =
         NSMakeSize((size.width + padding + innerPadding) * self.window.contentView.subviews.count +

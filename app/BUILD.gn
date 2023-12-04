@@ -23,6 +23,7 @@ macos_app_bundle("app") {
     "util/file_util.mm",
     "util/log_util.mm",
     "util/shader_util.cc",
+    "view/CACaptureView.mm",
     "view/CaptureView.mm",
     "view/MainView.mm",
   ]
