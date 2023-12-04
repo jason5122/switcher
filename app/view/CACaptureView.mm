@@ -129,26 +129,12 @@
     IOSurfaceRef frameSurface = CVPixelBufferGetIOSurface(imageBuffer);
     CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
 
-    // CFRetain(frameSurface);
-    // IOSurfaceIncrementUseCount(frameSurface);
-
     if (frameSurface) {
-        captureView.layer.contents = (__bridge id)CFRetain(frameSurface);
+        custom_log(OS_LOG_TYPE_DEFAULT, @"ca-capture-view", @"YEAH");
+        captureView.layer.contents = (__bridge id)frameSurface;
     } else {
         custom_log(OS_LOG_TYPE_ERROR, @"ca-capture-view", @"fuckkk");
     }
-
-    // if (frameSurface && !pthread_mutex_lock(&captureView->mutex)) {
-    //     custom_log(OS_LOG_TYPE_DEFAULT, @"ca-capture-view", @"YEAH");
-    //     captureView.layer.contents = (__bridge id)frameSurface;
-
-    //     pthread_mutex_unlock(&captureView->mutex);
-    // } else {
-    //     custom_log(OS_LOG_TYPE_ERROR, @"ca-capture-view", @"fuckkk");
-    // }
-
-    // IOSurfaceDecrementUseCount(frameSurface);
-    // CFRelease(frameSurface);
 }
 
 @end
