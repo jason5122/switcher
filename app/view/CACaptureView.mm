@@ -6,6 +6,7 @@
 @interface CACaptureDelegate : NSObject <SCStreamOutput> {
     // https://mobiarch.wordpress.com/2014/02/05/circular-reference-and-arc/
     __weak CACaptureView* captureView;
+    dispatch_queue_t serialQueue;
 }
 
 - (instancetype)initWithView:(CACaptureView*)captureView;
@@ -110,6 +111,7 @@
     self = [super init];
     if (self) {
         captureView = theCaptureView;
+        serialQueue = dispatch_queue_create("com.jason.switcher", NULL);
     }
     return self;
 }
@@ -118,23 +120,26 @@
     didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
                    ofType:(SCStreamOutputType)type {
     if (type == SCStreamOutputTypeScreen) {
-        [self update:sampleBuffer];
+        IOSurfaceRef surface = [self getFrame:sampleBuffer];
+        dispatch_sync(serialQueue, ^{
+          if (surface) {
+              custom_log(OS_LOG_TYPE_DEFAULT, @"ca-capture-view", @"YEAH");
+              captureView.layer.contents = (__bridge id)surface;
+          } else {
+              custom_log(OS_LOG_TYPE_ERROR, @"ca-capture-view", @"fuckkk");
+          }
+        });
     }
 }
 
-- (void)update:(CMSampleBufferRef)sampleBuffer {
+- (IOSurfaceRef)getFrame:(CMSampleBufferRef)sampleBuffer {
     CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
 
     CVPixelBufferLockBaseAddress(imageBuffer, 0);
-    IOSurfaceRef frameSurface = CVPixelBufferGetIOSurface(imageBuffer);
+    IOSurfaceRef surface = CVPixelBufferGetIOSurface(imageBuffer);
     CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
 
-    if (frameSurface) {
-        custom_log(OS_LOG_TYPE_DEFAULT, @"ca-capture-view", @"YEAH");
-        captureView.layer.contents = (__bridge id)frameSurface;
-    } else {
-        custom_log(OS_LOG_TYPE_ERROR, @"ca-capture-view", @"fuckkk");
-    }
+    return surface;
 }
 
 @end
