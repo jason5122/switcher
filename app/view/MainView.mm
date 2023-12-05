@@ -50,10 +50,8 @@
 
 - (void)stopCaptureSubviews {
     for (CaptureViewController* controller : capture_controllers) {
-        // dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0),
-        //                ^{ [controller.captureView stopCapture]; });
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0),
-                       ^{ [controller.capturePreview stopCapture]; });
+                       ^{ [controller.captureView stopCapture]; });
     }
 }
 

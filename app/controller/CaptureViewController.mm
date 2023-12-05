@@ -23,28 +23,29 @@
         stackView.wantsLayer = true;
         stackView.layer.cornerRadius = 9.0;
 
-        // _captureView = [[CaptureView alloc] initWithFrame:captureFrame windowId:wid];
-        // [stackView addSubview:_captureView];
+        _captureView = [[CaptureView alloc] initWithFrame:captureFrame windowId:wid];
+        [stackView addSubview:_captureView];
         // _caCaptureView = [[CACaptureView alloc] initWithFrame:captureFrame windowId:wid];
         // [stackView addSubview:_caCaptureView];
+        // {
+        //     SCStreamConfiguration* config = [[SCStreamConfiguration alloc] init];
+        //     config.width = captureFrame.size.width * 2;
+        //     config.height = captureFrame.size.height * 2;
+        //     config.queueDepth = 8;
+        //     config.showsCursor = false;
+        //     config.pixelFormat = 'BGRA';
+        //     config.colorSpaceName = kCGColorSpaceDisplayP3;
 
-        SCStreamConfiguration* config = [[SCStreamConfiguration alloc] init];
-        config.width = captureFrame.size.width * 2;
-        config.height = captureFrame.size.height * 2;
-        config.queueDepth = 8;
-        config.showsCursor = false;
-        config.pixelFormat = 'BGRA';
-        config.colorSpaceName = kCGColorSpaceDisplayP3;
+        //     SCWindow* targetWindow = [[SCWindow alloc] initWithId:wid];
+        //     SCContentFilter* filter =
+        //         [[SCContentFilter alloc] initWithDesktopIndependentWindow:targetWindow];
 
-        SCWindow* targetWindow = [[SCWindow alloc] initWithId:wid];
-        SCContentFilter* filter =
-            [[SCContentFilter alloc] initWithDesktopIndependentWindow:targetWindow];
-
-        _capturePreview = [[CapturePreview alloc] initWithFrame:captureFrame
-                                                         filter:filter
-                                                  configuration:config];
-        [stackView addSubview:_capturePreview];
-        [_capturePreview startCapture];
+        //     _captureView = [[CapturePreview alloc] initWithFrame:captureFrame
+        //                                                   filter:filter
+        //                                            configuration:config];
+        //     [stackView addSubview:_captureView];
+        //     [_captureView startCapture];
+        // }
 
         CFStringRef title;
         CGSCopyWindowProperty(CGSMainConnectionID(), wid, CFSTR("kCGSWindowTitle"), &title);
@@ -76,10 +77,7 @@
         iconView.frameOrigin = NSMakePoint(size.width - icon.size.width, 0);
         // iconView.wantsLayer = true;
         // iconView.layer.backgroundColor = NSColor.redColor.CGColor;
-        // [_captureView addSubview:iconView];
-
-        // [_caCaptureView addSubview:iconView];
-        // [_caCaptureView startCapture];
+        [_captureView addSubview:iconView];
 
         self.view = stackView;
     }
