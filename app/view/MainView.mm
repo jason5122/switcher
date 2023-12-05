@@ -69,8 +69,9 @@
 }
 
 - (void)reset {
-    self.subviews = [NSArray array];
-    capture_controllers.clear();
+    // self.subviews = [NSArray array];
+    // capture_controllers.clear();
+    [capture_controllers[selectedIndex] unhighlight];
     selectedIndex = 0;
 }
 
