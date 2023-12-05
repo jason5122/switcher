@@ -63,10 +63,12 @@ config("objc_standard") {
 }
 
 config("mac_minimum_version") {
-  cflags_objc = [ "-mmacosx-version-min=$mac_deployment_target" ]
+  cflags_objc = [ "-mmacos-version-min=$mac_deployment_target" ]
   cflags_objcc = cflags_objc
   cflags_cc = cflags_objc
-  ldflags = [ "-mmacosx-version-min=$mac_deployment_target" ]
+  ldflags = [ "-mmacos-version-min=$mac_deployment_target" ]
+  # TODO: don't hard code to arm64
+  swiftflags = [ "-target=arm64-apple-macos$mac_deployment_target" ]
 }
 
 if (current_os == "ios" || current_os == "mac") {

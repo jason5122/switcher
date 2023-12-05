@@ -13,8 +13,7 @@ template("mac_toolchain") {
     tool("link") {
       output = "{{output_dir}}/{{target_output_name}}{{output_extension}}"
       rspfile = output + ".rsp"
-      rspfile_content =
-          "{{inputs}} {{libs}} {{solibs}} {{frameworks}}"
+      rspfile_content = "{{inputs}} {{libs}} {{solibs}} {{frameworks}}"
 
       outputs = [ output ]
       command = "$cxx {{ldflags}} -o $output @$rspfile"
@@ -28,8 +27,7 @@ template("mac_toolchain") {
     tool("solink") {
       dylib = "{{output_dir}}/{{target_output_name}}{{output_extension}}"
       rspfile = dylib + ".rsp"
-      rspfile_content =
-          "{{inputs}} {{libs}} {{solibs}} {{frameworks}} {{swiftmodules}}"
+      rspfile_content = "{{inputs}} {{libs}} {{solibs}} {{frameworks}}"
 
       outputs = [ dylib ]
       command = "$cxx -dynamiclib {{ldflags}} -o $dylib @$rspfile"
@@ -139,26 +137,6 @@ template("mac_toolchain") {
 
       _pch_output_dir = "{{target_out_dir}}/{{module_name}}:pch/"
       outputs += [ _pch_output_dir ]
-
-      # Include the version of the compiler on the command-line. This causes
-      # `ninja` to consider all the compilation output to be dirty when the
-      # version changes.
-      if (defined(swiftc_version)) {
-        _extra_flags += " -swiftc-version $swiftc_version"
-      }
-
-      # Include the version of Xcode on the command-line (if specified via
-      # toolchain_args). This causes `ninja` to consider all the compilation
-      # outputs to be dirty when the version change.
-      #
-      # This is required because sometimes module dependency changes between
-      # different version of Xcode (e.g. when moving from Xcode 14 beta 6 to
-      # Xcode 14 RC). If the swiftmodule are not rebuilt when the version
-      # changes, they may encode dependency on now non-existing frameworks
-      # causing linker failures ultimately.
-      if (defined(toolchain_args.xcode_build)) {
-        _extra_flags += " -xcode-version ${toolchain_args.xcode_build}"
-      }
 
       # The Swift compiler assumes that the generated header will be used by
       # Objective-C code compiled with module support enabled (-fmodules).
