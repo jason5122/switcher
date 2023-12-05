@@ -2,5 +2,17 @@ import Foundation
 import os
 
 class LogUtil: NSObject {
-    static var logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "switcher")
+    static let bundleId = Bundle.main.bundleIdentifier!
+
+    static func customLog(
+        _ type: OSLogType, _ category: String, _ format: String, _ args: CVarArg...
+    ) {
+        let logger = Logger(subsystem: bundleId, category: category)
+        withVaList(args) { vaList in
+            let message = NSString(
+                format: format,
+                arguments: vaList)
+            logger.log("\(message, privacy: .public)")
+        }
+    }
 }

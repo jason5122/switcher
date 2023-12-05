@@ -10,6 +10,6 @@ class Person: NSObject {
 
     func printName() {
         let name = self.name ?? "no name"
-        LogUtil.logger.log("\(name, privacy: .public)")
+        LogUtil.customLog(.default, "person", "hiya %@", name)
     }
 }
