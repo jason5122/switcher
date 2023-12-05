@@ -78,15 +78,6 @@ CGEventRef modifier_callback(CGEventTapProxy proxy, CGEventType type, CGEventRef
             [handler->windowController hideWindow];
             return nil;
         }
-
-        if (keycode == 38 && handler->windowController.shown) {
-            [handler->windowController start];
-            return nil;
-        }
-        if (keycode == 40 && handler->windowController.shown) {
-            [handler->windowController stop];
-            return nil;
-        }
     }
     return cgEvent;
 }

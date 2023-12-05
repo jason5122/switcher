@@ -23,7 +23,5 @@
 - (void)focusSelectedIndex;
 - (void)showWindow:(bool)onlyActiveApp;
 - (void)hideWindow;
-- (void)start;
-- (void)stop;
 
 @end

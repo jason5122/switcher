@@ -77,12 +77,4 @@
     [mainView reset];
 }
 
-- (void)start {
-    [mainView startCaptureSubviews];
-}
-
-- (void)stop {
-    [mainView stopCaptureSubviews];
-}
-
 @end

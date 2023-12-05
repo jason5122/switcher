@@ -10,8 +10,6 @@
     NSImageView* iconView;
 }
 
-// @property(nonatomic) CaptureView* captureView;
-// @property(nonatomic) CACaptureView* captureView;
 @property(nonatomic) CapturePreview* captureView;
 @property(nonatomic) CGWindowID wid;
 
