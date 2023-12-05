@@ -5,6 +5,7 @@ class CaptureEngine: NSObject {
     private var stream: SCStream?
     private var streamOutput: CaptureOutput?
     private var continuation: AsyncStream<IOSurface>.Continuation?
+    private let startedSem = DispatchSemaphore(value: 0)
 
     func startCapture(filter: SCContentFilter, configuration: SCStreamConfiguration)
         -> AsyncStream<IOSurface>
@@ -17,16 +18,30 @@ class CaptureEngine: NSObject {
                 stream = SCStream(
                     filter: filter, configuration: configuration, delegate: streamOutput)
                 try stream?.addStreamOutput(streamOutput!, type: .screen, sampleHandlerQueue: nil)
-                stream?.startCapture()
+
+                let startCompletedSem = DispatchSemaphore(value: 0)
+                stream?.startCapture(completionHandler: { error in
+                    if let error {
+                        LogUtil.customLog(.error, "capture-engine", error.localizedDescription)
+                    } else {
+                        startCompletedSem.signal()
+                    }
+                })
+                startCompletedSem.wait()
+
+                startedSem.signal()
             } catch {}
         }
     }
 
-    func stopCapture() async {
-        do {
-            try await stream?.stopCapture()
-            continuation?.finish()
-        } catch {}
+    func stopCapture() {
+        startedSem.wait()
+        Task {
+            do {
+                try await stream?.stopCapture()
+                continuation?.finish()
+            } catch {}
+        }
     }
 }
 

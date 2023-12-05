@@ -44,7 +44,7 @@
                                                          filter:filter
                                                   configuration:config];
         [stackView addSubview:_capturePreview];
-        [_capturePreview startCaptureWithCompletionHandler:^{}];
+        [_capturePreview startCapture];
 
         CFStringRef title;
         CGSCopyWindowProperty(CGSMainConnectionID(), wid, CFSTR("kCGSWindowTitle"), &title);
