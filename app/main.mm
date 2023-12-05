@@ -1,6 +1,6 @@
 #import "AppDelegate.h"
 #import "controller/shortcut_controller.h"
-#import "swift_experiment.h"
+#import "person_swift.h"
 #import "util/log_util.h"
 #import <Cocoa/Cocoa.h>
 

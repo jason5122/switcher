@@ -1,6 +1,6 @@
 import Foundation
 import os
 
-class CustomLog: NSObject {
+class LogUtil: NSObject {
     static var logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "switcher")
 }

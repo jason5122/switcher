@@ -1,6 +1,5 @@
 import("//build/config/mac/templates/icon.gni")
 import("//build/config/mac/templates/macos_app_bundle.gni")
-import("//build/config/mac/templates/swift_source_set.gni")
 
 macos_app_bundle("app") {
   output_name = "Switcher"
@@ -56,18 +55,18 @@ macos_app_bundle("app") {
 
   deps = [
     ":icon",
+    ":person_swift",
     ":shaders",
     ":shortcut_recorder_bundle_data",
-    ":swift_experiment",
   ]
 }
 
-swift_source_set("swift_experiment") {
+source_set("person_swift") {
   sources = [
     "model/Person.swift",
-    "util/CustomLog.swift",
+    "util/LogUtil.swift",
   ]
-  bridge_header = "model/swift_bridge.h"
+  bridge_header = "model/person_swift_bridge.h"
 }
 
 icon("icon") {
