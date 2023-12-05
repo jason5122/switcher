@@ -10,6 +10,7 @@
 
 ### Fix
 
+- Rare race conditions under `CapturePreview.swift`/`CaptureEngine.swift`
 - Make linking against third-party frameworks reproducible
   - [Create a BUILD.gn for each one](https://groups.google.com/a/chromium.org/g/chromium-dev/c/gY0ngYZ2A1k)
 - Crash when closing a capture window before hiding switcher
