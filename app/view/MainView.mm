@@ -41,6 +41,13 @@
     }
 }
 
+- (void)updateWithWindowIds:(std::vector<CGWindowID>)windowIds {
+    int min_size = std::min(capture_controllers.size(), windowIds.size());
+    for (int i = 0; i < min_size; i++) {
+        [capture_controllers[i] updateWithWindowId:windowIds[i]];
+    }
+}
+
 - (void)startCaptureSubviews {
     for (CaptureViewController* controller : capture_controllers) {
         dispatch_async(dispatch_get_main_queue(), ^{ [controller.captureView startCapture]; });

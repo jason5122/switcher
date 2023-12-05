@@ -7,12 +7,13 @@
 @implementation CaptureViewController
 
 - (instancetype)initWithWindowId:(CGWindowID)wid
-                            size:(CGSize)size
+                            size:(CGSize)theSize
                     innerPadding:(CGFloat)innerPadding
                 titleTextPadding:(CGFloat)titleTextPadding {
     self = [super init];
     if (self) {
         _wid = wid;
+        size = theSize;
 
         CGRect viewFrame = NSMakeRect(0, 0, size.width + innerPadding * 2,
                                       size.height + innerPadding * 2 + titleTextPadding);
@@ -50,7 +51,7 @@
 
         CFStringRef title;
         CGSCopyWindowProperty(CGSMainConnectionID(), wid, CFSTR("kCGSWindowTitle"), &title);
-        NSTextField* titleText = [NSTextField labelWithString:(__bridge NSString*)title];
+        titleText = [NSTextField labelWithString:(__bridge NSString*)title];
         titleText.frameOrigin = CGPointMake(innerPadding, 5);
         titleText.frameSize = CGSizeMake(size.width, 20);
         titleText.alignment = NSTextAlignmentCenter;
@@ -73,7 +74,7 @@
         NSImage* icon = [[NSImage alloc] initWithIconRef:iconRef];
 #pragma clang diagnostic pop
 
-        NSImageView* iconView = [NSImageView imageViewWithImage:icon];
+        iconView = [NSImageView imageViewWithImage:icon];
         iconView.frameSize = icon.size;
         iconView.frameOrigin = NSMakePoint(size.width - icon.size.width, 0);
         // iconView.wantsLayer = true;
@@ -83,6 +84,34 @@
         self.view = stackView;
     }
     return self;
+}
+
+- (void)updateWithWindowId:(CGWindowID)wid {
+    _wid = wid;
+
+    SCWindow* targetWindow = [[SCWindow alloc] initWithId:wid];
+    SCContentFilter* filter =
+        [[SCContentFilter alloc] initWithDesktopIndependentWindow:targetWindow];
+    [_captureView updateWithFilter:filter];
+
+    CFStringRef title;
+    CGSCopyWindowProperty(CGSMainConnectionID(), wid, CFSTR("kCGSWindowTitle"), &title);
+    titleText.stringValue = (__bridge NSString*)title;
+
+    CGSConnectionID elementConnection;
+    CGSGetWindowOwner(CGSMainConnectionID(), wid, &elementConnection);
+    ProcessSerialNumber psn = ProcessSerialNumber();
+    CGSGetConnectionPSN(elementConnection, &psn);
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    FSRef fsRef;
+    GetProcessBundleLocation(&psn, &fsRef);
+    IconRef iconRef;
+    GetIconRefFromFileInfo(&fsRef, 0, NULL, 0, NULL, kIconServicesNormalUsageFlag, &iconRef, NULL);
+    NSImage* icon = [[NSImage alloc] initWithIconRef:iconRef];
+#pragma clang diagnostic pop
+    iconView.image = icon;
 }
 
 - (void)highlight {

@@ -32,22 +32,7 @@
         sp = new space(1);
         sp->add_window(self.window);
 
-        std::vector<CGWindowID> window_ids;
-        for (CGWindowID windowId : space::get_all_window_ids_new()) {
-            if (apps.window_map.count(windowId)) {
-                pid_t pid;
-                AXUIElementGetPid(apps.window_map[windowId].windowRef, &pid);
-                // if (onlyActiveApp && pid != frontmost_pid) continue;
-
-                CFStringRef subroleRef;
-                AXUIElementCopyAttributeValue(apps.window_map[windowId].windowRef,
-                                              kAXSubroleAttribute, (CFTypeRef*)&subroleRef);
-                NSString* subrole = (__bridge NSString*)subroleRef;
-                if ([subrole isEqual:@"AXStandardWindow"]) {
-                    window_ids.push_back(windowId);
-                }
-            }
-        }
+        std::vector<CGWindowID> window_ids = space::get_all_valid_window_ids(apps.window_map);
         [mainView populateWithWindowIds:window_ids];
     }
     return self;
@@ -68,7 +53,8 @@
     if (_shown) return;
     else _shown = true;
 
-    // pid_t frontmost_pid = NSWorkspace.sharedWorkspace.frontmostApplication.processIdentifier;
+    std::vector<CGWindowID> window_ids = space::get_all_valid_window_ids(apps.window_map);
+    [mainView updateWithWindowIds:window_ids];
 
     [mainView startCaptureSubviews];
 

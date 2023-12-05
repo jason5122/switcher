@@ -13,6 +13,34 @@ void space::add_window(NSWindow* window) {
                           (__bridge CFArrayRef) @[ @(spaceId) ]);
 }
 
+std::vector<CGWindowID>
+space::get_all_valid_window_ids(std::unordered_map<CGWindowID, window_element>& window_map) {
+    std::vector<CGWindowID> result;
+    NSArray* windowList = (__bridge NSArray*)CGWindowListCopyWindowInfo(
+        kCGWindowListOptionOnScreenOnly | kCGWindowListExcludeDesktopElements, kCGNullWindowID);
+
+    for (NSDictionary* cgWindow in windowList) {
+        int layer = [cgWindow[(__bridge NSString*)kCGWindowLayer] intValue];
+        if (layer == 0) {
+            CGWindowID wid = [cgWindow[(__bridge NSString*)kCGWindowNumber] intValue];
+            if (window_map.count(wid)) {
+                pid_t pid;
+                AXUIElementGetPid(window_map[wid].windowRef, &pid);
+                // if (onlyActiveApp && pid != frontmost_pid) continue;
+
+                CFStringRef subroleRef;
+                AXUIElementCopyAttributeValue(window_map[wid].windowRef, kAXSubroleAttribute,
+                                              (CFTypeRef*)&subroleRef);
+                NSString* subrole = (__bridge NSString*)subroleRef;
+                if ([subrole isEqual:@"AXStandardWindow"]) {
+                    result.push_back(wid);
+                }
+            }
+        }
+    }
+    return result;
+}
+
 std::vector<CGWindowID> space::get_all_window_ids_new() {
     std::vector<CGWindowID> result;
     NSArray* windowList = (__bridge NSArray*)CGWindowListCopyWindowInfo(

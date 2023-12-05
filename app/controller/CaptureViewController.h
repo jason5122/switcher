@@ -4,7 +4,11 @@
 #import "view/CaptureView.h"
 #import <Cocoa/Cocoa.h>
 
-@interface CaptureViewController : NSViewController
+@interface CaptureViewController : NSViewController {
+    CGSize size;
+    NSTextField* titleText;
+    NSImageView* iconView;
+}
 
 // @property(nonatomic) CaptureView* captureView;
 // @property(nonatomic) CACaptureView* captureView;
@@ -15,6 +19,7 @@
                             size:(CGSize)size
                     innerPadding:(CGFloat)innerPadding
                 titleTextPadding:(CGFloat)theTitleTextPadding;
+- (void)updateWithWindowId:(CGWindowID)wid;
 - (void)highlight;
 - (void)unhighlight;
 
