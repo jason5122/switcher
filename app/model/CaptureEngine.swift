@@ -2,21 +2,24 @@ import Foundation
 import ScreenCaptureKit
 
 class CaptureEngine: NSObject {
+    var config: SCStreamConfiguration?
     private var stream: SCStream?
     private var streamOutput: CaptureOutput?
     private var continuation: AsyncStream<IOSurface>.Continuation?
     private let startedSem = DispatchSemaphore(value: 0)
 
-    func startCapture(filter: SCContentFilter, configuration: SCStreamConfiguration)
-        -> AsyncStream<IOSurface>
-    {
+    init(configuration: SCStreamConfiguration) {
+        self.config = configuration
+    }
+
+    func startCapture(filter: SCContentFilter) -> AsyncStream<IOSurface> {
         AsyncStream<IOSurface> { continuation in
             streamOutput = CaptureOutput()
             streamOutput?.capturedFrameHandler = { continuation.yield($0) }
 
             do {
                 stream = SCStream(
-                    filter: filter, configuration: configuration, delegate: streamOutput)
+                    filter: filter, configuration: config!, delegate: streamOutput)
                 try stream?.addStreamOutput(streamOutput!, type: .screen, sampleHandlerQueue: nil)
 
                 let startCompletedSem = DispatchSemaphore(value: 0)

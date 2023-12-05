@@ -3,29 +3,30 @@ import ScreenCaptureKit
 
 @objcMembers
 class CapturePreview: NSView {
+    var captureEngine: CaptureEngine?
     var filter: SCContentFilter?
-    var config: SCStreamConfiguration?
-    private let captureEngine = CaptureEngine()
 
-    init(frame: CGRect, filter: SCContentFilter, configuration: SCStreamConfiguration) {
+    init(frame: CGRect, configuration: SCStreamConfiguration) {
         super.init(frame: frame)
-        self.filter = filter
-        self.config = configuration
+        self.captureEngine = CaptureEngine(configuration: configuration)
 
         wantsLayer = true
     }
 
+    func update(filter: SCContentFilter) {
+        self.filter = filter
+    }
+
     func startCapture() {
         Task {
-            for await surface in captureEngine.startCapture(filter: filter!, configuration: config!)
-            {
+            for await surface in captureEngine!.startCapture(filter: filter!) {
                 self.layer?.contents = surface
             }
         }
     }
 
     func stopCapture() {
-        captureEngine.stopCapture()
+        captureEngine!.stopCapture()
     }
 
     required init?(coder: NSCoder) {

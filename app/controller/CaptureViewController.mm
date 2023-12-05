@@ -41,8 +41,8 @@
                 [[SCContentFilter alloc] initWithDesktopIndependentWindow:targetWindow];
 
             _captureView = [[CapturePreview alloc] initWithFrame:captureFrame
-                                                          filter:filter
                                                    configuration:config];
+            [_captureView updateWithFilter:filter];
             [stackView addSubview:_captureView];
             // dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0),
             //                ^{ [_captureView startCapture]; });
