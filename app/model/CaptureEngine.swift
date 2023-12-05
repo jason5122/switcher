@@ -22,15 +22,15 @@ class CaptureEngine: NSObject {
                     filter: filter, configuration: config!, delegate: streamOutput)
                 try stream?.addStreamOutput(streamOutput!, type: .screen, sampleHandlerQueue: nil)
 
-                let startCompletedSem = DispatchSemaphore(value: 0)
+                let sem = DispatchSemaphore(value: 0)
                 stream?.startCapture(completionHandler: { error in
                     if let error {
                         LogUtil.customLog(.error, "capture-engine", error.localizedDescription)
                     } else {
-                        startCompletedSem.signal()
+                        sem.signal()
                     }
                 })
-                startCompletedSem.wait()
+                sem.wait()
 
                 startedSem.signal()
             } catch {}
@@ -39,12 +39,18 @@ class CaptureEngine: NSObject {
 
     func stopCapture() {
         startedSem.wait()
-        Task {
-            do {
-                try await stream?.stopCapture()
-                continuation?.finish()
-            } catch {}
-        }
+
+        let sem = DispatchSemaphore(value: 0)
+        stream?.stopCapture(completionHandler: { error in
+            if let error {
+                LogUtil.customLog(.error, "capture-engine", error.localizedDescription)
+            } else {
+                sem.signal()
+            }
+        })
+        sem.wait()
+
+        continuation?.finish()
     }
 }
 
