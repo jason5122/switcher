@@ -1,5 +1,6 @@
 #import "AppDelegate.h"
 #import "controller/shortcut_controller.h"
+#import "swift_experiment.h"
 #import "util/log_util.h"
 #import <Cocoa/Cocoa.h>
 
@@ -14,6 +15,9 @@ int main() {
     });
 
     @autoreleasepool {
+        Person* person = [[Person alloc] initWithName:@"Jerry"];
+        [person printName];
+
         NSApplication* app = NSApplication.sharedApplication;
         AppDelegate* appDelegate = [[AppDelegate alloc] init];
 

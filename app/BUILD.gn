@@ -1,5 +1,6 @@
 import("//build/config/mac/templates/icon.gni")
 import("//build/config/mac/templates/macos_app_bundle.gni")
+import("//build/config/mac/templates/swift_source_set.gni")
 
 macos_app_bundle("app") {
   output_name = "Switcher"
@@ -46,7 +47,10 @@ macos_app_bundle("app") {
     "/System/Library/PrivateFrameworks",
   ]
 
-  include_dirs = [ "//app" ]
+  include_dirs = [
+    "//app",
+    "$root_gen_dir/app",
+  ]
 
   defines = [ "GL_SILENCE_DEPRECATION" ]
 
@@ -54,7 +58,16 @@ macos_app_bundle("app") {
     ":icon",
     ":shaders",
     ":shortcut_recorder_bundle_data",
+    ":swift_experiment",
   ]
+}
+
+swift_source_set("swift_experiment") {
+  sources = [
+    "model/Person.swift",
+    "util/CustomLog.swift",
+  ]
+  bridge_header = "model/swift_bridge.h"
 }
 
 icon("icon") {
