@@ -17,11 +17,9 @@ class CapturePreview: NSView {
         self.filter = filter
     }
 
-    func startCapture() {
-        Task {
-            for await surface in captureEngine!.startCapture(filter: filter!) {
-                self.layer?.contents = surface
-            }
+    func startCapture() async {
+        for await surface in captureEngine!.startCapture(filter: filter!) {
+            self.layer?.contents = surface
         }
     }
 
