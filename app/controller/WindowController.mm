@@ -33,7 +33,7 @@
         sp->add_window(self.window);
 
         std::vector<CGWindowID> window_ids = space::get_all_valid_window_ids(apps.window_map);
-        [mainView populateWithCount:window_ids.size()];
+        [mainView populateWithWindowIds:window_ids];
     }
     return self;
 }

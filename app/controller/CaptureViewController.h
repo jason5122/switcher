@@ -13,9 +13,10 @@
 @property(nonatomic) CapturePreview* captureView;
 @property(nonatomic) CGWindowID wid;
 
-- (instancetype)initWithSize:(CGSize)theSize
-                innerPadding:(CGFloat)innerPadding
-            titleTextPadding:(CGFloat)titleTextPadding;
+- (instancetype)initWithWindowId:(CGWindowID)wid
+                            size:(CGSize)theSize
+                    innerPadding:(CGFloat)innerPadding
+                titleTextPadding:(CGFloat)titleTextPadding;
 - (void)updateWithWindowId:(CGWindowID)wid;
 - (void)highlight;
 - (void)unhighlight;
