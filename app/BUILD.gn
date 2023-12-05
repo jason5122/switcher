@@ -68,7 +68,7 @@ source_set("capture_preview_swift") {
     "util/LogUtil.swift",
     "view/CapturePreview.swift",
   ]
-  bridge_header = "model/capture_preview_swift_bridge.h"
+  bridge_header = "view/capture_preview_swift_bridge.h"
 }
 
 icon("icon") {

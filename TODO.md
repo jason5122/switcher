@@ -12,9 +12,6 @@
 
 - Make linking against third-party frameworks reproducible
   - [Create a BUILD.gn for each one](https://groups.google.com/a/chromium.org/g/chromium-dev/c/gY0ngYZ2A1k)
-- Startup of Swift CapturePreview/CaptureEngine is slow
-  - Try initializing the `SCStream` in Obj-C and pass it in?
-  - Also try reusing same view & engine
 - Crash when closing a capture window before hiding switcher
 - Prevent window from ever gaining focus on click
   - Still allow click actions

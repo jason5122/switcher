@@ -13,7 +13,6 @@
                 titleTextPadding:(CGFloat)titleTextPadding {
     self = [super init];
     if (self) {
-        _wid = wid;
         size = theSize;
 
         CGRect viewFrame = NSMakeRect(0, 0, size.width + innerPadding * 2,
@@ -37,11 +36,6 @@
             _captureView = [[CapturePreview alloc] initWithFrame:captureFrame
                                                    configuration:config];
             [stackView addSubview:_captureView];
-
-            SCWindow* targetWindow = [[SCWindow alloc] initWithId:wid];
-            SCContentFilter* filter =
-                [[SCContentFilter alloc] initWithDesktopIndependentWindow:targetWindow];
-            [_captureView updateWithFilter:filter];
         }
 
         titleText = [NSTextField labelWithString:@""];
@@ -54,20 +48,20 @@
         iconView = [[NSImageView alloc] init];
         [_captureView addSubview:iconView];
 
+        [self updateWithWindowId:wid];
+
         self.view = stackView;
     }
     return self;
 }
 
 - (void)updateWithWindowId:(CGWindowID)wid {
-    if (_wid != wid) {
-        SCWindow* targetWindow = [[SCWindow alloc] initWithId:wid];
-        SCContentFilter* filter =
-            [[SCContentFilter alloc] initWithDesktopIndependentWindow:targetWindow];
-        [_captureView updateWithFilter:filter];
-    }
-
     _wid = wid;
+
+    SCWindow* targetWindow = [[SCWindow alloc] initWithId:wid];
+    SCContentFilter* filter =
+        [[SCContentFilter alloc] initWithDesktopIndependentWindow:targetWindow];
+    [_captureView updateWithFilter:filter];
 
     CFStringRef title;
     CGSCopyWindowProperty(CGSMainConnectionID(), wid, CFSTR("kCGSWindowTitle"), &title);

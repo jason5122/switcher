@@ -9,6 +9,7 @@
                    titleTextPadding:(CGFloat)theTitleTextPadding {
     self = [super init];
     if (self) {
+        actual_count = 0;
         size = theSize;
         padding = thePadding;
         innerPadding = theInnerPadding;
@@ -25,27 +26,37 @@
 
 - (void)populateWithWindowIds:(std::vector<CGWindowID>)windowIds {
     for (CGWindowID wid : windowIds) {
-        CaptureViewController* captureViewController =
-            [[CaptureViewController alloc] initWithWindowId:wid
-                                                       size:size
-                                               innerPadding:innerPadding
-                                           titleTextPadding:titleTextPadding];
-
-        CGFloat x = padding;
-        CGFloat y = padding;
-        x += (size.width + padding + innerPadding) * self.subviews.count;
-        captureViewController.view.frameOrigin = CGPointMake(x, y);
-
-        [self addSubview:captureViewController.view];
-        capture_controllers.push_back(captureViewController);
+        [self appendViewControllerWithId:wid];
     }
 }
 
 - (void)updateWithWindowIds:(std::vector<CGWindowID>)windowIds {
-    int min_size = std::min(capture_controllers.size(), windowIds.size());
-    for (int i = 0; i < min_size; i++) {
-        [capture_controllers[i] updateWithWindowId:windowIds[i]];
+    int old_count = capture_controllers.size();
+    int count = windowIds.size();
+    actual_count = count;
+
+    for (int i = 0; i < count; i++) {
+        if (i >= old_count) {
+            [self appendViewControllerWithId:windowIds[i]];
+        } else {
+            [capture_controllers[i] updateWithWindowId:windowIds[i]];
+        }
+
+        CGFloat x = padding;
+        CGFloat y = padding;
+        x += (size.width + padding + innerPadding) * self.subviews.count;
+        capture_controllers[i].view.frameOrigin = CGPointMake(x, y);
+        [self addSubview:capture_controllers[i].view];
     }
+}
+
+- (void)appendViewControllerWithId:(CGWindowID)wid {
+    CaptureViewController* captureViewController =
+        [[CaptureViewController alloc] initWithWindowId:wid
+                                                   size:size
+                                           innerPadding:innerPadding
+                                       titleTextPadding:titleTextPadding];
+    capture_controllers.push_back(captureViewController);
 }
 
 - (void)startCaptureSubviews {
@@ -61,22 +72,22 @@
 }
 
 - (void)cycleSelectedIndex {
-    if (capture_controllers.empty()) return;
+    if (actual_count == 0) return;
 
     [capture_controllers[selectedIndex] unhighlight];
     selectedIndex++;
-    if (selectedIndex == capture_controllers.size()) selectedIndex = 0;
+    if (selectedIndex == actual_count) selectedIndex = 0;
     [capture_controllers[selectedIndex] highlight];
 }
 
 - (CGWindowID)getSelectedWindowId {
-    if (capture_controllers.empty()) return -1;
+    if (actual_count == 0) return -1;
 
     return capture_controllers[selectedIndex].wid;
 }
 
 - (void)reset {
-    // self.subviews = [NSArray array];
+    self.subviews = [NSArray array];
     // capture_controllers.clear();
     [capture_controllers[selectedIndex] unhighlight];
     selectedIndex = 0;

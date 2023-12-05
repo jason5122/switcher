@@ -4,6 +4,7 @@
 #import <vector>
 
 @interface MainView : NSVisualEffectView {
+    int actual_count;
     CGSize size;
     CGFloat padding;
     CGFloat innerPadding;
