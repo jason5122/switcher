@@ -29,7 +29,6 @@
 ### Repo
 
 - Add `README.md`
-- Add license
 - Add acknowledgements of other open-source projects used
   1. OBS
   2. HyperSwitch
