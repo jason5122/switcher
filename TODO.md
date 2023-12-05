@@ -10,9 +10,12 @@
 
 ### Fix
 
+- Make linking against third-party frameworks reproducible
+  - [Create a BUILD.gn for each one](https://groups.google.com/a/chromium.org/g/chromium-dev/c/gY0ngYZ2A1k)
+- Startup of Swift CapturePreview/CaptureEngine is slow
+  - Try initializing the `SCStream` in Obj-C and pass it in?
+  - Also try reusing same view & engine
 - Crash when closing a capture window before hiding switcher
-- Memory leak
-  - Use Instruments.app to measure
 - Prevent window from ever gaining focus on click
   - Still allow click actions
 - Remove Sonoma recording icon?
@@ -31,7 +34,8 @@
 - Add acknowledgements of other open-source projects used
   1. OBS
   2. HyperSwitch
-  3. AltTab?
+  3. AltTab
+  4. Chromium
 - Remove history
 - Create releases
 
