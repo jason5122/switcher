@@ -4,6 +4,7 @@
 
 ### Implement
 
+- Implement protocol for different kinds of view backends
 - Detect more types of crashes/signals
   - Spawn a second process to detect with the app closes?
 - [Universal binaries](https://developer.apple.com/documentation/apple-silicon/building-a-universal-macos-binary#Update-the-Architecture-List-of-Custom-Makefiles)
