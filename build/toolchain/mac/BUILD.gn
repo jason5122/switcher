@@ -13,10 +13,11 @@ template("mac_toolchain") {
     tool("link") {
       output = "{{output_dir}}/{{target_output_name}}{{output_extension}}"
       rspfile = output + ".rsp"
-      rspfile_content = "{{inputs_newline}}"
+      rspfile_content =
+          "{{inputs}} {{libs}} {{solibs}} {{frameworks}} {{swiftmodules}}"
 
       outputs = [ output ]
-      command = "$cxx {{ldflags}} -o $output -Wl,-filelist,$rspfile {{libs}} {{solibs}} {{frameworks}}"
+      command = "$cxx {{ldflags}} -o $output @$rspfile"
       description = "LINK {{output}}"
 
       default_output_dir = "{{root_out_dir}}"
@@ -27,10 +28,11 @@ template("mac_toolchain") {
     tool("solink") {
       dylib = "{{output_dir}}/{{target_output_name}}{{output_extension}}"
       rspfile = dylib + ".rsp"
-      rspfile_content = "{{inputs_newline}}"
+      rspfile_content =
+          "{{inputs}} {{libs}} {{solibs}} {{frameworks}} {{swiftmodules}}"
 
       outputs = [ dylib ]
-      command = "$cxx -dynamiclib {{ldflags}} -o $dylib -Wl,-filelist,$rspfile {{libs}} {{solibs}} {{frameworks}}"
+      command = "$cxx -dynamiclib {{ldflags}} -o $dylib @$rspfile"
       description = "SOLINK {{output}}"
 
       default_output_dir = "{{root_out_dir}}"
