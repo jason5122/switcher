@@ -1,5 +1,7 @@
 #import "CaptureViewController.h"
+#import "extensions/ScreenCaptureKit+InitWithId.h"
 #import "private_apis/CGS.h"
+#import "util/log_util.h"
 
 // TODO: maybe get rid of this and merge with CaptureView.mm?
 @implementation CaptureViewController
@@ -25,9 +27,23 @@
         // [stackView addSubview:_captureView];
         // _caCaptureView = [[CACaptureView alloc] initWithFrame:captureFrame windowId:wid];
         // [stackView addSubview:_caCaptureView];
-        _capturePreview = [[CapturePreview alloc] initWithFrame:captureFrame];
-        [stackView addSubview:_capturePreview];
 
+        SCStreamConfiguration* config = [[SCStreamConfiguration alloc] init];
+        config.width = captureFrame.size.width * 2;
+        config.height = captureFrame.size.height * 2;
+        config.queueDepth = 8;
+        config.showsCursor = false;
+        config.pixelFormat = 'BGRA';
+        config.colorSpaceName = kCGColorSpaceDisplayP3;
+
+        SCWindow* targetWindow = [[SCWindow alloc] initWithId:wid];
+        SCContentFilter* filter =
+            [[SCContentFilter alloc] initWithDesktopIndependentWindow:targetWindow];
+
+        _capturePreview = [[CapturePreview alloc] initWithFrame:captureFrame
+                                                         filter:filter
+                                                  configuration:config];
+        [stackView addSubview:_capturePreview];
         [_capturePreview startCaptureWithCompletionHandler:^{}];
 
         CFStringRef title;

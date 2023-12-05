@@ -6,27 +6,27 @@ class CaptureEngine: NSObject {
     private var streamOutput: CaptureOutput?
     private var continuation: AsyncStream<IOSurface>.Continuation?
 
-    func startCapture(window: SCWindow) -> AsyncStream<IOSurface> {
-        let streamConfig = SCStreamConfiguration()
-        streamConfig.width = Int(window.frame.width) * 2
-        streamConfig.height = Int(window.frame.height) * 2
-        streamConfig.queueDepth = 8
-        streamConfig.showsCursor = false
-        streamConfig.colorSpaceName = CGColorSpace.sRGB
-
-        let filter = SCContentFilter(desktopIndependentWindow: window)
-
-        return AsyncStream<IOSurface> { continuation in
+    func startCapture(filter: SCContentFilter, configuration: SCStreamConfiguration)
+        -> AsyncStream<IOSurface>
+    {
+        AsyncStream<IOSurface> { continuation in
             streamOutput = CaptureOutput()
             streamOutput?.capturedFrameHandler = { continuation.yield($0) }
 
             do {
                 stream = SCStream(
-                    filter: filter, configuration: streamConfig, delegate: streamOutput)
+                    filter: filter, configuration: configuration, delegate: streamOutput)
                 try stream?.addStreamOutput(streamOutput!, type: .screen, sampleHandlerQueue: nil)
                 stream?.startCapture()
             } catch {}
         }
+    }
+
+    func stopCapture() async {
+        do {
+            try await stream?.stopCapture()
+            continuation?.finish()
+        } catch {}
     }
 }
 
