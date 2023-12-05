@@ -7,13 +7,12 @@
 // TODO: maybe get rid of this and merge with CaptureView.mm?
 @implementation CaptureViewController
 
-- (instancetype)initWithWindowId:(CGWindowID)wid
-                            size:(CGSize)theSize
-                    innerPadding:(CGFloat)innerPadding
-                titleTextPadding:(CGFloat)titleTextPadding {
+- (instancetype)initWithSize:(CGSize)theSize
+                innerPadding:(CGFloat)innerPadding
+            titleTextPadding:(CGFloat)titleTextPadding {
     self = [super init];
     if (self) {
-        _wid = wid;
+        _wid = -1;
         size = theSize;
 
         CGRect viewFrame = NSMakeRect(0, 0, size.width + innerPadding * 2,
@@ -38,9 +37,7 @@
                                                    configuration:config];
             [stackView addSubview:_captureView];
 
-            SCWindow* targetWindow = [[SCWindow alloc] initWithId:wid];
-            SCContentFilter* filter =
-                [[SCContentFilter alloc] initWithDesktopIndependentWindow:targetWindow];
+            SCContentFilter* filter = [[SCContentFilter alloc] init];
             [_captureView updateWithFilter:filter];
         }
 
@@ -60,7 +57,7 @@
 }
 
 - (void)updateWithWindowId:(CGWindowID)wid {
-    if (_wid != wid) {
+    if (_wid == -1) {
         SCWindow* targetWindow = [[SCWindow alloc] initWithId:wid];
         SCContentFilter* filter =
             [[SCContentFilter alloc] initWithDesktopIndependentWindow:targetWindow];

@@ -23,13 +23,12 @@
     return self;
 }
 
-- (void)populateWithWindowIds:(std::vector<CGWindowID>)windowIds {
-    for (CGWindowID wid : windowIds) {
+- (void)populateWithCount:(int)count {
+    for (int i = 0; i < count; i++) {
         CaptureViewController* captureViewController =
-            [[CaptureViewController alloc] initWithWindowId:wid
-                                                       size:size
-                                               innerPadding:innerPadding
-                                           titleTextPadding:titleTextPadding];
+            [[CaptureViewController alloc] initWithSize:size
+                                           innerPadding:innerPadding
+                                       titleTextPadding:titleTextPadding];
 
         CGFloat x = padding;
         CGFloat y = padding;
