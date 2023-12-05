@@ -54,19 +54,20 @@ macos_app_bundle("app") {
   defines = [ "GL_SILENCE_DEPRECATION" ]
 
   deps = [
+    ":capture_preview_swift",
     ":icon",
-    ":person_swift",
     ":shaders",
     ":shortcut_recorder_bundle_data",
   ]
 }
 
-source_set("person_swift") {
+source_set("capture_preview_swift") {
   sources = [
-    "model/Person.swift",
+    "model/CaptureEngine.swift",
     "util/LogUtil.swift",
+    "view/CapturePreview.swift",
   ]
-  bridge_header = "model/person_swift_bridge.h"
+  bridge_header = "model/capture_preview_swift_bridge.h"
 }
 
 icon("icon") {

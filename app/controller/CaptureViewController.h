@@ -1,3 +1,4 @@
+#import "capture_preview_swift.h"
 #import "model/window_element.h"
 #import "view/CACaptureView.h"
 #import "view/CaptureView.h"
@@ -7,6 +8,7 @@
 
 @property(nonatomic) CaptureView* captureView;
 @property(nonatomic) CACaptureView* caCaptureView;
+@property(nonatomic) CapturePreview* capturePreview;
 @property(nonatomic) CGWindowID wid;
 
 - (instancetype)initWithWindowId:(CGWindowID)wid
