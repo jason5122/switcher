@@ -1,7 +1,5 @@
-#import "capture_preview_swift.h"
+#import "capture_view_swift.h"
 #import "model/window_element.h"
-#import "view/CACaptureView.h"
-#import "view/CaptureView.h"
 #import <Cocoa/Cocoa.h>
 
 @interface CaptureViewController : NSViewController {
@@ -10,7 +8,7 @@
     NSImageView* iconView;
 }
 
-@property(nonatomic) CapturePreview* captureView;
+@property(nonatomic) SwiftCaptureView* captureView;
 @property(nonatomic) CGWindowID wid;
 
 - (instancetype)initWithWindowId:(CGWindowID)wid

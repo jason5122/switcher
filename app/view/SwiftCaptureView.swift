@@ -2,7 +2,7 @@ import Cocoa
 import ScreenCaptureKit
 
 @objcMembers
-class CapturePreview: NSView {
+class SwiftCaptureView: NSView {
     var captureEngine: CaptureEngine?
     var filter: SCContentFilter?
 

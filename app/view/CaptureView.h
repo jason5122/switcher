@@ -1,8 +1,10 @@
 #import <Cocoa/Cocoa.h>
 
-@interface CaptureView : NSOpenGLView
+@interface CaptureView : NSView
 
-- (instancetype)initWithFrame:(NSRect)frame windowId:(CGWindowID)wid;
+@property(nonatomic) CALayer* contentLayer;
+
+- (instancetype)initWithFrame:(CGRect)frame windowId:(CGWindowID)wid;
 - (void)startCapture;
 - (void)stopCapture;
 

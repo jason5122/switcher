@@ -1,5 +1,4 @@
 #import "MainView.h"
-#import "view/CaptureView.h"
 
 @implementation MainView
 
