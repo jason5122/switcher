@@ -2,8 +2,10 @@
 
 A lightweight, simple window switcher inspired by [HyperSwitch](https://bahoom.com/hyperswitch).
 
-> [!NOTE]  
+> [!NOTE]\
 > The name, app icon, and menu icon are all placeholders!
+
+https://github.com/jasonhan-vassar/switcher/assets/34594853/218a5335-62c4-4331-ab30-c822114a16cd
 
 ## Building
 
@@ -16,15 +18,19 @@ The build system, Ninja, can be installed with `brew install ninja`.
 It is highly recommended to code sign the app! This prevents macOS from asking for Accessiblity/Screen Recording permissions on every recompile.
 
 To do this, find your ID using `security find-identity -v -p codesigning`. Then,
+
 ```
 gn args out
 ```
+
 and paste your ID in the editor as
+
 ```
 code_signing_identity = "your 40 hexadecimal digits"
 ```
 
 Next, run
+
 ```
 gn gen out
 ```
@@ -34,6 +40,7 @@ gn gen out
 ```
 ninja -C out
 ```
+
 This generates `Switcher.app` in the `out/` directory.
 
 ## Viewing logs
