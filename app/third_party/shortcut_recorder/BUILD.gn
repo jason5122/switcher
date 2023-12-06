@@ -1,0 +1,21 @@
+static_library("shortcut_recorder") {
+  sources = [
+    "src/SRCommon.m",
+    "src/SRKeyBindingTransformer.m",
+    "src/SRKeyCodeTransformer.m",
+    "src/SRKeyEquivalentModifierMaskTransformer.m",
+    "src/SRKeyEquivalentTransformer.m",
+    "src/SRModifierFlagsTransformer.m",
+    "src/SRRecorderControl.m",
+    "src/SRRecorderControlStyle.m",
+    "src/SRShortcut.m",
+    "src/SRShortcutAction.m",
+    "src/SRShortcutController.m",
+    "src/SRShortcutFormatter.m",
+    "src/SRShortcutValidator.m",
+  ]
+
+  include_dirs = [ "src" ]
+
+  cflags = [ "-Wno-deprecated-declarations" ]
+}

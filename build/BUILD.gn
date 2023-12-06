@@ -9,7 +9,6 @@ config("compiler") {
     ":objc_abi_version",
     ":mac_minimum_version",
   ]
-  cflags = [ "-g" ]
 }
 
 config("shared_binary") {
@@ -63,10 +62,9 @@ config("objc_standard") {
 }
 
 config("mac_minimum_version") {
-  cflags_objc = [ "-mmacos-version-min=$mac_deployment_target" ]
-  cflags_objcc = cflags_objc
-  cflags_cc = cflags_objc
+  cflags = [ "-mmacos-version-min=$mac_deployment_target" ]
   ldflags = [ "-mmacos-version-min=$mac_deployment_target" ]
+
   # TODO: don't hard code to arm64
   swiftflags = [ "-target=arm64-apple-macos$mac_deployment_target" ]
 }
