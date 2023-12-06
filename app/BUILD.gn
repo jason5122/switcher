@@ -51,19 +51,18 @@ macos_app_bundle("app") {
   defines = [ "GL_SILENCE_DEPRECATION" ]
 
   deps = [
-    ":capture_view_swift",
     ":icon",
+    ":swift_capture_view",
     "//app/third_party/shortcut_recorder:shortcut_recorder",
   ]
 }
 
-source_set("capture_view_swift") {
+source_set("swift_capture_view") {
   sources = [
-    "model/CaptureEngine.swift",
     "util/LogUtil.swift",
     "view/SwiftCaptureView.swift",
   ]
-  bridge_header = "view/capture_view_swift_bridge.h"
+  bridge_header = "view/swift_capture_view_bridge.h"
 }
 
 icon("icon") {

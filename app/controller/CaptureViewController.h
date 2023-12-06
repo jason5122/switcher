@@ -1,5 +1,5 @@
-#import "capture_view_swift.h"
 #import "model/window_element.h"
+#import "swift_capture_view.h"
 #import <Cocoa/Cocoa.h>
 
 @interface CaptureViewController : NSViewController {
