@@ -21,7 +21,7 @@ gn args out
 ```
 and paste your ID in the editor as
 ```
-code_signing_identity = <40 hexadecimal digits>
+code_signing_identity = "your 40 hexadecimal digits"
 ```
 
 Next, run

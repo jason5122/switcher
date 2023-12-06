@@ -4,7 +4,6 @@
 
 ### Implement
 
-- Implement protocol for different kinds of view backends
 - Detect more types of crashes/signals
   - Spawn a second process to detect with the app closes?
 - [Universal binaries](https://developer.apple.com/documentation/apple-silicon/building-a-universal-macos-binary#Update-the-Architecture-List-of-Custom-Makefiles)
@@ -28,13 +27,12 @@
 
 ### Repo
 
-- Add `README.md`
 - Add acknowledgements of other open-source projects used
   1. OBS
   2. HyperSwitch
   3. AltTab
   4. Chromium
-- Remove history
+- Clean up history
 - Create releases
 
 ### Project
