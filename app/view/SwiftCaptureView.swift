@@ -21,7 +21,7 @@ class SwiftCaptureView: NSView {
         self.filter = filter
     }
 
-    func startCapture() async {
+    func startCapture() {
         let asyncStream = AsyncStream<IOSurface> { continuation in
             captureOutput = CaptureOutput()
             captureOutput?.capturedFrameHandler = { continuation.yield($0) }
@@ -44,8 +44,10 @@ class SwiftCaptureView: NSView {
             } catch {}
         }
 
-        for await surface in asyncStream {
-            self.layer?.contents = surface
+        Task {
+            for await surface in asyncStream {
+                self.layer?.contents = surface
+            }
         }
     }
 
@@ -85,8 +87,8 @@ private class CaptureOutput: NSObject, SCStreamOutput {
     }
 
     private func createFrame(for sampleBuffer: CMSampleBuffer) -> IOSurface? {
-        guard let pixelBuffer = sampleBuffer.imageBuffer else { return nil }
-        guard let surfaceRef = CVPixelBufferGetIOSurface(pixelBuffer)?.takeUnretainedValue() else {
+        guard let imageBuffer = sampleBuffer.imageBuffer else { return nil }
+        guard let surfaceRef = CVPixelBufferGetIOSurface(imageBuffer)?.takeUnretainedValue() else {
             return nil
         }
         let surface = unsafeBitCast(surfaceRef, to: IOSurface.self)

@@ -60,11 +60,8 @@
 
 - (void)startCaptureSubviews {
     for (CaptureViewController* controller : capture_controllers) {
-        dispatch_async(dispatch_get_main_queue(),
-                       ^{ [controller.captureView startCaptureWithCompletionHandler:^{}]; });
-
-        // FIXME: this seems to delay stopping until this finishes?
-        // [controller.captureView startCaptureWithCompletionHandler:^{}];
+        // dispatch_async(dispatch_get_main_queue(), ^{ [controller.captureView startCapture]; });
+        [controller.captureView startCapture];
     }
 }
 

@@ -1,5 +1,4 @@
 #import "CaptureView.h"
-#import "extensions/ScreenCaptureKit+InitWithId.h"
 #import "util/log_util.h"
 #import <pthread.h>
 
@@ -17,53 +16,40 @@
     CaptureOutput* captureOutput;
     SCStream* stream;
     dispatch_semaphore_t startedSem;
-
-@public
-    pthread_mutex_t mutex;
+    SCContentFilter* filter;
+    SCStreamConfiguration* config;
 }
 @end
 
 @implementation CaptureView
 
-- (instancetype)initWithFrame:(CGRect)frame windowId:(CGWindowID)wid {
+- (instancetype)initWithFrame:(CGRect)frame configuration:(SCStreamConfiguration*)theConfig {
     self = [super initWithFrame:frame];
     if (self) {
-        self.wantsLayer = true;
-
-        // self.layer.backgroundColor = NSColor.redColor.CGColor;
-
         startedSem = dispatch_semaphore_create(0);
-        pthread_mutex_init(&mutex, NULL);
+        config = theConfig;
 
-        SCStreamConfiguration* streamConfig = [[SCStreamConfiguration alloc] init];
-        streamConfig.width = frame.size.width * 2;
-        streamConfig.height = frame.size.height * 2;
-        streamConfig.queueDepth = 8;
-        streamConfig.showsCursor = false;
-        streamConfig.colorSpaceName = kCGColorSpaceSRGB;
-
-        SCWindow* targetWindow = [[SCWindow alloc] initWithId:wid];
-        SCContentFilter* contentFilter =
-            [[SCContentFilter alloc] initWithDesktopIndependentWindow:targetWindow];
-        stream = [[SCStream alloc] initWithFilter:contentFilter
-                                    configuration:streamConfig
-                                         delegate:nil];
-
-        captureOutput = [[CaptureOutput alloc] initWithView:self];
-
-        NSError* error = nil;
-        BOOL did_add_output = [stream addStreamOutput:captureOutput
-                                                 type:SCStreamOutputTypeScreen
-                                   sampleHandlerQueue:nil
-                                                error:&error];
-        if (!did_add_output) {
-            custom_log(OS_LOG_TYPE_ERROR, @"ca-capture-view", error.localizedFailureReason);
-        }
+        self.wantsLayer = true;
     }
     return self;
 }
 
+- (void)updateWithFilter:(SCContentFilter*)theFilter {
+    filter = theFilter;
+}
+
 - (void)startCapture {
+    stream = [[SCStream alloc] initWithFilter:filter configuration:config delegate:nil];
+    captureOutput = [[CaptureOutput alloc] initWithView:self];
+    NSError* error = nil;
+    BOOL did_add_output = [stream addStreamOutput:captureOutput
+                                             type:SCStreamOutputTypeScreen
+                               sampleHandlerQueue:nil
+                                            error:&error];
+    if (!did_add_output) {
+        custom_log(OS_LOG_TYPE_ERROR, @"ca-capture-view", error.localizedFailureReason);
+    }
+
     dispatch_semaphore_t stream_start_completed = dispatch_semaphore_create(0);
 
     __block BOOL success = false;
@@ -120,7 +106,7 @@
     didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
                    ofType:(SCStreamOutputType)type {
     if (type == SCStreamOutputTypeScreen) {
-        IOSurfaceRef surface = [self getFrame:sampleBuffer];
+        IOSurfaceRef surface = [self createFrame:sampleBuffer];
         dispatch_sync(serialQueue, ^{
           if (surface) {
               captureView.layer.contents = (__bridge id)surface;
@@ -129,7 +115,7 @@
     }
 }
 
-- (IOSurfaceRef)getFrame:(CMSampleBufferRef)sampleBuffer {
+- (IOSurfaceRef)createFrame:(CMSampleBufferRef)sampleBuffer {
     CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
 
     CVPixelBufferLockBaseAddress(imageBuffer, 0);

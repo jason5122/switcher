@@ -33,6 +33,9 @@
             config.pixelFormat = 'BGRA';
             config.colorSpaceName = kCGColorSpaceDisplayP3;
 
+            // TODO: make this work with CaptureView
+            // _captureView = [[CaptureView alloc] initWithFrame:captureFrame
+            // configuration:config];
             _captureView = [[SwiftCaptureView alloc] initWithFrame:captureFrame
                                                      configuration:config];
             [stackView addSubview:_captureView];
