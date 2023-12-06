@@ -7,11 +7,17 @@ A lightweight, simple window switcher inspired by [HyperSwitch](https://bahoom.c
 
 https://github.com/jasonhan-vassar/switcher/assets/34594853/218a5335-62c4-4331-ab30-c822114a16cd
 
+## Requirements
+
+macOS 13.0+
+
 ## Building
 
 This project uses the GN meta-build system. Binaries are available [here](https://gn.googlesource.com/gn#getting-a-binary). This was done to avoid relying on Xcode! GN is also just fast and very nice to work with.
 
 The build system, Ninja, can be installed with `brew install ninja`.
+
+The archiver `llvm-ar` is used for linking static libraries and is part of `brew install llvm`.
 
 ### Setting up the build
 
