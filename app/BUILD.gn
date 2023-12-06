@@ -59,6 +59,7 @@ macos_app_bundle("app") {
     ":icon",
     ":shaders",
     ":shortcut_recorder_bundle_data",
+    "//app/third_party/sample_library:sample_library",
   ]
 }
 
