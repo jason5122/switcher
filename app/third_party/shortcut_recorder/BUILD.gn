@@ -1,4 +1,39 @@
-static_library("shortcut_recorder") {
+import("//build/config/mac/templates/mac_framework_bundle.gni")
+
+bundle_data("shortcut_recorder_framework_bundle_data") {
+  # deps = [ ":shortcut_recorder_framework+link" ]
+  public_deps = [ ":shortcut_recorder_framework+link" ]
+  sources = [ "$root_out_dir/ShortcutRecorder.framework" ]
+  outputs = [ "{{bundle_contents_dir}}/Frameworks/{{source_file_part}}" ]
+}
+
+mac_framework_bundle("shortcut_recorder_framework") {
+  output_name = "ShortcutRecorder"
+
+  framework_version = "A"
+  framework_contents = [
+    "Headers",
+    "Resources",
+  ]
+
+  # info_plist = "Info.plist"
+
+  public_deps = []
+
+  # public_deps = [ ":shortcut_recorder" ]
+
+  bundle_deps = [
+    ":shortcut_recorder_framework_headers",
+    ":shortcut_recorder_framework_resources",
+  ]
+
+  ldflags = [
+    "-install_name",
+    "@executable_path/../Frameworks/$target_name.framework",
+  ]
+}
+
+shared_library("shortcut_recorder") {
   sources = [
     "src/SRCommon.m",
     "src/SRKeyBindingTransformer.m",
@@ -18,4 +53,34 @@ static_library("shortcut_recorder") {
   include_dirs = [ "src" ]
 
   cflags = [ "-Wno-deprecated-declarations" ]
+
+  frameworks = [
+    "Cocoa.framework",
+    "Carbon.framework",
+  ]
+}
+
+bundle_data("shortcut_recorder_framework_headers") {
+  sources = [
+    "src/ShortcutRecorder/SRCommon.h",
+    "src/ShortcutRecorder/SRKeyBindingTransformer.h",
+    "src/ShortcutRecorder/SRKeyCodeTransformer.h",
+    "src/ShortcutRecorder/SRKeyEquivalentModifierMaskTransformer.h",
+    "src/ShortcutRecorder/SRKeyEquivalentTransformer.h",
+    "src/ShortcutRecorder/SRModifierFlagsTransformer.h",
+    "src/ShortcutRecorder/SRRecorderControl.h",
+    "src/ShortcutRecorder/SRRecorderControlStyle.h",
+    "src/ShortcutRecorder/SRShortcut.h",
+    "src/ShortcutRecorder/SRShortcutAction.h",
+    "src/ShortcutRecorder/SRShortcutController.h",
+    "src/ShortcutRecorder/SRShortcutFormatter.h",
+    "src/ShortcutRecorder/SRShortcutValidator.h",
+    "src/ShortcutRecorder/ShortcutRecorder.h",
+  ]
+  outputs = [ "{{bundle_contents_dir}}/Headers/{{source_file_part}}" ]
+}
+
+bundle_data("shortcut_recorder_framework_resources") {
+  sources = [ "Resources" ]
+  outputs = [ "{{bundle_resources_dir}}" ]
 }

@@ -9,24 +9,25 @@ macos_app_bundle("app") {
   # define `code_signing_identity` in args.gn
 
   sources = [
-    "AppDelegate.mm",
-    "controller/CaptureViewController.mm",
-    "controller/WindowController.mm",
-    "controller/shortcut_controller.mm",
-    "extensions/NSImage+InitWithId.mm",
-    "extensions/NSWindow+ActuallyCenter.m",
-    "extensions/ScreenCaptureKit+InitWithId.m",
-    "main.mm",
-    "model/application.mm",
-    "model/applications.mm",
-    "model/space.mm",
-    "model/window_element.mm",
-    "util/file_util.mm",
-    "util/log_util.mm",
-    "util/shader_util.cc",
-    "view/CACaptureView.mm",
-    "view/CaptureView.mm",
-    "view/MainView.mm",
+    # "AppDelegate.mm",
+    # "controller/CaptureViewController.mm",
+    # "controller/WindowController.mm",
+    # "controller/shortcut_controller.mm",
+    # "extensions/NSImage+InitWithId.mm",
+    # "extensions/NSWindow+ActuallyCenter.m",
+    # "extensions/ScreenCaptureKit+InitWithId.m",
+    # "main.mm",
+    # "model/application.mm",
+    # "model/applications.mm",
+    # "model/space.mm",
+    # "model/window_element.mm",
+    # "util/file_util.mm",
+    # "util/log_util.mm",
+    # "util/shader_util.cc",
+    # "view/CACaptureView.mm",
+    # "view/CaptureView.mm",
+    # "view/MainView.mm",
+    "hmm.mm",
   ]
 
   frameworks = [
@@ -38,12 +39,13 @@ macos_app_bundle("app") {
     "ScreenCaptureKit.framework",
     "GLKit.framework",
     "Carbon.framework",
-    "ShortcutRecorder.framework",
+
+    # "ShortcutRecorder.framework",
     "SkyLight.framework",
   ]
 
   framework_dirs = [
-    "third_party",
+    # "third_party",
     "/System/Library/PrivateFrameworks",
   ]
 
@@ -58,9 +60,13 @@ macos_app_bundle("app") {
     ":capture_preview_swift",
     ":icon",
     ":shaders",
-    ":shortcut_recorder_bundle_data",
-    "//app/third_party/sample_library:sample_library",
-    "//app/third_party/shortcut_recorder:shortcut_recorder",
+
+    # ":shortcut_recorder_bundle_data",
+
+    # "//app/third_party/sample_library:sample_library",
+
+    # "//app/third_party/shortcut_recorder:shortcut_recorder",
+    "//app/third_party/shortcut_recorder:shortcut_recorder_framework_bundle_data",
   ]
 }
 
