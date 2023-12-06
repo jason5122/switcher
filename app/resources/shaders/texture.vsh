@@ -1,3 +1,4 @@
+R"(
 #version 150
 
 in vec4 inVertex, inTexCoord;
@@ -9,3 +10,4 @@ void main() {
 	gl_Position = MVP * inVertex;
 	textureCoord = inTexCoord.st;
 }
+)"

@@ -21,7 +21,6 @@ macos_app_bundle("app") {
     "model/applications.mm",
     "model/space.mm",
     "model/window_element.mm",
-    "util/file_util.mm",
     "util/log_util.mm",
     "util/shader_util.cc",
     "view/CACaptureView.mm",
@@ -54,7 +53,6 @@ macos_app_bundle("app") {
   deps = [
     ":capture_preview_swift",
     ":icon",
-    ":shaders",
     "//app/third_party/shortcut_recorder:shortcut_recorder",
   ]
 }
@@ -70,12 +68,4 @@ source_set("capture_preview_swift") {
 
 icon("icon") {
   sources = [ "resources/app.iconset" ]
-}
-
-bundle_data("shaders") {
-  sources = [
-    "resources/shaders/texture.vsh",
-    "resources/shaders/textureRect.fsh",
-  ]
-  outputs = [ "{{bundle_resources_dir}}/shaders/{{source_file_part}}" ]
 }

@@ -1,12 +1,12 @@
 #import "CaptureView.h"
 #import "extensions/ScreenCaptureKit+InitWithId.h"
-#import "util/file_util.h"
 #import "util/log_util.h"
 #import "util/shader_util.h"
 #import <Cocoa/Cocoa.h>
 #import <GLKit/GLKit.h>
 #import <OpenGL/gl3.h>
 #import <pthread.h>
+#import <string>
 
 enum { UNIFORM_MVP, UNIFORM_TEXTURE, NUM_UNIFORMS };
 enum { ATTRIB_VERTEX, ATTRIB_TEXCOORD, NUM_ATTRIBS };
@@ -176,14 +176,19 @@ struct program_info_t {
 
     glBindVertexArray(quadVAOId);
 
-    char* vsrc = read_file(resource_path("shaders/texture.vsh"));
-    char* fsrc = read_file(resource_path("shaders/textureRect.fsh"));
+    std::string vsrc =
+#include "resources/shaders/texture.vsh"
+        ;
+
+    std::string fsrc =
+#include "resources/shaders/textureRect.fsh"
+        ;
 
     GLuint prog = glCreateProgram();
 
     GLuint vertShader = 0, fragShader = 0;
-    const GLchar* vertSource = vsrc;
-    const GLchar* fragSource = fsrc;
+    const GLchar* vertSource = vsrc.c_str();
+    const GLchar* fragSource = fsrc.c_str();
     glueCompileShader(GL_VERTEX_SHADER, 1, &vertSource, &vertShader);
     glueCompileShader(GL_FRAGMENT_SHADER, 1, &fragSource, &fragShader);
     glAttachShader(prog, vertShader);
@@ -201,8 +206,6 @@ struct program_info_t {
 
     if (vertShader) glDeleteShader(vertShader);
     if (fragShader) glDeleteShader(fragShader);
-    free(vsrc);
-    free(fsrc);
 
     glBindVertexArray(0);
 }
