@@ -1,5 +1,4 @@
 #import "GLCaptureView.h"
-#import "extensions/ScreenCaptureKit+InitWithId.h"
 #import "util/log_util.h"
 #import "util/shader_util.h"
 #import <Cocoa/Cocoa.h>
@@ -29,12 +28,12 @@ struct program_info_t {
 @interface GLCaptureView () {
     GLCaptureOutput* captureOutput;
     SCStream* stream;
-    SCStreamConfiguration* streamConfig;
+    dispatch_semaphore_t startedSem;
+    SCContentFilter* filter;
+    SCStreamConfiguration* config;
 
     program_info_t* program;
     GLuint quadVAOId, quadVBOId;
-
-    dispatch_semaphore_t startedSem;
 }
 
 @property(nonatomic, getter=didQuadInit) bool quadInit;
@@ -43,7 +42,7 @@ struct program_info_t {
 
 @implementation GLCaptureView
 
-- (instancetype)initWithFrame:(NSRect)frame windowId:(CGWindowID)wid {
+- (instancetype)initWithFrame:(CGRect)frame configuration:(SCStreamConfiguration*)theConfig {
     NSOpenGLPixelFormatAttribute attribs[] = {
         NSOpenGLPFAAllowOfflineRenderers,
         NSOpenGLPFAAccelerated,
@@ -72,37 +71,14 @@ struct program_info_t {
 
     self = [super initWithFrame:frame pixelFormat:pf];
     if (self) {
+        _prepared = false;
         _quadInit = false;
+
+        config = theConfig;
 
         startedSem = dispatch_semaphore_create(0);
 
         program = new program_info_t();
-
-        streamConfig = [[SCStreamConfiguration alloc] init];
-        streamConfig.width = frame.size.width * 2;
-        streamConfig.height = frame.size.height * 2;
-        streamConfig.queueDepth = 8;
-        streamConfig.showsCursor = false;
-        streamConfig.pixelFormat = 'BGRA';
-        streamConfig.colorSpaceName = kCGColorSpaceDisplayP3;
-
-        SCWindow* targetWindow = [[SCWindow alloc] initWithId:wid];
-        SCContentFilter* contentFilter =
-            [[SCContentFilter alloc] initWithDesktopIndependentWindow:targetWindow];
-        stream = [[SCStream alloc] initWithFilter:contentFilter
-                                    configuration:streamConfig
-                                         delegate:nil];
-
-        captureOutput = [[GLCaptureOutput alloc] initWithView:self];
-
-        NSError* error = nil;
-        BOOL did_add_output = [stream addStreamOutput:captureOutput
-                                                 type:SCStreamOutputTypeScreen
-                                   sampleHandlerQueue:nil
-                                                error:&error];
-        if (!did_add_output) {
-            custom_log(OS_LOG_TYPE_ERROR, @"capture-view", error.localizedFailureReason);
-        }
     }
     return self;
 }
@@ -121,11 +97,28 @@ struct program_info_t {
 
     [self setupShaders];
 
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0),
-                   ^{ [self startCapture]; });
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+      [self startCapture];
+      _prepared = true;
+    });
+}
+
+- (void)updateWithFilter:(SCContentFilter*)theFilter {
+    filter = theFilter;
 }
 
 - (void)startCapture {
+    stream = [[SCStream alloc] initWithFilter:filter configuration:config delegate:nil];
+    captureOutput = [[GLCaptureOutput alloc] initWithView:self];
+    NSError* error = nil;
+    BOOL did_add_output = [stream addStreamOutput:captureOutput
+                                             type:SCStreamOutputTypeScreen
+                               sampleHandlerQueue:nil
+                                            error:&error];
+    if (!did_add_output) {
+        custom_log(OS_LOG_TYPE_ERROR, @"capture-view", error.localizedFailureReason);
+    }
+
     dispatch_semaphore_t stream_start_completed = dispatch_semaphore_create(0);
 
     __block BOOL success = false;

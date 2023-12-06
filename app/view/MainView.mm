@@ -60,6 +60,12 @@
 
 - (void)startCaptureSubviews {
     for (CaptureViewController* controller : capture_controllers) {
+
+        // hack to support GLCaptureView's unique shader preparation requirements
+        if ([controller.captureView isKindOfClass:[GLCaptureView class]] &&
+            ![[controller.captureView valueForKey:@"prepared"] boolValue])
+            continue;
+
         // dispatch_async(dispatch_get_main_queue(), ^{ [controller.captureView startCapture]; });
         [controller.captureView startCapture];
     }
@@ -67,7 +73,8 @@
 
 - (void)stopCaptureSubviews {
     for (CaptureViewController* controller : capture_controllers) {
-        dispatch_async(dispatch_get_main_queue(), ^{ [controller.captureView stopCapture]; });
+        // dispatch_async(dispatch_get_main_queue(), ^{ [controller.captureView stopCapture]; });
+        [controller.captureView stopCapture];
     }
 }
 
@@ -88,7 +95,6 @@
 
 - (void)reset {
     self.subviews = [NSArray array];
-    // capture_controllers.clear();
     [capture_controllers[selectedIndex] unhighlight];
     selectedIndex = 0;
 }

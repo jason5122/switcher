@@ -1,8 +1,12 @@
 #import <Cocoa/Cocoa.h>
+#import <ScreenCaptureKit/ScreenCaptureKit.h>
 
 @interface GLCaptureView : NSOpenGLView
 
-- (instancetype)initWithFrame:(NSRect)frame windowId:(CGWindowID)wid;
+@property(nonatomic, getter=isPrepared) bool prepared;
+
+- (instancetype)initWithFrame:(CGRect)frame configuration:(SCStreamConfiguration*)config;
+- (void)updateWithFilter:(SCContentFilter*)filter;
 - (void)startCapture;
 - (void)stopCapture;
 

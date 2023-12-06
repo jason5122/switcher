@@ -24,22 +24,19 @@
         stackView.wantsLayer = true;
         stackView.layer.cornerRadius = 9.0;
 
-        {
-            SCStreamConfiguration* config = [[SCStreamConfiguration alloc] init];
-            config.width = captureFrame.size.width * 2;
-            config.height = captureFrame.size.height * 2;
-            config.queueDepth = 8;
-            config.showsCursor = false;
-            config.pixelFormat = 'BGRA';
-            config.colorSpaceName = kCGColorSpaceDisplayP3;
+        SCStreamConfiguration* config = [[SCStreamConfiguration alloc] init];
+        config.width = captureFrame.size.width * 2;
+        config.height = captureFrame.size.height * 2;
+        config.queueDepth = 8;
+        config.showsCursor = false;
+        config.pixelFormat = 'BGRA';
+        config.colorSpaceName = kCGColorSpaceDisplayP3;
 
-            // TODO: make this work with CaptureView
-            // _captureView = [[CaptureView alloc] initWithFrame:captureFrame
-            // configuration:config];
-            _captureView = [[SwiftCaptureView alloc] initWithFrame:captureFrame
-                                                     configuration:config];
-            [stackView addSubview:_captureView];
-        }
+        // TODO: make this work with CaptureView
+        // _captureView = [[CaptureView alloc] initWithFrame:captureFrame configuration:config];
+        _captureView = [[SwiftCaptureView alloc] initWithFrame:captureFrame configuration:config];
+        // _captureView = [[GLCaptureView alloc] initWithFrame:captureFrame configuration:config];
+        [stackView addSubview:_captureView];
 
         titleText = [NSTextField labelWithString:@""];
         titleText.frameOrigin = CGPointMake(innerPadding, 5);
