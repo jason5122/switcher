@@ -14,8 +14,8 @@
 @end
 
 @interface CaptureView () {
-    CaptureOutput* captureDelegate;
-    SCStream* disp;
+    CaptureOutput* captureOutput;
+    SCStream* stream;
     dispatch_semaphore_t startedSem;
 
 @public
@@ -45,17 +45,17 @@
         SCWindow* targetWindow = [[SCWindow alloc] initWithId:wid];
         SCContentFilter* contentFilter =
             [[SCContentFilter alloc] initWithDesktopIndependentWindow:targetWindow];
-        disp = [[SCStream alloc] initWithFilter:contentFilter
-                                  configuration:streamConfig
-                                       delegate:nil];
+        stream = [[SCStream alloc] initWithFilter:contentFilter
+                                    configuration:streamConfig
+                                         delegate:nil];
 
-        captureDelegate = [[CaptureOutput alloc] initWithView:self];
+        captureOutput = [[CaptureOutput alloc] initWithView:self];
 
         NSError* error = nil;
-        BOOL did_add_output = [disp addStreamOutput:captureDelegate
-                                               type:SCStreamOutputTypeScreen
-                                 sampleHandlerQueue:nil
-                                              error:&error];
+        BOOL did_add_output = [stream addStreamOutput:captureOutput
+                                                 type:SCStreamOutputTypeScreen
+                                   sampleHandlerQueue:nil
+                                                error:&error];
         if (!did_add_output) {
             custom_log(OS_LOG_TYPE_ERROR, @"ca-capture-view", error.localizedFailureReason);
         }
@@ -67,7 +67,7 @@
     dispatch_semaphore_t stream_start_completed = dispatch_semaphore_create(0);
 
     __block BOOL success = false;
-    [disp startCaptureWithCompletionHandler:^(NSError* _Nullable error) {
+    [stream startCaptureWithCompletionHandler:^(NSError* _Nullable error) {
       success = (BOOL)(error == nil);
       if (!success) {
           custom_log(OS_LOG_TYPE_ERROR, @"ca-capture-view", error.localizedFailureReason);
@@ -89,7 +89,7 @@
     dispatch_semaphore_t stream_stop_completed = dispatch_semaphore_create(0);
 
     __block BOOL success = false;
-    [disp stopCaptureWithCompletionHandler:^(NSError* _Nullable error) {
+    [stream stopCaptureWithCompletionHandler:^(NSError* _Nullable error) {
       success = (BOOL)(error == nil);
       if (!success) {
           custom_log(OS_LOG_TYPE_ERROR, @"ca-capture-view", error.localizedFailureReason);

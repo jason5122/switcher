@@ -28,7 +28,7 @@ struct program_info_t {
 // http://philjordan.eu/article/mixing-objective-c-c++-and-objective-c++
 @interface GLCaptureView () {
     GLCaptureOutput* captureOutput;
-    SCStream* disp;
+    SCStream* stream;
     SCStreamConfiguration* streamConfig;
 
     program_info_t* program;
@@ -89,17 +89,17 @@ struct program_info_t {
         SCWindow* targetWindow = [[SCWindow alloc] initWithId:wid];
         SCContentFilter* contentFilter =
             [[SCContentFilter alloc] initWithDesktopIndependentWindow:targetWindow];
-        disp = [[SCStream alloc] initWithFilter:contentFilter
-                                  configuration:streamConfig
-                                       delegate:nil];
+        stream = [[SCStream alloc] initWithFilter:contentFilter
+                                    configuration:streamConfig
+                                         delegate:nil];
 
         captureOutput = [[GLCaptureOutput alloc] initWithView:self];
 
         NSError* error = nil;
-        BOOL did_add_output = [disp addStreamOutput:captureOutput
-                                               type:SCStreamOutputTypeScreen
-                                 sampleHandlerQueue:nil
-                                              error:&error];
+        BOOL did_add_output = [stream addStreamOutput:captureOutput
+                                                 type:SCStreamOutputTypeScreen
+                                   sampleHandlerQueue:nil
+                                                error:&error];
         if (!did_add_output) {
             custom_log(OS_LOG_TYPE_ERROR, @"capture-view", error.localizedFailureReason);
         }
@@ -129,7 +129,7 @@ struct program_info_t {
     dispatch_semaphore_t stream_start_completed = dispatch_semaphore_create(0);
 
     __block BOOL success = false;
-    [disp startCaptureWithCompletionHandler:^(NSError* _Nullable error) {
+    [stream startCaptureWithCompletionHandler:^(NSError* _Nullable error) {
       success = (BOOL)(error == nil);
       if (!success) {
           custom_log(OS_LOG_TYPE_ERROR, @"capture-view", error.localizedFailureReason);
@@ -151,7 +151,7 @@ struct program_info_t {
     dispatch_semaphore_t stream_stop_completed = dispatch_semaphore_create(0);
 
     __block BOOL success = false;
-    [disp stopCaptureWithCompletionHandler:^(NSError* _Nullable error) {
+    [stream stopCaptureWithCompletionHandler:^(NSError* _Nullable error) {
       success = (BOOL)(error == nil);
       if (!success) {
           custom_log(OS_LOG_TYPE_ERROR, @"capture-view", error.localizedFailureReason);

@@ -14,7 +14,7 @@
   <key>CFBundleIconFile</key>
   <string>app</string>
   <key>NSHumanReadableCopyright</key>
-  <string>Copyright © 2023 Jason Han</string>
+  <string>GPL-3.0 license</string>
   
   <key>NSSupportsAutomaticGraphicsSwitching</key>
   <true/>

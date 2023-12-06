@@ -3,12 +3,16 @@ import ScreenCaptureKit
 
 @objcMembers
 class SwiftCaptureView: NSView {
-    var captureEngine: CaptureEngine?
+    private var captureOutput: CaptureOutput?
+    var stream: SCStream?
+    let startedSem = DispatchSemaphore(value: 0)
     var filter: SCContentFilter?
+    var config: SCStreamConfiguration?
+    var continuation: AsyncStream<IOSurface>.Continuation?
 
     init(frame: CGRect, configuration: SCStreamConfiguration) {
         super.init(frame: frame)
-        self.captureEngine = CaptureEngine(configuration: configuration)
+        self.config = configuration
 
         wantsLayer = true
     }
@@ -18,40 +22,13 @@ class SwiftCaptureView: NSView {
     }
 
     func startCapture() async {
-        for await surface in captureEngine!.startCapture(filter: filter!) {
-            self.layer?.contents = surface
-        }
-    }
-
-    func stopCapture() {
-        captureEngine!.stopCapture()
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-}
-
-class CaptureEngine: NSObject {
-    var config: SCStreamConfiguration?
-    private var stream: SCStream?
-    private var streamOutput: CaptureOutput?
-    private var continuation: AsyncStream<IOSurface>.Continuation?
-    private let startedSem = DispatchSemaphore(value: 0)
-
-    init(configuration: SCStreamConfiguration) {
-        self.config = configuration
-    }
-
-    func startCapture(filter: SCContentFilter) -> AsyncStream<IOSurface> {
-        AsyncStream<IOSurface> { continuation in
-            streamOutput = CaptureOutput()
-            streamOutput?.capturedFrameHandler = { continuation.yield($0) }
+        let asyncStream = AsyncStream<IOSurface> { continuation in
+            captureOutput = CaptureOutput()
+            captureOutput?.capturedFrameHandler = { continuation.yield($0) }
 
             do {
-                stream = SCStream(
-                    filter: filter, configuration: config!, delegate: streamOutput)
-                try stream?.addStreamOutput(streamOutput!, type: .screen, sampleHandlerQueue: nil)
+                stream = SCStream(filter: filter!, configuration: config!, delegate: nil)
+                try stream?.addStreamOutput(captureOutput!, type: .screen, sampleHandlerQueue: nil)
 
                 let sem = DispatchSemaphore(value: 0)
                 stream?.startCapture(completionHandler: { error in
@@ -65,6 +42,10 @@ class CaptureEngine: NSObject {
 
                 startedSem.signal()
             } catch {}
+        }
+
+        for await surface in asyncStream {
+            self.layer?.contents = surface
         }
     }
 
@@ -83,9 +64,13 @@ class CaptureEngine: NSObject {
 
         continuation?.finish()
     }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 }
 
-private class CaptureOutput: NSObject, SCStreamOutput, SCStreamDelegate {
+private class CaptureOutput: NSObject, SCStreamOutput {
     var capturedFrameHandler: ((IOSurface) -> Void)?
 
     func stream(
