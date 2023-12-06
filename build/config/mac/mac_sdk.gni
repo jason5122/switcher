@@ -1,7 +1,3 @@
 declare_args() {
   mac_deployment_target = "13.0"
-
-  mac_sdk_name = "macosx"
-  mac_sdk_version = "14.0"
-  mac_sdk_build_version = "23A334"
 }

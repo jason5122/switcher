@@ -1,3 +1,0 @@
-static_library("sample_library") {
-  sources = [ "src/MathLibrary.cc" ]
-}
