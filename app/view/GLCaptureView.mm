@@ -65,7 +65,7 @@ struct program_info_t {
 
     NSOpenGLPixelFormat* pf = [[NSOpenGLPixelFormat alloc] initWithAttributes:attribs];
     if (!pf) {
-        custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"failed to create pixel format");
+        custom_log(OS_LOG_TYPE_ERROR, @"gl-capture-view", @"failed to create pixel format");
         return nil;
     }
 
@@ -116,7 +116,7 @@ struct program_info_t {
                                sampleHandlerQueue:nil
                                             error:&error];
     if (!did_add_output) {
-        custom_log(OS_LOG_TYPE_ERROR, @"capture-view", error.localizedFailureReason);
+        custom_log(OS_LOG_TYPE_ERROR, @"gl-capture-view", error.localizedFailureReason);
     }
 
     dispatch_semaphore_t stream_start_completed = dispatch_semaphore_create(0);
@@ -125,14 +125,14 @@ struct program_info_t {
     [stream startCaptureWithCompletionHandler:^(NSError* _Nullable error) {
       success = (BOOL)(error == nil);
       if (!success) {
-          custom_log(OS_LOG_TYPE_ERROR, @"capture-view", error.localizedFailureReason);
+          custom_log(OS_LOG_TYPE_ERROR, @"gl-capture-view", error.localizedFailureReason);
       }
       dispatch_semaphore_signal(stream_start_completed);
     }];
     dispatch_semaphore_wait(stream_start_completed, DISPATCH_TIME_FOREVER);
 
     if (!success) {
-        custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"start capture failed");
+        custom_log(OS_LOG_TYPE_ERROR, @"gl-capture-view", @"start capture failed");
     } else {
         dispatch_semaphore_signal(startedSem);
     }
@@ -147,14 +147,14 @@ struct program_info_t {
     [stream stopCaptureWithCompletionHandler:^(NSError* _Nullable error) {
       success = (BOOL)(error == nil);
       if (!success) {
-          custom_log(OS_LOG_TYPE_ERROR, @"capture-view", error.localizedFailureReason);
+          custom_log(OS_LOG_TYPE_ERROR, @"gl-capture-view", error.localizedFailureReason);
       }
       dispatch_semaphore_signal(stream_stop_completed);
     }];
     dispatch_semaphore_wait(stream_stop_completed, DISPATCH_TIME_FOREVER);
 
     if (!success) {
-        custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"stop capture failed");
+        custom_log(OS_LOG_TYPE_ERROR, @"gl-capture-view", @"stop capture failed");
     }
 }
 

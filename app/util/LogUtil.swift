@@ -12,7 +12,7 @@ class LogUtil: NSObject {
             let message = NSString(
                 format: format,
                 arguments: vaList)
-            logger.log("\(message, privacy: .public)")
+            logger.log(level: type, "\(message, privacy: .public)")
         }
     }
 }

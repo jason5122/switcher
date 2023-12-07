@@ -47,7 +47,7 @@
                                sampleHandlerQueue:nil
                                             error:&error];
     if (!did_add_output) {
-        custom_log(OS_LOG_TYPE_ERROR, @"ca-capture-view", error.localizedFailureReason);
+        custom_log(OS_LOG_TYPE_ERROR, @"capture-view", error.localizedFailureReason);
     }
 
     dispatch_semaphore_t stream_start_completed = dispatch_semaphore_create(0);
@@ -56,14 +56,14 @@
     [stream startCaptureWithCompletionHandler:^(NSError* _Nullable error) {
       success = (BOOL)(error == nil);
       if (!success) {
-          custom_log(OS_LOG_TYPE_ERROR, @"ca-capture-view", error.localizedFailureReason);
+          custom_log(OS_LOG_TYPE_ERROR, @"capture-view", error.localizedFailureReason);
       }
       dispatch_semaphore_signal(stream_start_completed);
     }];
     dispatch_semaphore_wait(stream_start_completed, DISPATCH_TIME_FOREVER);
 
     if (!success) {
-        custom_log(OS_LOG_TYPE_ERROR, @"ca-capture-view", @"start capture failed");
+        custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"start capture failed");
     } else {
         dispatch_semaphore_signal(startedSem);
     }
@@ -78,14 +78,14 @@
     [stream stopCaptureWithCompletionHandler:^(NSError* _Nullable error) {
       success = (BOOL)(error == nil);
       if (!success) {
-          custom_log(OS_LOG_TYPE_ERROR, @"ca-capture-view", error.localizedFailureReason);
+          custom_log(OS_LOG_TYPE_ERROR, @"capture-view", error.localizedFailureReason);
       }
       dispatch_semaphore_signal(stream_stop_completed);
     }];
     dispatch_semaphore_wait(stream_stop_completed, DISPATCH_TIME_FOREVER);
 
     if (!success) {
-        custom_log(OS_LOG_TYPE_ERROR, @"ca-capture-view", @"stop capture failed");
+        custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"stop capture failed");
     }
 }
 
@@ -106,22 +106,35 @@
     didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
                    ofType:(SCStreamOutputType)type {
     if (type == SCStreamOutputTypeScreen) {
-        IOSurfaceRef surface = [self createFrame:sampleBuffer];
-        dispatch_sync(serialQueue, ^{
-          if (surface) {
-              captureView.layer.contents = (__bridge id)surface;
-          }
-        });
+        IOSurfaceRef frame = [self createFrame:sampleBuffer];
+        if (!frame) {
+            custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"invalid frame");
+            return;
+        }
+        custom_log(OS_LOG_TYPE_DEFAULT, @"capture-view", @"good");
+        dispatch_sync(serialQueue, ^{ captureView.layer.contents = (__bridge id)frame; });
     }
 }
 
 - (IOSurfaceRef)createFrame:(CMSampleBufferRef)sampleBuffer {
-    CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+    // Retrieve the array of metadata attachments from the sample buffer.
+    CFArrayRef attachmentsArray = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, false);
+    if (attachmentsArray == nil || CFArrayGetCount(attachmentsArray) == 0) return nil;
 
+    CFDictionaryRef attachments = (CFDictionaryRef)CFArrayGetValueAtIndex(attachmentsArray, 0);
+    if (attachments == nil) return nil;
+
+    // Validate the status of the frame. If it isn't `.complete`, return nil.
+    CFTypeRef statusRawValue =
+        CFDictionaryGetValue(attachments, (__bridge void*)SCStreamFrameInfoStatus);
+    int status;
+    bool result = CFNumberGetValue((CFNumberRef)statusRawValue, kCFNumberFloatType, &status);
+    if (!result || status != SCFrameStatusComplete) return nil;
+
+    CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
     CVPixelBufferLockBaseAddress(imageBuffer, 0);
     IOSurfaceRef surface = CVPixelBufferGetIOSurface(imageBuffer);
     CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
-
     return surface;
 }
 

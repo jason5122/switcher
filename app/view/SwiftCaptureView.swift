@@ -33,7 +33,7 @@ class SwiftCaptureView: NSView {
                 let sem = DispatchSemaphore(value: 0)
                 stream?.startCapture(completionHandler: { error in
                     if let error {
-                        LogUtil.customLog(.error, "capture-engine", error.localizedDescription)
+                        LogUtil.customLog(.error, "swift-capture-view", error.localizedDescription)
                     } else {
                         sem.signal()
                     }
@@ -57,7 +57,7 @@ class SwiftCaptureView: NSView {
         let sem = DispatchSemaphore(value: 0)
         stream?.stopCapture(completionHandler: { error in
             if let error {
-                LogUtil.customLog(.error, "capture-engine", error.localizedDescription)
+                LogUtil.customLog(.error, "swift-capture-view", error.localizedDescription)
             } else {
                 sem.signal()
             }
@@ -81,12 +81,30 @@ private class CaptureOutput: NSObject, SCStreamOutput {
     ) {
         guard sampleBuffer.isValid else { return }
         if outputType == .screen {
-            guard let frame = createFrame(for: sampleBuffer) else { return }
+            guard let frame = createFrame(for: sampleBuffer) else {
+                LogUtil.customLog(.error, "swift-capture-view", "invalid frame")
+                return
+            }
+            LogUtil.customLog(.default, "swift-capture-view", "good")
             capturedFrameHandler?(frame)
         }
     }
 
     private func createFrame(for sampleBuffer: CMSampleBuffer) -> IOSurface? {
+        // Retrieve the array of metadata attachments from the sample buffer.
+        guard
+            let attachmentsArray = CMSampleBufferGetSampleAttachmentsArray(
+                sampleBuffer,
+                createIfNecessary: false) as? [[SCStreamFrameInfo: Any]],
+            let attachments = attachmentsArray.first
+        else { return nil }
+
+        // Validate the status of the frame. If it isn't `.complete`, return nil.
+        guard let statusRawValue = attachments[SCStreamFrameInfo.status] as? Int,
+            let status = SCFrameStatus(rawValue: statusRawValue),
+            status == .complete
+        else { return nil }
+
         guard let imageBuffer = sampleBuffer.imageBuffer else { return nil }
         guard let surfaceRef = CVPixelBufferGetIOSurface(imageBuffer)?.takeUnretainedValue() else {
             return nil
