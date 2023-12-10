@@ -108,10 +108,10 @@
     if (type == SCStreamOutputTypeScreen) {
         IOSurfaceRef frame = [self createFrame:sampleBuffer];
         if (!frame) {
-            custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"invalid frame");
+            // custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"invalid frame");
             return;
         }
-        custom_log(OS_LOG_TYPE_DEFAULT, @"capture-view", @"good");
+        // custom_log(OS_LOG_TYPE_DEFAULT, @"capture-view", @"good");
         dispatch_sync(serialQueue, ^{ captureView.layer.contents = (__bridge id)frame; });
     }
 }

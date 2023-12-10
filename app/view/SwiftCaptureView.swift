@@ -82,10 +82,10 @@ private class CaptureOutput: NSObject, SCStreamOutput {
         guard sampleBuffer.isValid else { return }
         if outputType == .screen {
             guard let frame = createFrame(for: sampleBuffer) else {
-                LogUtil.customLog(.error, "swift-capture-view", "invalid frame")
+                // LogUtil.customLog(.error, "swift-capture-view", "invalid frame")
                 return
             }
-            LogUtil.customLog(.default, "swift-capture-view", "good")
+            // LogUtil.customLog(.default, "swift-capture-view", "good")
             capturedFrameHandler?(frame)
         }
     }
