@@ -8,10 +8,8 @@ public:
     ProcessSerialNumber psn;
     std::vector<window_element> windows;
     AXUIElementRef axUiElement;
-    NSRunningApplication* runningApp;
 
-    application(NSRunningApplication* runningApp);
-    NSString* name();
+    application(pid_t pid);
     bool is_xpc();
     void populate_initial_windows();
 };

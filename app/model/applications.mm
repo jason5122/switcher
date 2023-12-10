@@ -8,7 +8,7 @@ applications::applications() {
 
         if (runningApp.activationPolicy == NSApplicationActivationPolicyRegular ||
             runningApp.activationPolicy == NSApplicationActivationPolicyAccessory) {
-            add_app(runningApp);
+            add_app(runningApp.processIdentifier);
         }
     }
 
@@ -19,7 +19,7 @@ applications::applications() {
                          usingBlock:^(NSNotification* notification) {
                            NSRunningApplication* runningApp =
                                notification.userInfo[@"NSWorkspaceApplicationKey"];
-                           add_app(runningApp);
+                           add_app(runningApp.processIdentifier);
                          }];
 
     [notifCenter addObserverForName:NSWorkspaceActiveSpaceDidChangeNotification
@@ -51,8 +51,8 @@ void applications::populate_with_window_ids() {
     }
 }
 
-void applications::add_app(NSRunningApplication* runningApp) {
-    application app = application(runningApp);
+void applications::add_app(pid_t pid) {
+    application app = application(pid);
 
     if (!app.is_xpc()) {
         app.populate_initial_windows();
@@ -93,7 +93,7 @@ void applications::add_observer(application& app) {
     AXObserverRef axObserver;
 
     // WARNING: starting SCStream triggers kAXWindowCreatedNotification (one per captured window)
-    AXObserverCreate(app.runningApp.processIdentifier, &observer_callback, &axObserver);
+    AXObserverCreate(app.pid, &observer_callback, &axObserver);
 
     AXObserverAddNotification(axObserver, app.axUiElement, kAXWindowCreatedNotification, this);
     AXObserverAddNotification(axObserver, app.axUiElement, kAXUIElementDestroyedNotification,

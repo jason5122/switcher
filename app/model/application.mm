@@ -2,18 +2,15 @@
 #import "private_apis/AXUI.h"
 #import "util/log_util.h"
 
-application::application(NSRunningApplication* runningApp) {
+application::application(pid_t pid) {
+    this->pid = pid;
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-    GetProcessForPID(runningApp.processIdentifier, &psn);
+    GetProcessForPID(pid, &psn);
 #pragma clang diagnostic pop
 
-    this->runningApp = runningApp;
-    this->axUiElement = AXUIElementCreateApplication(runningApp.processIdentifier);
-}
-
-NSString* application::name() {
-    return runningApp.localizedName;
+    axUiElement = AXUIElementCreateApplication(pid);
 }
 
 bool application::is_xpc() {
