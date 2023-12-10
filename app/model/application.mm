@@ -2,6 +2,8 @@
 #import "private_apis/AXUI.h"
 #import "util/log_util.h"
 
+application::application() {}
+
 application::application(pid_t pid) {
     this->pid = pid;
 

@@ -8,6 +8,7 @@ public:
     ProcessSerialNumber psn;
     AXUIElementRef axUiElement;
 
+    application();
     application(pid_t pid);
     bool is_xpc();
     std::vector<window_element> windows();

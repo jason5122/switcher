@@ -1,10 +1,11 @@
 #import "applications.h"
 #import "model/space.h"
 #import "util/log_util.h"
-#import <unordered_set>
 
 applications::applications() {
     NSNotificationCenter* notifCenter = NSWorkspace.sharedWorkspace.notificationCenter;
+
+    // launching/terminating apps
     [notifCenter addObserverForName:NSWorkspaceDidLaunchApplicationNotification
                              object:nil
                               queue:NSOperationQueue.mainQueue
@@ -12,8 +13,20 @@ applications::applications() {
                            NSRunningApplication* runningApp =
                                notification.userInfo[@"NSWorkspaceApplicationKey"];
                            add_app(runningApp.processIdentifier);
+                           custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"added pid: %d",
+                                      runningApp.processIdentifier);
                          }];
-
+    [notifCenter addObserverForName:NSWorkspaceDidTerminateApplicationNotification
+                             object:nil
+                              queue:NSOperationQueue.mainQueue
+                         usingBlock:^(NSNotification* notification) {
+                           NSRunningApplication* runningApp =
+                               notification.userInfo[@"NSWorkspaceApplicationKey"];
+                           remove_app(runningApp.processIdentifier);
+                           custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"removed pid: %d",
+                                      runningApp.processIdentifier);
+                         }];
+    // switching spaces
     [notifCenter addObserverForName:NSWorkspaceActiveSpaceDidChangeNotification
                              object:nil
                               queue:NSOperationQueue.mainQueue
@@ -24,8 +37,6 @@ applications::applications() {
 
 void applications::populate_with_window_ids() {
     std::vector<CGWindowID> wids = space::get_all_window_ids();
-
-    std::unordered_set<pid_t> seen;
     for (CGWindowID wid : wids) {
         pid_t pid;
 
@@ -38,18 +49,16 @@ void applications::populate_with_window_ids() {
         GetProcessPID(&psn, &pid);
 #pragma clang diagnostic pop
 
-        if (!seen.count(pid)) {
-            add_app(pid);
-            seen.insert(pid);
-        }
+        add_app(pid);
     }
 
-    custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"apps: %d window_map: %d window_ref_map: %d",
-               apps.size(), window_map.size(), window_ref_map.size());
+    custom_log(OS_LOG_TYPE_DEFAULT, @"applications",
+               @"app_map: %d window_map: %d window_ref_map: %d", app_map.size(), window_map.size(),
+               window_ref_map.size());
 }
 
 void applications::refresh_window_ids() {
-    for (application& app : apps) {
+    for (auto& [pid, app] : app_map) {
         for (const window_element& window : app.windows()) {
             window_map[window.wid] = window;
             window_ref_map[CFHash(window.windowRef)] = window.wid;
@@ -57,21 +66,27 @@ void applications::refresh_window_ids() {
     }
 
     custom_log(OS_LOG_TYPE_DEFAULT, @"applications",
-               @"*apps: %d window_map: %d window_ref_map: %d", apps.size(), window_map.size(),
-               window_ref_map.size());
+               @"*app_map: %d window_map: %d window_ref_map: %d", app_map.size(),
+               window_map.size(), window_ref_map.size());
 }
 
 void applications::add_app(pid_t pid) {
     application app = application(pid);
-    if (!app.is_xpc()) {
-        apps.push_back(app);
-        add_observer(app);
+    if (app_map.count(pid)) return;
+    if (app.is_xpc()) return;
 
-        for (const window_element& window : app.windows()) {
-            window_map[window.wid] = window;
-            window_ref_map[CFHash(window.windowRef)] = window.wid;
-        }
+    app_map[pid] = app;
+    add_observer(app);
+
+    for (const window_element& window : app.windows()) {
+        window_map[window.wid] = window;
+        window_ref_map[CFHash(window.windowRef)] = window.wid;
     }
+}
+
+void applications::remove_app(pid_t pid) {
+    if (!app_map.count(pid)) return;
+    app_map.erase(pid);
 }
 
 void applications::add_window_ref(AXUIElementRef windowRef) {
