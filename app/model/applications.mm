@@ -3,15 +3,6 @@
 #import "util/log_util.h"
 
 applications::applications() {
-    for (NSRunningApplication* runningApp in NSWorkspace.sharedWorkspace.runningApplications) {
-        if ([runningApp.localizedName isEqual:@"Family"]) continue;
-
-        if (runningApp.activationPolicy == NSApplicationActivationPolicyRegular ||
-            runningApp.activationPolicy == NSApplicationActivationPolicyAccessory) {
-            add_app(runningApp.processIdentifier);
-        }
-    }
-
     NSNotificationCenter* notifCenter = NSWorkspace.sharedWorkspace.notificationCenter;
     [notifCenter addObserverForName:NSWorkspaceDidLaunchApplicationNotification
                              object:nil
@@ -44,16 +35,16 @@ void applications::populate_with_window_ids() {
         GetProcessPID(&psn, &pid);
 #pragma clang diagnostic pop
 
-        CFStringRef title;
-        CGSCopyWindowProperty(CGSMainConnectionID(), wid, CFSTR("kCGSWindowTitle"), &title);
-        custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"pid: %d %@", pid,
-                   (__bridge NSString*)title);
+        if (!pids.count(pid)) {
+            add_app(pid);
+        }
     }
 }
 
 void applications::add_app(pid_t pid) {
-    application app = application(pid);
+    pids.insert(pid);
 
+    application app = application(pid);
     if (!app.is_xpc()) {
         app.populate_initial_windows();
         add_observer(app);

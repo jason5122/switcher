@@ -15,6 +15,8 @@ public:
     void remove_window_ref(AXUIElementRef windowRef);
 
 private:
+    std::unordered_set<pid_t> pids;
+
     void add_app(pid_t pid);
     void add_observer(application& app);
 };
