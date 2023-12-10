@@ -1,4 +1,5 @@
 #import "applications.h"
+#import "model/space.h"
 
 applications::applications() {
     for (NSRunningApplication* runningApp in NSWorkspace.sharedWorkspace.runningApplications) {

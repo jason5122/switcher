@@ -13,6 +13,6 @@ public:
     void add_window(NSWindow* window);
     static std::vector<CGWindowID>
     get_all_valid_window_ids(std::unordered_map<CGWindowID, window_element>& window_map);
-    static std::vector<CGWindowID> get_all_window_ids_new();
     static std::vector<CGWindowID> get_all_window_ids();
+    static void add_all_windows_to_current_space();
 };

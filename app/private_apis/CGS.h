@@ -8,6 +8,8 @@ extern "C" CGSSpaceID CGSSpaceCreate(CGSConnectionID cid, int unknown, CFDiction
 extern "C" void CGSSpaceDestroy(CGSConnectionID cid, CGSSpaceID sid);
 extern "C" void CGSSpaceSetAbsoluteLevel(CGSConnectionID cid, CGSSpaceID space, int level);
 extern "C" void CGSAddWindowsToSpaces(CGSConnectionID cid, CFArrayRef windows, CFArrayRef spaces);
+extern "C" void CGSRemoveWindowsFromSpaces(CGSConnectionID cid, CFArrayRef windows,
+                                           CFArrayRef spaces);
 extern "C" void CGSShowSpaces(CGSConnectionID cid, CFArrayRef spaces);
 extern "C" void CGSHideSpaces(CGSConnectionID cid, CFArrayRef spaces);
 
