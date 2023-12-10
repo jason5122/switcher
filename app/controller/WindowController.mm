@@ -54,8 +54,6 @@
     if (_shown) return;
     else _shown = true;
 
-    space::add_all_windows_to_current_space();
-
     std::vector<CGWindowID> window_ids = space::get_all_valid_window_ids(apps.window_map);
     // std::vector<CGWindowID> window_ids = space::get_all_window_ids();
     [mainView updateWithWindowIds:window_ids];

@@ -1,5 +1,6 @@
 #import "applications.h"
 #import "model/space.h"
+#import "util/log_util.h"
 
 applications::applications() {
     for (NSRunningApplication* runningApp in NSWorkspace.sharedWorkspace.runningApplications) {
@@ -17,6 +18,13 @@ applications::applications() {
                            NSRunningApplication* runningApp =
                                notification.userInfo[@"NSWorkspaceApplicationKey"];
                            add_app(runningApp);
+                         }];
+
+    [notifCenter addObserverForName:NSWorkspaceActiveSpaceDidChangeNotification
+                             object:nil
+                              queue:NSOperationQueue.mainQueue
+                         usingBlock:^(NSNotification* notification) {
+                           custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"space changed");
                          }];
 }
 

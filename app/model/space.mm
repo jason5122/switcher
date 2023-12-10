@@ -26,7 +26,7 @@ space::get_all_valid_window_ids(std::unordered_map<CGWindowID, window_element>& 
 
             CFStringRef title;
             CGSCopyWindowProperty(CGSMainConnectionID(), wid, CFSTR("kCGSWindowTitle"), &title);
-            custom_log(OS_LOG_TYPE_DEFAULT, @"space", (__bridge NSString*)title);
+            // custom_log(OS_LOG_TYPE_DEFAULT, @"space", (__bridge NSString*)title);
 
             result.push_back(wid);
 
@@ -73,33 +73,6 @@ std::vector<CGWindowID> space::get_all_window_ids() {
         }
     }
     return result;
-}
-
-void space::add_all_windows_to_current_space() {
-    // TODO: combine with space.mm
-    CGSSpaceID currentSid;
-    CFArrayRef aaa = CGSCopyManagedDisplaySpaces(CGSMainConnectionID());
-    for (NSDictionary* screen in (__bridge NSArray*)aaa) {
-        NSDictionary* sp = screen[@"Current Space"];
-        CGSSpaceID sid = [sp[@"id64"] intValue];
-        currentSid = sid;
-        break;
-    }
-
-    CFArrayRef screenDicts = CGSCopyManagedDisplaySpaces(CGSMainConnectionID());
-    for (NSDictionary* screen in (__bridge NSArray*)screenDicts) {
-        for (NSDictionary* spaceDict in screen[@"Spaces"]) {
-            CGSSpaceID sid = [spaceDict[@"id64"] intValue];
-            int setTags = 0;
-            int clearTags = 0;
-            CFArrayRef windowIds = CGSCopyWindowsWithOptionsAndTags(
-                CGSMainConnectionID(), 0, (__bridge CFArrayRef) @[ @(sid) ], 2, &setTags,
-                &clearTags);
-
-            CGSAddWindowsToSpaces(CGSMainConnectionID(), (__bridge CFArrayRef) @[ @(currentSid) ],
-                                  windowIds);
-        }
-    }
 }
 
 space::~space() {
