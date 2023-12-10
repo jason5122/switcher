@@ -1,6 +1,7 @@
 #import "applications.h"
 #import "model/space.h"
 #import "util/log_util.h"
+#import <unordered_set>
 
 applications::applications() {
     NSNotificationCenter* notifCenter = NSWorkspace.sharedWorkspace.notificationCenter;
@@ -23,6 +24,8 @@ applications::applications() {
 
 void applications::populate_with_window_ids() {
     std::vector<CGWindowID> wids = space::get_all_window_ids();
+
+    std::unordered_set<pid_t> seen;
     for (CGWindowID wid : wids) {
         pid_t pid;
 
@@ -35,21 +38,36 @@ void applications::populate_with_window_ids() {
         GetProcessPID(&psn, &pid);
 #pragma clang diagnostic pop
 
-        if (!pids.count(pid)) {
+        if (!seen.count(pid)) {
             add_app(pid);
+            seen.insert(pid);
         }
     }
+
+    custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"apps: %d window_map: %d window_ref_map: %d",
+               apps.size(), window_map.size(), window_ref_map.size());
+}
+
+void applications::refresh_window_ids() {
+    for (application& app : apps) {
+        for (const window_element& window : app.windows()) {
+            window_map[window.wid] = window;
+            window_ref_map[CFHash(window.windowRef)] = window.wid;
+        }
+    }
+
+    custom_log(OS_LOG_TYPE_DEFAULT, @"applications",
+               @"*apps: %d window_map: %d window_ref_map: %d", apps.size(), window_map.size(),
+               window_ref_map.size());
 }
 
 void applications::add_app(pid_t pid) {
-    pids.insert(pid);
-
     application app = application(pid);
     if (!app.is_xpc()) {
-        app.populate_initial_windows();
+        apps.push_back(app);
         add_observer(app);
 
-        for (const window_element& window : app.windows) {
+        for (const window_element& window : app.windows()) {
             window_map[window.wid] = window;
             window_ref_map[CFHash(window.windowRef)] = window.wid;
         }

@@ -2,7 +2,6 @@
 #import "model/window_element.h"
 #import <Cocoa/Cocoa.h>
 #import <unordered_map>
-#import <unordered_set>
 
 class applications {
 public:
@@ -11,11 +10,12 @@ public:
 
     applications();
     void populate_with_window_ids();
+    void refresh_window_ids();
     void add_window_ref(AXUIElementRef windowRef);
     void remove_window_ref(AXUIElementRef windowRef);
 
 private:
-    std::unordered_set<pid_t> pids;
+    std::vector<application> apps;
 
     void add_app(pid_t pid);
     void add_observer(application& app);

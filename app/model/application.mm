@@ -22,7 +22,9 @@ bool application::is_xpc() {
     return info.processType == 'XPC!';
 }
 
-void application::populate_initial_windows() {
+std::vector<window_element> application::windows() {
+    std::vector<window_element> windows;
+
     CFArrayRef windowList;
     AXError err =
         AXUIElementCopyAttributeValue(axUiElement, kAXWindowsAttribute, (CFTypeRef*)&windowList);
@@ -33,4 +35,5 @@ void application::populate_initial_windows() {
             windows.push_back(windowRef);
         }
     }
+    return windows;
 }
