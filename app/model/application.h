@@ -4,6 +4,8 @@
 
 class application {
 public:
+    pid_t pid;
+    ProcessSerialNumber psn;
     std::vector<window_element> windows;
     AXUIElementRef axUiElement;
     NSRunningApplication* runningApp;
@@ -12,7 +14,4 @@ public:
     NSString* name();
     bool is_xpc();
     void populate_initial_windows();
-
-private:
-    ProcessSerialNumber psn;
 };

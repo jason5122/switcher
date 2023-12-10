@@ -4,6 +4,8 @@
 
 applications::applications() {
     for (NSRunningApplication* runningApp in NSWorkspace.sharedWorkspace.runningApplications) {
+        if ([runningApp.localizedName isEqual:@"Family"]) continue;
+
         if (runningApp.activationPolicy == NSApplicationActivationPolicyRegular ||
             runningApp.activationPolicy == NSApplicationActivationPolicyAccessory) {
             add_app(runningApp);
@@ -26,6 +28,27 @@ applications::applications() {
                          usingBlock:^(NSNotification* notification) {
                            custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"space changed");
                          }];
+}
+
+void applications::populate_with_window_ids() {
+    std::vector<CGWindowID> wids = space::get_all_window_ids();
+    for (CGWindowID wid : wids) {
+        pid_t pid;
+
+        CGSConnectionID elementConnection;
+        CGSGetWindowOwner(CGSMainConnectionID(), wid, &elementConnection);
+        ProcessSerialNumber psn = ProcessSerialNumber();
+        CGSGetConnectionPSN(elementConnection, &psn);
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        GetProcessPID(&psn, &pid);
+#pragma clang diagnostic pop
+
+        CFStringRef title;
+        CGSCopyWindowProperty(CGSMainConnectionID(), wid, CFSTR("kCGSWindowTitle"), &title);
+        custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"pid: %d %@", pid,
+                   (__bridge NSString*)title);
+    }
 }
 
 void applications::add_app(NSRunningApplication* runningApp) {

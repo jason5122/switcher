@@ -35,6 +35,8 @@
         std::vector<CGWindowID> window_ids = space::get_all_valid_window_ids(apps.window_map);
         // std::vector<CGWindowID> window_ids = space::get_all_window_ids();
         [mainView populateWithWindowIds:window_ids];
+
+        apps.populate_with_window_ids();
     }
     return self;
 }

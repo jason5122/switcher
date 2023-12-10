@@ -2,6 +2,7 @@
 #import "model/window_element.h"
 #import <Cocoa/Cocoa.h>
 #import <unordered_map>
+#import <unordered_set>
 
 class applications {
 public:
@@ -9,6 +10,7 @@ public:
     std::unordered_map<CFHashCode, CGWindowID> window_ref_map;
 
     applications();
+    void populate_with_window_ids();
     void add_window_ref(AXUIElementRef windowRef);
     void remove_window_ref(AXUIElementRef windowRef);
 
