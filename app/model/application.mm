@@ -12,7 +12,7 @@ application::application(pid_t pid) {
     GetProcessForPID(pid, &psn);
 #pragma clang diagnostic pop
 
-    axUiElement = AXUIElementCreateApplication(pid);
+    axRef = AXUIElementCreateApplication(pid);
 }
 
 bool application::is_xpc() {
@@ -22,20 +22,4 @@ bool application::is_xpc() {
     GetProcessInformation(&psn, &info);
 #pragma clang diagnostic pop
     return info.processType == 'XPC!';
-}
-
-std::vector<window_element> application::windows() {
-    std::vector<window_element> windows;
-
-    CFArrayRef windowList;
-    AXError err =
-        AXUIElementCopyAttributeValue(axUiElement, kAXWindowsAttribute, (CFTypeRef*)&windowList);
-
-    if (err == kAXErrorSuccess) {
-        for (int i = 0; i < CFArrayGetCount(windowList); i++) {
-            AXUIElementRef windowRef = (AXUIElementRef)CFArrayGetValueAtIndex(windowList, i);
-            windows.push_back(windowRef);
-        }
-    }
-    return windows;
 }

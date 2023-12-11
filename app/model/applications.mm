@@ -3,6 +3,12 @@
 #import "model/space.h"
 #import "util/log_util.h"
 
+void applications::debug_print() {
+    custom_log(OS_LOG_TYPE_DEFAULT, @"applications",
+               @"app_map: %d window_map: %d window_ref_map: %d", app_map.size(), window_map.size(),
+               window_ref_map.size());
+}
+
 applications::applications() {
     NSNotificationCenter* notifCenter = NSWorkspace.sharedWorkspace.notificationCenter;
 
@@ -16,6 +22,7 @@ applications::applications() {
                            add_app(runningApp.processIdentifier);
                            custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"added pid: %d",
                                       runningApp.processIdentifier);
+                           debug_print();
                          }];
     [notifCenter addObserverForName:NSWorkspaceDidTerminateApplicationNotification
                              object:nil
@@ -26,6 +33,7 @@ applications::applications() {
                            remove_app(runningApp.processIdentifier);
                            custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"removed pid: %d",
                                       runningApp.processIdentifier);
+                           debug_print();
                          }];
 }
 
@@ -46,22 +54,17 @@ void applications::populate_with_window_ids() {
         add_app(pid);
     }
 
-    custom_log(OS_LOG_TYPE_DEFAULT, @"applications",
-               @"app_map: %d window_map: %d window_ref_map: %d", app_map.size(), window_map.size(),
-               window_ref_map.size());
+    debug_print();
 }
 
 void applications::refresh_window_ids() {
     for (auto& [pid, app] : app_map) {
-        for (const window_element& window : app.windows()) {
-            window_map[window.wid] = window;
-            window_ref_map[CFHash(window.windowRef)] = window.wid;
+        for (AXUIElementRef& windowRef : AXUIElementGetWindows(app.axRef)) {
+            add_window_ref(windowRef);
         }
     }
 
-    custom_log(OS_LOG_TYPE_DEFAULT, @"applications",
-               @"*app_map: %d window_map: %d window_ref_map: %d", app_map.size(),
-               window_map.size(), window_ref_map.size());
+    debug_print();
 }
 
 void applications::add_app(pid_t pid) {
@@ -72,9 +75,8 @@ void applications::add_app(pid_t pid) {
     app_map[pid] = app;
     add_observer(app);
 
-    for (const window_element& window : app.windows()) {
-        window_map[window.wid] = window;
-        window_ref_map[CFHash(window.windowRef)] = window.wid;
+    for (AXUIElementRef& windowRef : AXUIElementGetWindows(app.axRef)) {
+        add_window_ref(windowRef);
     }
 }
 
@@ -84,11 +86,9 @@ void applications::remove_app(pid_t pid) {
 }
 
 void applications::add_window_ref(AXUIElementRef windowRef) {
-    CGWindowID wid = CGWindowID();
-    _AXUIElementGetWindow(windowRef, &wid);
-
-    window_map[wid] = window_element(windowRef);
-    window_ref_map[CFHash(windowRef)] = wid;
+    window_element win_el = window_element(windowRef);
+    window_map[win_el.wid] = win_el;
+    window_ref_map[CFHash(windowRef)] = win_el.wid;
 }
 
 void applications::remove_window_ref(AXUIElementRef windowRef) {
@@ -111,12 +111,14 @@ void observer_callback(AXObserverRef observer, AXUIElementRef windowRef,
 void applications::add_observer(application& app) {
     AXObserverRef axObserver;
 
-    // WARNING: starting SCStream triggers kAXWindowCreatedNotification (one per captured window)
+    /*
+     * WARNING: Starting SCStream triggers kAXWindowCreatedNotification (one per captured window).
+     * This is due to the Sonoma screen recording icon counting as a window.
+     */
     AXObserverCreate(app.pid, &observer_callback, &axObserver);
 
-    AXObserverAddNotification(axObserver, app.axUiElement, kAXWindowCreatedNotification, this);
-    AXObserverAddNotification(axObserver, app.axUiElement, kAXUIElementDestroyedNotification,
-                              this);
+    AXObserverAddNotification(axObserver, app.axRef, kAXWindowCreatedNotification, this);
+    AXObserverAddNotification(axObserver, app.axRef, kAXUIElementDestroyedNotification, this);
     CFRunLoopAddSource(CFRunLoopGetMain(), AXObserverGetRunLoopSource(axObserver),
                        kCFRunLoopDefaultMode);
 }

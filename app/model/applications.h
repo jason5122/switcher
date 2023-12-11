@@ -15,6 +15,8 @@ public:
     void remove_window_ref(AXUIElementRef windowRef);
 
 private:
+    void debug_print();
+
     std::unordered_map<pid_t, application> app_map;
 
     void add_app(pid_t pid);

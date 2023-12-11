@@ -6,10 +6,9 @@ class application {
 public:
     pid_t pid;
     ProcessSerialNumber psn;
-    AXUIElementRef axUiElement;
+    AXUIElementRef axRef;
 
     application();
     application(pid_t pid);
     bool is_xpc();
-    std::vector<window_element> windows();
 };
