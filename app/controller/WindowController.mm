@@ -15,6 +15,7 @@
         innerPadding = theInnerPadding;
         titleTextPadding = theTitleTextPadding;
         _shown = false;
+        numDelays = 0;
 
         self.window = [[NSWindow alloc] initWithContentRect:NSZeroRect
                                                   styleMask:NSWindowStyleMaskFullSizeContentView
@@ -69,8 +70,17 @@
                        padding + innerPadding,
                    size.height + (padding + innerPadding) * 2 + titleTextPadding);
     [self.window setContentSize:contentSize];
-    [self.window actuallyCenter];
-    [self.window makeKeyAndOrderFront:nil];
+
+    numDelays++;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 500 * NSEC_PER_MSEC),
+                   dispatch_get_main_queue(), ^{
+                     // Multiple delayed triggers should only show when the latest delay ends.
+                     if (numDelays == 1 && _shown) {
+                         [self.window actuallyCenter];
+                         [self.window makeKeyAndOrderFront:nil];
+                     }
+                     numDelays--;
+                   });
 }
 
 - (void)hideWindow {

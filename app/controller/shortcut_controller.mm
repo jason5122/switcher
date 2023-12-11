@@ -97,11 +97,7 @@ CGEventRef modifier_callback(CGEventTapProxy proxy, CGEventType type, CGEventRef
     } else if (type == kCGEventKeyDown) {
         CGKeyCode keycode =
             (CGKeyCode)CGEventGetIntegerValueField(cgEvent, kCGKeyboardEventKeycode);
-        // if (keycode == handler->cancelKey.carbonKeyCode && handler->windowController.shown) {
-        //     [handler->windowController hideWindow];
-        //     return nil;
-        // }
-        if (keycode == handler->cancelKey.carbonKeyCode) {
+        if (keycode == handler->cancelKey.carbonKeyCode && handler->windowController.shown) {
             [handler->windowController hideWindow];
             return nil;
         }

@@ -11,6 +11,7 @@
     MainView* mainView;
     space* sp;
     applications apps;
+    int numDelays;
 }
 
 @property(nonatomic, getter=isShown) bool shown;
