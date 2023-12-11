@@ -66,14 +66,14 @@
             ![[controller.captureView valueForKey:@"prepared"] boolValue])
             continue;
 
-        // dispatch_async(dispatch_get_main_queue(), ^{ [controller.captureView startCapture]; });
+        dispatch_async(dispatch_get_main_queue(), ^{ [controller.captureView startCapture]; });
         // [controller.captureView startCapture];
     }
 }
 
 - (void)stopCaptureSubviews {
     for (CaptureViewController* controller : capture_controllers) {
-        // dispatch_async(dispatch_get_main_queue(), ^{ [controller.captureView stopCapture]; });
+        dispatch_async(dispatch_get_main_queue(), ^{ [controller.captureView stopCapture]; });
         // [controller.captureView stopCapture];
     }
 }

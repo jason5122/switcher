@@ -133,9 +133,8 @@ struct program_info_t {
 
     if (!success) {
         custom_log(OS_LOG_TYPE_ERROR, @"gl-capture-view", @"start capture failed");
-    } else {
-        dispatch_semaphore_signal(startedSem);
     }
+    dispatch_semaphore_signal(startedSem);
 }
 
 - (void)stopCapture {
@@ -299,19 +298,36 @@ struct program_info_t {
     didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
                    ofType:(SCStreamOutputType)type {
     if (type == SCStreamOutputTypeScreen) {
-        IOSurfaceRef surface = [self createFrame:sampleBuffer];
-        [captureView render:surface];
+        IOSurfaceRef frame = [self createFrame:sampleBuffer];
+        if (!frame) {
+            // custom_log(OS_LOG_TYPE_ERROR, @"gl-capture-view", @"invalid frame");
+            return;
+        }
+        // custom_log(OS_LOG_TYPE_DEFAULT, @"gl-capture-view", @"good");
+        [captureView render:frame];
     }
 }
 
 - (IOSurfaceRef)createFrame:(CMSampleBufferRef)sampleBuffer {
+    // Retrieve the array of metadata attachments from the sample buffer.
+    CFArrayRef attachmentsArray = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, false);
+    if (attachmentsArray == nil || CFArrayGetCount(attachmentsArray) == 0) return nil;
+
+    CFDictionaryRef attachments = (CFDictionaryRef)CFArrayGetValueAtIndex(attachmentsArray, 0);
+    if (attachments == nil) return nil;
+
+    // Validate the status of the frame. If it isn't `.complete`, return nil.
+    CFTypeRef statusRawValue =
+        CFDictionaryGetValue(attachments, (__bridge void*)SCStreamFrameInfoStatus);
+    int status;
+    bool result = CFNumberGetValue((CFNumberRef)statusRawValue, kCFNumberFloatType, &status);
+    if (!result || status != SCFrameStatusComplete) return nil;
+
     CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
-
     CVPixelBufferLockBaseAddress(imageBuffer, 0);
-    IOSurfaceRef frameSurface = CVPixelBufferGetIOSurface(imageBuffer);
+    IOSurfaceRef surface = CVPixelBufferGetIOSurface(imageBuffer);
     CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
-
-    return frameSurface;
+    return surface;
 }
 
 @end

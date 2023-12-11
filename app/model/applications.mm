@@ -26,13 +26,6 @@ applications::applications() {
                            custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"removed pid: %d",
                                       runningApp.processIdentifier);
                          }];
-    // switching spaces
-    [notifCenter addObserverForName:NSWorkspaceActiveSpaceDidChangeNotification
-                             object:nil
-                              queue:NSOperationQueue.mainQueue
-                         usingBlock:^(NSNotification* notification) {
-                           custom_log(OS_LOG_TYPE_DEFAULT, @"applications", @"space changed");
-                         }];
 }
 
 void applications::populate_with_window_ids() {

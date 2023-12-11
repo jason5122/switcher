@@ -64,9 +64,8 @@
 
     if (!success) {
         custom_log(OS_LOG_TYPE_ERROR, @"capture-view", @"start capture failed");
-    } else {
-        dispatch_semaphore_signal(startedSem);
     }
+    dispatch_semaphore_signal(startedSem);
 }
 
 - (void)stopCapture {
