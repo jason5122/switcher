@@ -22,7 +22,7 @@
             titleTextPadding:(CGFloat)titleTextPadding;
 - (void)cycleSelectedIndex;
 - (void)focusSelectedIndex;
-- (void)showWindow:(bool)onlyActiveApp;
+- (void)showWindow:(bool)activeAppOnly;
 - (void)hideWindow;
 
 @end

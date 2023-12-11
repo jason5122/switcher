@@ -22,37 +22,14 @@ void shortcut_controller::register_hotkey(NSString* shortcutString, std::string 
 }
 
 void handle_event(EventHotKeyID hotKeyId, shortcut_controller* handler, bool is_pressed) {
-    // if (!is_pressed) return;
-
-    // if (hotKeyId.id == 0) {
-    //     [handler->windowController showWindow:false];
-    //     [handler->windowController cycleSelectedIndex];
-    // } else if (hotKeyId.id == 1) {
-    //     // [handler->windowController showWindow:true];
-    //     // [handler->windowController cycleSelectedIndex];
-
-    //     if (handler->windowController.shown) {
-    //         [handler->windowController focusSelectedIndex];
-    //         [handler->windowController hideWindow];
-    //     }
-    // }
+    if (!is_pressed) return;
 
     if (hotKeyId.id == 0) {
-        if (is_pressed) {
-            [handler->windowController showWindow:false];
-            [handler->windowController cycleSelectedIndex];
-        } else {
-            if (handler->windowController.shown) {
-                [handler->windowController focusSelectedIndex];
-                [handler->windowController hideWindow];
-            }
-        }
+        [handler->windowController showWindow:false];
+        [handler->windowController cycleSelectedIndex];
     } else if (hotKeyId.id == 1) {
-        if (is_pressed) {
-            if (handler->windowController.shown) {
-                [handler->windowController cycleSelectedIndex];
-            }
-        }
+        [handler->windowController showWindow:true];
+        [handler->windowController cycleSelectedIndex];
     }
 }
 
@@ -89,11 +66,11 @@ CGEventRef modifier_callback(CGEventTapProxy proxy, CGEventType type, CGEventRef
                              void* inUserData) {
     shortcut_controller* handler = (shortcut_controller*)inUserData;
     if (type == kCGEventFlagsChanged) {
-        // NSUInteger flags = CGEventGetFlags(cgEvent);
-        // if (!(flags & NSEventModifierFlagCommand) && handler->windowController.shown) {
-        //     [handler->windowController focusSelectedIndex];
-        //     [handler->windowController hideWindow];
-        // }
+        NSUInteger flags = CGEventGetFlags(cgEvent);
+        if (!(flags & NSEventModifierFlagCommand) && handler->windowController.shown) {
+            [handler->windowController focusSelectedIndex];
+            [handler->windowController hideWindow];
+        }
     } else if (type == kCGEventKeyDown) {
         CGKeyCode keycode =
             (CGKeyCode)CGEventGetIntegerValueField(cgEvent, kCGKeyboardEventKeycode);

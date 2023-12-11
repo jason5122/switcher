@@ -35,13 +35,10 @@
                       keyEquivalent:@"q"];
     statusBarItem.menu = statusBarMenu;
 
-    // shortcut_controller::set_native_command_tab_enabled(false);
-    sh_controller->register_hotkey(@"`", "nextWindowShortcut");
-    sh_controller->register_hotkey(@"\\", "nextWindowShortcutActiveApp");
-
-    // sh_controller->register_hotkey(@"⌘⇥", "nextWindowShortcut");
-    // sh_controller->register_hotkey(@"⌘`", "nextWindowShortcutActiveApp");
-    // sh_controller->register_hotkey(@"⌘", "holdShortcut");
+    shortcut_controller::set_native_command_tab_enabled(false);
+    sh_controller->register_hotkey(@"⌘⇥", "nextWindowShortcut");
+    sh_controller->register_hotkey(@"⌘`", "nextWindowShortcutActiveApp");
+    sh_controller->register_hotkey(@"⌘", "holdShortcut");
     sh_controller->add_global_handler();
     sh_controller->add_modifier_event_tap();
 }

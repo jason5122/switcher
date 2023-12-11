@@ -35,7 +35,8 @@
 
         apps.populate_with_window_ids();
 
-        std::vector<CGWindowID> window_ids = space::get_all_valid_window_ids(apps.window_map);
+        std::vector<CGWindowID> window_ids =
+            space::get_all_valid_window_ids(apps.window_map, false);
         // std::vector<CGWindowID> window_ids = space::get_all_window_ids();
         [mainView populateWithWindowIds:window_ids];
     }
@@ -53,13 +54,14 @@
     }
 }
 
-- (void)showWindow:(bool)onlyActiveApp {
+- (void)showWindow:(bool)activeAppOnly {
     if (_shown) return;
     else _shown = true;
 
     apps.refresh_window_ids();
 
-    std::vector<CGWindowID> window_ids = space::get_all_valid_window_ids(apps.window_map);
+    std::vector<CGWindowID> window_ids =
+        space::get_all_valid_window_ids(apps.window_map, activeAppOnly);
     // std::vector<CGWindowID> window_ids = space::get_all_window_ids();
     [mainView updateWithWindowIds:window_ids];
 
@@ -72,8 +74,8 @@
     [self.window setContentSize:contentSize];
 
     numDelays++;
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 500 * NSEC_PER_MSEC),
-                   dispatch_get_main_queue(), ^{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 80 * NSEC_PER_MSEC), dispatch_get_main_queue(),
+                   ^{
                      // Multiple delayed triggers should only show when the latest delay ends.
                      if (numDelays == 1 && _shown) {
                          [self.window actuallyCenter];

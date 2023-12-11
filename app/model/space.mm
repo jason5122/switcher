@@ -15,11 +15,13 @@ void space::add_window(NSWindow* window) {
 }
 
 std::vector<CGWindowID>
-space::get_all_valid_window_ids(std::unordered_map<CGWindowID, window_element>& window_map) {
+space::get_all_valid_window_ids(std::unordered_map<CGWindowID, window_element>& window_map,
+                                bool active_app_only) {
     std::vector<CGWindowID> result;
     NSArray* windowList = (__bridge NSArray*)CGWindowListCopyWindowInfo(
         kCGWindowListOptionOnScreenOnly | kCGWindowListExcludeDesktopElements, kCGNullWindowID);
 
+    pid_t frontmost_pid = NSWorkspace.sharedWorkspace.frontmostApplication.processIdentifier;
     for (NSDictionary* cgWindow in windowList) {
         int layer = [cgWindow[(__bridge NSString*)kCGWindowLayer] intValue];
         if (layer == 0) {
@@ -32,9 +34,9 @@ space::get_all_valid_window_ids(std::unordered_map<CGWindowID, window_element>& 
             // result.push_back(wid);
 
             if (window_map.count(wid)) {
-                // pid_t pid;
-                // AXUIElementGetPid(window_map[wid].windowRef, &pid);
-                // if (onlyActiveApp && pid != frontmost_pid) continue;
+                pid_t pid;
+                AXUIElementGetPid(window_map[wid].windowRef, &pid);
+                if (active_app_only && pid != frontmost_pid) continue;
 
                 if (AXUIElementIsStandardWindow(window_map[wid].windowRef)) {
                     result.push_back(wid);
