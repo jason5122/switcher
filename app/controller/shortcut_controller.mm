@@ -71,15 +71,19 @@ CGEventRef modifier_callback(CGEventTapProxy proxy, CGEventType type, CGEventRef
                              void* inUserData) {
     shortcut_controller* handler = (shortcut_controller*)inUserData;
     if (type == kCGEventFlagsChanged) {
-        NSUInteger flags = CGEventGetFlags(cgEvent);
-        if (!(flags & NSEventModifierFlagCommand) && handler->windowController.shown) {
-            [handler->windowController focusSelectedIndex];
-            [handler->windowController hideWindow];
-        }
+        // NSUInteger flags = CGEventGetFlags(cgEvent);
+        // if (!(flags & NSEventModifierFlagCommand) && handler->windowController.shown) {
+        //     [handler->windowController focusSelectedIndex];
+        //     [handler->windowController hideWindow];
+        // }
     } else if (type == kCGEventKeyDown) {
         CGKeyCode keycode =
             (CGKeyCode)CGEventGetIntegerValueField(cgEvent, kCGKeyboardEventKeycode);
-        if (keycode == handler->cancelKey.carbonKeyCode && handler->windowController.shown) {
+        // if (keycode == handler->cancelKey.carbonKeyCode && handler->windowController.shown) {
+        //     [handler->windowController hideWindow];
+        //     return nil;
+        // }
+        if (keycode == handler->cancelKey.carbonKeyCode) {
             [handler->windowController hideWindow];
             return nil;
         }

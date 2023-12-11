@@ -51,6 +51,7 @@ void applications::populate_with_window_ids() {
 }
 
 void applications::refresh_window_ids() {
+    pthread_mutex_lock(&mutex);
     for (auto& [pid, app] : app_map) {
         for (const window_element& window : app.windows()) {
             window_map[window.wid] = window;
@@ -61,6 +62,7 @@ void applications::refresh_window_ids() {
     custom_log(OS_LOG_TYPE_DEFAULT, @"applications",
                @"*app_map: %d window_map: %d window_ref_map: %d", app_map.size(),
                window_map.size(), window_ref_map.size());
+    pthread_mutex_unlock(&mutex);
 }
 
 void applications::add_app(pid_t pid) {
@@ -83,16 +85,20 @@ void applications::remove_app(pid_t pid) {
 }
 
 void applications::add_window_ref(AXUIElementRef windowRef) {
+    pthread_mutex_lock(&mutex);
     CGWindowID wid = CGWindowID();
     _AXUIElementGetWindow(windowRef, &wid);
 
     window_map[wid] = window_element(windowRef);
     window_ref_map[CFHash(windowRef)] = wid;
+    pthread_mutex_unlock(&mutex);
 }
 
 void applications::remove_window_ref(AXUIElementRef windowRef) {
+    pthread_mutex_lock(&mutex);
     window_map.erase(window_ref_map[CFHash(windowRef)]);
     window_ref_map.erase(CFHash(windowRef));
+    pthread_mutex_unlock(&mutex);
 }
 
 void observer_callback(AXObserverRef observer, AXUIElementRef windowRef,

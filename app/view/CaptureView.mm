@@ -1,6 +1,5 @@
 #import "CaptureView.h"
 #import "util/log_util.h"
-#import <pthread.h>
 
 @interface CaptureOutput : NSObject <SCStreamOutput> {
     // https://mobiarch.wordpress.com/2014/02/05/circular-reference-and-arc/

@@ -4,7 +4,6 @@
 #import <Cocoa/Cocoa.h>
 #import <GLKit/GLKit.h>
 #import <OpenGL/gl3.h>
-#import <pthread.h>
 #import <string>
 
 enum { UNIFORM_MVP, UNIFORM_TEXTURE, NUM_UNIFORMS };

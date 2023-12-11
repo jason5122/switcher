@@ -24,25 +24,25 @@ space::get_all_valid_window_ids(std::unordered_map<CGWindowID, window_element>& 
         if (layer == 0) {
             CGWindowID wid = [cgWindow[(__bridge NSString*)kCGWindowNumber] intValue];
 
-            CFStringRef title;
-            CGSCopyWindowProperty(CGSMainConnectionID(), wid, CFSTR("kCGSWindowTitle"), &title);
+            // CFStringRef title;
+            // CGSCopyWindowProperty(CGSMainConnectionID(), wid, CFSTR("kCGSWindowTitle"), &title);
             // custom_log(OS_LOG_TYPE_DEFAULT, @"space", (__bridge NSString*)title);
 
-            result.push_back(wid);
+            // result.push_back(wid);
 
-            // if (window_map.count(wid)) {
-            // pid_t pid;
-            // AXUIElementGetPid(window_map[wid].windowRef, &pid);
-            // // if (onlyActiveApp && pid != frontmost_pid) continue;
+            if (window_map.count(wid)) {
+                pid_t pid;
+                AXUIElementGetPid(window_map[wid].windowRef, &pid);
+                // if (onlyActiveApp && pid != frontmost_pid) continue;
 
-            // CFStringRef subroleRef;
-            // AXUIElementCopyAttributeValue(window_map[wid].windowRef, kAXSubroleAttribute,
-            //                               (CFTypeRef*)&subroleRef);
-            // NSString* subrole = (__bridge NSString*)subroleRef;
-            // if ([subrole isEqual:@"AXStandardWindow"]) {
-            //     result.push_back(wid);
-            // }
-            // }
+                CFStringRef subroleRef;
+                AXUIElementCopyAttributeValue(window_map[wid].windowRef, kAXSubroleAttribute,
+                                              (CFTypeRef*)&subroleRef);
+                NSString* subrole = (__bridge NSString*)subroleRef;
+                if ([subrole isEqual:@"AXStandardWindow"]) {
+                    result.push_back(wid);
+                }
+            }
         }
     }
     return result;
