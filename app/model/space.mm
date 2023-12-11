@@ -1,3 +1,4 @@
+#import "extensions/AXUIElementRef.h"
 #import "space.h"
 #import "util/log_util.h"
 
@@ -31,15 +32,11 @@ space::get_all_valid_window_ids(std::unordered_map<CGWindowID, window_element>& 
             // result.push_back(wid);
 
             if (window_map.count(wid)) {
-                pid_t pid;
-                AXUIElementGetPid(window_map[wid].windowRef, &pid);
+                // pid_t pid;
+                // AXUIElementGetPid(window_map[wid].windowRef, &pid);
                 // if (onlyActiveApp && pid != frontmost_pid) continue;
 
-                CFStringRef subroleRef;
-                AXUIElementCopyAttributeValue(window_map[wid].windowRef, kAXSubroleAttribute,
-                                              (CFTypeRef*)&subroleRef);
-                NSString* subrole = (__bridge NSString*)subroleRef;
-                if ([subrole isEqual:@"AXStandardWindow"]) {
+                if (AXUIElementIsStandardWindow(window_map[wid].windowRef)) {
                     result.push_back(wid);
                 }
             }
