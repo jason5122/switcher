@@ -14,8 +14,7 @@
                                                           padding:padding
                                                      innerPadding:innerPadding
                                                  titleTextPadding:titleTextPadding];
-        sh_controller = new shortcut_controller(windowController, @"i");
-        // sh_controller = new shortcut_controller(windowController, @"⎋");
+        sh_controller = new shortcut_controller(windowController, @"⎋");
     }
     return self;
 }
@@ -37,8 +36,8 @@
     statusBarItem.menu = statusBarMenu;
 
     // shortcut_controller::set_native_command_tab_enabled(false);
-    sh_controller->register_hotkey(@"j", "nextWindowShortcut");
-    sh_controller->register_hotkey(@"k", "nextWindowShortcutActiveApp");
+    sh_controller->register_hotkey(@"`", "nextWindowShortcut");
+    sh_controller->register_hotkey(@"\\", "nextWindowShortcutActiveApp");
 
     // sh_controller->register_hotkey(@"⌘⇥", "nextWindowShortcut");
     // sh_controller->register_hotkey(@"⌘`", "nextWindowShortcutActiveApp");

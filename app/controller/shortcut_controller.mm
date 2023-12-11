@@ -22,18 +22,36 @@ void shortcut_controller::register_hotkey(NSString* shortcutString, std::string 
 }
 
 void handle_event(EventHotKeyID hotKeyId, shortcut_controller* handler, bool is_pressed) {
-    if (!is_pressed) return;
+    // if (!is_pressed) return;
+
+    // if (hotKeyId.id == 0) {
+    //     [handler->windowController showWindow:false];
+    //     [handler->windowController cycleSelectedIndex];
+    // } else if (hotKeyId.id == 1) {
+    //     // [handler->windowController showWindow:true];
+    //     // [handler->windowController cycleSelectedIndex];
+
+    //     if (handler->windowController.shown) {
+    //         [handler->windowController focusSelectedIndex];
+    //         [handler->windowController hideWindow];
+    //     }
+    // }
 
     if (hotKeyId.id == 0) {
-        [handler->windowController showWindow:false];
-        [handler->windowController cycleSelectedIndex];
+        if (is_pressed) {
+            [handler->windowController showWindow:false];
+            [handler->windowController cycleSelectedIndex];
+        } else {
+            if (handler->windowController.shown) {
+                [handler->windowController focusSelectedIndex];
+                [handler->windowController hideWindow];
+            }
+        }
     } else if (hotKeyId.id == 1) {
-        // [handler->windowController showWindow:true];
-        // [handler->windowController cycleSelectedIndex];
-
-        if (handler->windowController.shown) {
-            [handler->windowController focusSelectedIndex];
-            [handler->windowController hideWindow];
+        if (is_pressed) {
+            if (handler->windowController.shown) {
+                [handler->windowController cycleSelectedIndex];
+            }
         }
     }
 }
