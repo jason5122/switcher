@@ -1,7 +1,6 @@
 #import <Cocoa/Cocoa.h>
 #import <vector>
 
-// TODO: measure performance
 inline bool AXUIElementIsStandardWindow(AXUIElementRef& windowRef) {
     CFStringRef subroleRef;
     AXUIElementCopyAttributeValue(windowRef, kAXSubroleAttribute, (CFTypeRef*)&subroleRef);

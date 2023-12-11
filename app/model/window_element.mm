@@ -2,7 +2,7 @@
 #import "private_apis/SkyLight.h"
 #import "window_element.h"
 
-window_element::window_element() {}  // TODO: maybe remove this in the future
+window_element::window_element() {}
 
 window_element::window_element(AXUIElementRef windowRef) {
     this->windowRef = windowRef;

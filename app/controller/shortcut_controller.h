@@ -20,7 +20,7 @@ private:
     EventHandlerRef hotkey_pressed_handler;
     EventHandlerRef hotkey_released_handler;
 
-    FourCharCode signature = (FourCharCode)'1234';  // TODO: change to something else
+    FourCharCode signature = (FourCharCode)'1234';  // TODO: Change to something else.
     std::unordered_map<std::string, UInt32> global_hotkey_map = {
         {"nextWindowShortcut", 0},
         {"nextWindowShortcutActiveApp", 1},

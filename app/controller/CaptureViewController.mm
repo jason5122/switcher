@@ -4,7 +4,6 @@
 #import "private_apis/CGS.h"
 #import "util/log_util.h"
 
-// TODO: maybe get rid of this and merge with CaptureView.mm?
 @implementation CaptureViewController
 
 - (instancetype)initWithWindowId:(CGWindowID)wid
@@ -32,9 +31,10 @@
         config.pixelFormat = 'BGRA';
         config.colorSpaceName = kCGColorSpaceDisplayP3;
 
-        // TODO: make this work with CaptureView
+        // TODO: Make this work with CaptureView.
         // _captureView = [[CaptureView alloc] initWithFrame:captureFrame configuration:config];
-        // _captureView = [[SwiftCaptureView alloc] initWithFrame:captureFrame configuration:config];
+        // _captureView = [[SwiftCaptureView alloc] initWithFrame:captureFrame
+        // configuration:config];
         _captureView = [[GLCaptureView alloc] initWithFrame:captureFrame configuration:config];
         [stackView addSubview:_captureView];
 

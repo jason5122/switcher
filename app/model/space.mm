@@ -26,13 +26,6 @@ space::get_all_valid_window_ids(std::unordered_map<CGWindowID, window_element>& 
         int layer = [cgWindow[(__bridge NSString*)kCGWindowLayer] intValue];
         if (layer == 0) {
             CGWindowID wid = [cgWindow[(__bridge NSString*)kCGWindowNumber] intValue];
-
-            // CFStringRef title;
-            // CGSCopyWindowProperty(CGSMainConnectionID(), wid, CFSTR("kCGSWindowTitle"), &title);
-            // custom_log(OS_LOG_TYPE_DEFAULT, @"space", (__bridge NSString*)title);
-
-            // result.push_back(wid);
-
             if (window_map.count(wid)) {
                 pid_t pid;
                 AXUIElementGetPid(window_map[wid].windowRef, &pid);
@@ -61,8 +54,8 @@ std::vector<CGWindowID> space::get_all_window_ids() {
 
             for (int i = 0; i < windowIds.count; i++) {
                 // https://stackoverflow.com/a/74696817/14698275
-                id cfNumber = [windowIds objectAtIndex:i];
-                CGWindowID wid = [((NSNumber*)cfNumber) intValue];
+                NSNumber* widNumber = (NSNumber*)[windowIds objectAtIndex:i];
+                CGWindowID wid = [widNumber intValue];
                 CGWindowLevel level;
                 CGSGetWindowLevel(CGSMainConnectionID(), wid, &level);
                 if (level == CGWindowLevelForKey(kCGNormalWindowLevelKey)) {

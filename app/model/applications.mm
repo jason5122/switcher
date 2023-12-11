@@ -11,8 +11,6 @@ void applications::debug_print() {
 
 applications::applications() {
     NSNotificationCenter* notifCenter = NSWorkspace.sharedWorkspace.notificationCenter;
-
-    // launching/terminating apps
     [notifCenter addObserverForName:NSWorkspaceDidLaunchApplicationNotification
                              object:nil
                               queue:NSOperationQueue.mainQueue
