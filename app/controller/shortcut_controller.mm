@@ -93,6 +93,7 @@ void shortcut_controller::add_modifier_event_tap() {
 
 void shortcut_controller::set_native_command_tab_enabled(bool is_enabled) {
     CGSSetSymbolicHotKeyEnabled(kCGCommandTab, is_enabled);
+    CGSSetSymbolicHotKeyEnabled(kCGCommandShiftTab, is_enabled);
 }
 
 shortcut_controller::~shortcut_controller() {
