@@ -28,8 +28,13 @@ void handle_event(EventHotKeyID hotKeyId, shortcut_controller* handler, bool is_
         [handler->windowController showWindow:false];
         [handler->windowController cycleSelectedIndex];
     } else if (hotKeyId.id == 1) {
-        [handler->windowController showWindow:true];
-        [handler->windowController cycleSelectedIndex];
+        // [handler->windowController showWindow:true];
+        // [handler->windowController cycleSelectedIndex];
+
+        if (handler->windowController.shown) {
+            [handler->windowController focusSelectedIndex];
+            [handler->windowController hideWindow];
+        }
     }
 }
 
