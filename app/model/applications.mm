@@ -36,7 +36,7 @@ applications::applications() {
                          }];
 }
 
-void applications::populate_with_window_ids() {
+void applications::detect_new_apps() {
     for (CGWindowID wid : CGWindowListIDs()) {
         pid_t pid;
 
@@ -55,7 +55,7 @@ void applications::populate_with_window_ids() {
     debug_print();
 }
 
-void applications::refresh_window_ids() {
+void applications::refresh_app_window_ids() {
     for (auto& [pid, app] : app_map) {
         for (AXUIElementRef& windowRef : AXUIElementGetWindows(app.axRef)) {
             add_window_ref(windowRef);

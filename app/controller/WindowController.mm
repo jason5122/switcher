@@ -32,8 +32,7 @@
         sp = new space(1);
         sp->add_window(self.window);
 
-        apps.populate_with_window_ids();
-
+        apps.detect_new_apps();
         std::vector<CGWindowID> window_ids = apps.get_valid_window_ids(false);
         [mainView populateWithWindowIds:window_ids];
     }
@@ -55,8 +54,8 @@
     if (_shown) return;
     else _shown = true;
 
-    apps.refresh_window_ids();
-
+    apps.detect_new_apps();
+    apps.refresh_app_window_ids();
     std::vector<CGWindowID> window_ids = apps.get_valid_window_ids(activeAppOnly);
     [mainView updateWithWindowIds:window_ids];
 
