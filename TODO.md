@@ -8,13 +8,10 @@
   1. an existing app opens a new window
   2. an existing minimized window appears
 - When an app quits, delete windows in `window_map`/`window_ref_map`
-- Detect more types of crashes/signals
-  - Spawn a second process to detect with the app closes?
 - [Universal binaries](https://developer.apple.com/documentation/apple-silicon/building-a-universal-macos-binary#Update-the-Architecture-List-of-Custom-Makefiles)
 
 ### Fix
 
-- Handle "stream is nil" errors
 - Rare chance of app getting stuck, even when using the reliable `GLCaptureView`
 - Rare race conditions under `SwiftCaptureView.swift`/`CaptureEngine.swift`
 - Prevent window from ever gaining focus on click
