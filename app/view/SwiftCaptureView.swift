@@ -34,9 +34,8 @@ class SwiftCaptureView: NSView {
                 stream?.startCapture(completionHandler: { error in
                     if let error {
                         LogUtil.customLog(.error, "swift-capture-view", error.localizedDescription)
-                    } else {
-                        sem.signal()
                     }
+                    sem.signal()
                 })
                 sem.wait()
 
@@ -58,9 +57,8 @@ class SwiftCaptureView: NSView {
         stream?.stopCapture(completionHandler: { error in
             if let error {
                 LogUtil.customLog(.error, "swift-capture-view", error.localizedDescription)
-            } else {
-                sem.signal()
             }
+            sem.signal()
         })
         sem.wait()
 

@@ -17,7 +17,6 @@
 - Handle "stream is nil" errors
 - Rare chance of app getting stuck, even when using the reliable `GLCaptureView`
 - Rare race conditions under `SwiftCaptureView.swift`/`CaptureEngine.swift`
-- Crash when closing a capture window before hiding switcher
 - Prevent window from ever gaining focus on click
   - Still allow click actions
 - Remove Sonoma recording icon?

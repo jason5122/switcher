@@ -115,24 +115,18 @@ struct program_info_t {
                                sampleHandlerQueue:nil
                                             error:&error];
     if (!did_add_output) {
-        custom_log(OS_LOG_TYPE_ERROR, @"gl-capture-view", error.localizedFailureReason);
+        custom_log(OS_LOG_TYPE_ERROR, @"gl-capture-view", error.localizedDescription);
     }
 
     dispatch_semaphore_t stream_start_completed = dispatch_semaphore_create(0);
-
-    __block BOOL success = false;
     [stream startCaptureWithCompletionHandler:^(NSError* _Nullable error) {
-      success = (BOOL)(error == nil);
-      if (!success) {
-          custom_log(OS_LOG_TYPE_ERROR, @"gl-capture-view", error.localizedFailureReason);
+      if (error) {
+          custom_log(OS_LOG_TYPE_ERROR, @"gl-capture-view", error.localizedDescription);
       }
       dispatch_semaphore_signal(stream_start_completed);
     }];
     dispatch_semaphore_wait(stream_start_completed, DISPATCH_TIME_FOREVER);
 
-    if (!success) {
-        custom_log(OS_LOG_TYPE_ERROR, @"gl-capture-view", @"start capture failed");
-    }
     dispatch_semaphore_signal(startedSem);
 }
 
@@ -140,20 +134,13 @@ struct program_info_t {
     dispatch_semaphore_wait(startedSem, DISPATCH_TIME_FOREVER);
 
     dispatch_semaphore_t stream_stop_completed = dispatch_semaphore_create(0);
-
-    __block BOOL success = false;
     [stream stopCaptureWithCompletionHandler:^(NSError* _Nullable error) {
-      success = (BOOL)(error == nil);
-      if (!success) {
-          custom_log(OS_LOG_TYPE_ERROR, @"gl-capture-view", error.localizedFailureReason);
+      if (error) {
+          custom_log(OS_LOG_TYPE_ERROR, @"gl-capture-view", error.localizedDescription);
       }
       dispatch_semaphore_signal(stream_stop_completed);
     }];
     dispatch_semaphore_wait(stream_stop_completed, DISPATCH_TIME_FOREVER);
-
-    if (!success) {
-        custom_log(OS_LOG_TYPE_ERROR, @"gl-capture-view", @"stop capture failed");
-    }
 }
 
 - (void)update {
