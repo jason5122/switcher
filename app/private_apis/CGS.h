@@ -8,8 +8,6 @@ extern "C" CGSSpaceID CGSSpaceCreate(CGSConnectionID cid, int unknown, CFDiction
 extern "C" void CGSSpaceDestroy(CGSConnectionID cid, CGSSpaceID sid);
 extern "C" void CGSSpaceSetAbsoluteLevel(CGSConnectionID cid, CGSSpaceID space, int level);
 extern "C" void CGSAddWindowsToSpaces(CGSConnectionID cid, CFArrayRef windows, CFArrayRef spaces);
-extern "C" void CGSRemoveWindowsFromSpaces(CGSConnectionID cid, CFArrayRef windows,
-                                           CFArrayRef spaces);
 extern "C" void CGSShowSpaces(CGSConnectionID cid, CFArrayRef spaces);
 extern "C" void CGSHideSpaces(CGSConnectionID cid, CFArrayRef spaces);
 
@@ -21,24 +19,9 @@ typedef enum {
 
 extern "C" CGError CGSSetSymbolicHotKeyEnabled(CGSSymbolicHotKey hotKey, bool isEnabled);
 
-typedef uint64_t CGSManagedDisplay;
-
-extern "C" CGSManagedDisplay kCGSPackagesMainDisplayIdentifier;
-
-extern "C" CFArrayRef CGSCopyWindowsWithOptionsAndTags(CGSConnectionID cid, int owner,
-                                                       CFArrayRef spaces, int options,
-                                                       int* setTags, int* clearTags);
-extern "C" CFArrayRef CGSCopyManagedDisplaySpaces(CGSConnectionID cid);
-extern "C" CGSSpaceID CGSManagedDisplayGetCurrentSpace(CGSConnectionID cid,
-                                                       CGSManagedDisplay display);
-extern "C" CGWindowLevel CGSGetWindowLevel(CGSConnectionID cid, CGWindowID wid,
-                                           CGWindowLevel* level);
-
 extern "C" CGError CGSCopyWindowProperty(CGSConnectionID cid, CGWindowID wid, CFStringRef key,
                                          CFStringRef* output);
 
 extern "C" CGError CGSGetWindowOwner(CGSConnectionID cid, CGWindowID wid,
                                      CGSConnectionID* outOwner);
 extern "C" CGError CGSGetConnectionPSN(CGSConnectionID cid, ProcessSerialNumber* psn);
-
-extern "C" CGSSpaceID CGSGetActiveSpace(CGSConnectionID cid);

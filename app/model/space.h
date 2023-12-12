@@ -11,8 +11,4 @@ public:
     space(int level);
     ~space();
     void add_window(NSWindow* window);
-    static std::vector<CGWindowID>
-    get_all_valid_window_ids(std::unordered_map<CGWindowID, window_element>& window_map,
-                             bool active_app_only);
-    static std::vector<CGWindowID> get_all_window_ids();
 };

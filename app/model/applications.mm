@@ -1,5 +1,6 @@
 #import "applications.h"
 #import "extensions/AXUIElementRef.h"
+#import "extensions/CGWindow.h"
 #import "model/space.h"
 #import "util/log_util.h"
 
@@ -36,8 +37,7 @@ applications::applications() {
 }
 
 void applications::populate_with_window_ids() {
-    std::vector<CGWindowID> wids = space::get_all_window_ids();
-    for (CGWindowID wid : wids) {
+    for (CGWindowID wid : CGWindowListIDs()) {
         pid_t pid;
 
         CGSConnectionID elementConnection;
@@ -63,6 +63,23 @@ void applications::refresh_window_ids() {
     }
 
     debug_print();
+}
+
+std::vector<CGWindowID> applications::get_valid_window_ids(bool active_app_only) {
+    std::vector<CGWindowID> result;
+    pid_t frontmost_pid = NSWorkspace.sharedWorkspace.frontmostApplication.processIdentifier;
+    for (CGWindowID wid : CGWindowListIDs()) {
+        if (window_map.count(wid)) {
+            pid_t pid;
+            AXUIElementGetPid(window_map[wid].windowRef, &pid);
+            if (active_app_only && pid != frontmost_pid) continue;
+
+            if (AXUIElementIsStandardWindow(window_map[wid].windowRef)) {
+                result.push_back(wid);
+            }
+        }
+    }
+    return result;
 }
 
 void applications::add_app(pid_t pid) {

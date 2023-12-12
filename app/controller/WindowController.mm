@@ -1,6 +1,5 @@
 #import "WindowController.h"
 #import "extensions/NSWindow+ActuallyCenter.h"
-#import "model/space.h"
 
 @implementation WindowController
 
@@ -35,9 +34,7 @@
 
         apps.populate_with_window_ids();
 
-        std::vector<CGWindowID> window_ids =
-            space::get_all_valid_window_ids(apps.window_map, false);
-        // std::vector<CGWindowID> window_ids = space::get_all_window_ids();
+        std::vector<CGWindowID> window_ids = apps.get_valid_window_ids(false);
         [mainView populateWithWindowIds:window_ids];
     }
     return self;
@@ -60,9 +57,7 @@
 
     apps.refresh_window_ids();
 
-    std::vector<CGWindowID> window_ids =
-        space::get_all_valid_window_ids(apps.window_map, activeAppOnly);
-    // std::vector<CGWindowID> window_ids = space::get_all_window_ids();
+    std::vector<CGWindowID> window_ids = apps.get_valid_window_ids(activeAppOnly);
     [mainView updateWithWindowIds:window_ids];
 
     [mainView startCaptureSubviews];

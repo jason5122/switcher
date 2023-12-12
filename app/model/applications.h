@@ -11,6 +11,7 @@ public:
     applications();
     void populate_with_window_ids();
     void refresh_window_ids();
+    std::vector<CGWindowID> get_valid_window_ids(bool active_app_only);
     void add_window_ref(AXUIElementRef windowRef);
     void remove_window_ref(AXUIElementRef windowRef);
 
