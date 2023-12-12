@@ -9,7 +9,7 @@ https://github.com/jasonhan-vassar/switcher/assets/34594853/218a5335-62c4-4331-a
 
 ## Requirements
 
-macOS 13.0+
+macOS 12.3+
 
 ## Building
 

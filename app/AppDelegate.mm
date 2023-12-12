@@ -1,10 +1,27 @@
 #import "AppDelegate.h"
+#import "util/log_util.h"
 
 @implementation AppDelegate
 
 - (instancetype)init {
     self = [super init];
     if (self) {
+        NSDictionary* options = @{(__bridge NSString*)kAXTrustedCheckOptionPrompt : @false};
+        bool accessibilityGranted =
+            AXIsProcessTrustedWithOptions((__bridge CFDictionaryRef)options);
+        bool screenRecordingGranted = CGPreflightScreenCaptureAccess();
+        if (!accessibilityGranted) {
+            custom_log(OS_LOG_TYPE_ERROR, @"app-delegate",
+                       @"accessibility permissions not granted");
+        }
+        if (!screenRecordingGranted) {
+            custom_log(OS_LOG_TYPE_ERROR, @"app-delegate",
+                       @"screen recording permissions not granted");
+        }
+        if (!accessibilityGranted || !screenRecordingGranted) {
+            [NSApp terminate:nil];
+        }
+
         CGSize size = CGSizeMake(160, 100);
         CGFloat padding = 20;
         CGFloat innerPadding = 15;
