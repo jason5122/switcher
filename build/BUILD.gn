@@ -65,8 +65,9 @@ config("mac_minimum_version") {
   cflags = [ "-mmacos-version-min=$mac_deployment_target" ]
   ldflags = [ "-mmacos-version-min=$mac_deployment_target" ]
 
-  # TODO: don't hard code to arm64
-  swiftflags = [ "-target=arm64-apple-macos$mac_deployment_target" ]
+  # TODO: Don't hard code to arm64.
+  # TODO: Fix "built for newer 'macOS' version" warnings when deploying for <13.0.
+  swiftflags = [ "-target=arm64-apple-macos13.0" ]
 }
 
 if (current_os == "ios" || current_os == "mac") {
