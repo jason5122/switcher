@@ -1,4 +1,4 @@
-#import "extensions/AXUIElementRef.h"
+#import "extensions/AXUIElement.h"
 #import "space.h"
 #import "util/log_util.h"
 

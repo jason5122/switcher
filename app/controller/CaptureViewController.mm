@@ -1,7 +1,7 @@
 #import "CaptureViewController.h"
+#import "extensions/CGWindow.h"
 #import "extensions/NSImage+InitWithId.h"
 #import "extensions/ScreenCaptureKit+InitWithId.h"
-#import "private_apis/CGS.h"
 #import "util/log_util.h"
 
 @implementation CaptureViewController
@@ -62,9 +62,7 @@
         [[SCContentFilter alloc] initWithDesktopIndependentWindow:targetWindow];
     [_captureView updateWithFilter:filter];
 
-    CFStringRef title;
-    CGSCopyWindowProperty(CGSMainConnectionID(), wid, CFSTR("kCGSWindowTitle"), &title);
-    titleText.stringValue = (__bridge NSString*)title;
+    titleText.stringValue = CGWindowGetTitle(wid);
 
     NSImage* icon = [[NSImage alloc] initWithId:wid];
     iconView.frameSize = icon.size;

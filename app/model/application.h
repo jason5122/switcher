@@ -5,10 +5,14 @@
 class application {
 public:
     pid_t pid;
-    ProcessSerialNumber psn;
     AXUIElementRef axRef;
 
     application();
     application(pid_t pid);
     bool is_xpc();
+    NSString* name();
+
+private:
+    ProcessSerialNumber psn;
+    NSRunningApplication* runningApp;
 };

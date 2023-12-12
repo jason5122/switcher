@@ -1,5 +1,5 @@
 #import "applications.h"
-#import "extensions/AXUIElementRef.h"
+#import "extensions/AXUIElement.h"
 #import "extensions/CGWindow.h"
 #import "model/space.h"
 #import "util/log_util.h"
@@ -74,7 +74,7 @@ std::vector<CGWindowID> applications::get_valid_window_ids(bool active_app_only)
             AXUIElementGetPid(window_map[wid].windowRef, &pid);
             if (active_app_only && pid != frontmost_pid) continue;
 
-            if (AXUIElementIsStandardWindow(window_map[wid].windowRef)) {
+            if (AXUIElementIsValidWindow(window_map[wid].windowRef)) {
                 result.push_back(wid);
             }
         }
@@ -113,11 +113,11 @@ void applications::remove_window_ref(AXUIElementRef windowRef) {
 
 void observer_callback(AXObserverRef observer, AXUIElementRef windowRef,
                        CFStringRef notificationName, void* inUserData) {
-    if (!AXUIElementIsStandardWindow(windowRef)) return;
-
     applications* apps = (applications*)inUserData;
     if (CFEqual(notificationName, kAXWindowCreatedNotification)) {
-        apps->add_window_ref((AXUIElementRef)CFRetain(windowRef));
+        if (AXUIElementIsValidWindow(windowRef)) {
+            apps->add_window_ref((AXUIElementRef)CFRetain(windowRef));
+        }
     } else if (CFEqual(notificationName, kAXUIElementDestroyedNotification)) {
         apps->remove_window_ref(windowRef);
     }
