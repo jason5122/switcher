@@ -52,7 +52,7 @@ This generates `Switcher.app` in the `out/` directory.
 ## Viewing logs
 
 ```
-log stream --predicate 'subsystem contains "com.jason.switcher"' --style compact
+log stream --predicate 'subsystem contains "com.jason5122.switcher"' --style compact
 ```
 
 You can also use `Console.app`, but I prefer viewing them in the terminal so I use this command.

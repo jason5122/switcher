@@ -3,7 +3,7 @@ import("//build/config/mac/templates/macos_app_bundle.gni")
 
 macos_app_bundle("app") {
   output_name = "Switcher"
-  bundle_identifier = "com.jason.switcher"
+  bundle_identifier = "com.jason5122.switcher"
   info_plist = "resources/Info.plist"
 
   # define `code_signing_identity` in args.gn

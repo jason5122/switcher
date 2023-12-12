@@ -95,7 +95,7 @@
     self = [super init];
     if (self) {
         captureView = theCaptureView;
-        serialQueue = dispatch_queue_create("com.jason.switcher", NULL);
+        serialQueue = dispatch_queue_create("com.jason5122.switcher", NULL);
     }
     return self;
 }
