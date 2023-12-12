@@ -23,10 +23,10 @@ inline bool AXUIElementIsValidWindow(AXUIElementRef& windowRef) {
     // Ignore Sonoma purple recording icon.
     CGWindowID wid;
     _AXUIElementGetWindow(windowRef, &wid);
+    if (wid == 0) return false;  // Sometimes, wid can erroneously be 0.
     if ([subrole isEqual:@"AXDialog"] && [CGWindowGetTitle(wid) isEqual:@"Window"]) return false;
 
-    // return [subrole isEqual:@"AXStandardWindow"] || [subrole isEqual:@"AXDialog"];
-    return [subrole isEqual:@"AXStandardWindow"];
+    return [subrole isEqual:@"AXStandardWindow"] || [subrole isEqual:@"AXDialog"];
 }
 
 inline std::vector<AXUIElementRef> AXUIElementGetWindows(AXUIElementRef& appRef) {
