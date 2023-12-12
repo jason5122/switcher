@@ -21,7 +21,6 @@ macos_app_bundle("app") {
     "model/applications.mm",
     "model/space.mm",
     "model/window_element.mm",
-    "util/log_util.mm",
     "util/shader_util.cc",
     "view/CaptureView.mm",
     "view/GLCaptureView.mm",
@@ -52,6 +51,7 @@ macos_app_bundle("app") {
 
   deps = [
     ":icon",
+    ":log_util",
     ":swift_capture_view",
     "//app/third_party/shortcut_recorder:shortcut_recorder",
   ]
@@ -63,6 +63,14 @@ source_set("swift_capture_view") {
     "view/SwiftCaptureView.swift",
   ]
   bridge_header = "view/swift_capture_view_bridge.h"
+
+  include_dirs = [ "//app" ]
+
+  deps = [ ":log_util" ]
+}
+
+source_set("log_util") {
+  sources = [ "util/log_util.mm" ]
 }
 
 icon("icon") {

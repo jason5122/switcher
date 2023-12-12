@@ -14,3 +14,7 @@ void custom_log(os_log_type_t type, NSString* category, NSString* format, ...) {
     custom_logv(type, category, format, args);
     va_end(args);
 }
+
+extern "C" int hi() {
+    return 42;
+}
