@@ -16,7 +16,7 @@ window_element::window_element(AXUIElementRef windowRef) {
 }
 
 void window_element::focus() {
-    dispatch_async(dispatch_get_main_queue(), ^{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
       // https://github.com/koekeishiya/yabai/issues/1772#issuecomment-1649919480
       _SLPSSetFrontProcessWithOptions(&psn, 0, kSLPSNoWindows);
       AXUIElementPerformAction(windowRef, kAXRaiseAction);

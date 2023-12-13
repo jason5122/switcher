@@ -35,8 +35,9 @@ class SwiftCaptureView: NSView {
                     if let error {
                         LogUtil.customLog(.error, "swift-capture-view", error.localizedDescription)
                     }
-                    sem.signal()
+                    // sem.signal()
                 })
+                Thread.sleep(forTimeInterval: 0.25)
                 // sem.wait()
 
                 startedSem.signal()
@@ -51,15 +52,16 @@ class SwiftCaptureView: NSView {
     }
 
     func stopCapture() {
-        // startedSem.wait()
+        startedSem.wait()
 
         let sem = DispatchSemaphore(value: 0)
         stream?.stopCapture(completionHandler: { error in
             if let error {
                 LogUtil.customLog(.error, "swift-capture-view", error.localizedDescription)
             }
-            sem.signal()
+            // sem.signal()
         })
+        Thread.sleep(forTimeInterval: 0.25)
         // sem.wait()
 
         continuation?.finish()
