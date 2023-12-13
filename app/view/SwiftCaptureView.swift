@@ -30,14 +30,14 @@ class SwiftCaptureView: NSView {
                 stream = SCStream(filter: filter!, configuration: config!, delegate: nil)
                 try stream?.addStreamOutput(captureOutput!, type: .screen, sampleHandlerQueue: nil)
 
-                let sem = DispatchSemaphore(value: 0)
+                // let sem = DispatchSemaphore(value: 0)
                 stream?.startCapture(completionHandler: { error in
                     if let error {
                         LogUtil.customLog(.error, "swift-capture-view", error.localizedDescription)
                     }
                     // sem.signal()
                 })
-                Thread.sleep(forTimeInterval: 0.25)
+                // Thread.sleep(forTimeInterval: 0.25)
                 // sem.wait()
 
                 startedSem.signal()
@@ -54,14 +54,14 @@ class SwiftCaptureView: NSView {
     func stopCapture() {
         startedSem.wait()
 
-        let sem = DispatchSemaphore(value: 0)
+        // let sem = DispatchSemaphore(value: 0)
         stream?.stopCapture(completionHandler: { error in
             if let error {
                 LogUtil.customLog(.error, "swift-capture-view", error.localizedDescription)
             }
             // sem.signal()
         })
-        Thread.sleep(forTimeInterval: 0.25)
+        // Thread.sleep(forTimeInterval: 0.25)
         // sem.wait()
 
         continuation?.finish()
