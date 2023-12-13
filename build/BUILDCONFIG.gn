@@ -11,6 +11,10 @@ if (current_os == "") {
   current_os = target_os
 }
 
+if (target_cpu == "x86_64") {
+  target_cpu = "x64"
+}
+
 # All binary targets will get this list of configs by default.
 _shared_binary_target_configs = [ "//build:compiler" ]
 
@@ -31,9 +35,3 @@ set_defaults("source_set") {
 }
 
 set_default_toolchain("//build/toolchain/$target_os:clang_$target_cpu")
-
-if (target_os == "mac") {
-  host_toolchain = "//build/toolchain/$host_os:clang_$host_cpu"
-} else {
-  host_toolchain = default_toolchain
-}
