@@ -37,7 +37,7 @@ class SwiftCaptureView: NSView {
                     }
                     sem.signal()
                 })
-                sem.wait()
+                // sem.wait()
 
                 startedSem.signal()
             } catch {}
@@ -51,7 +51,7 @@ class SwiftCaptureView: NSView {
     }
 
     func stopCapture() {
-        startedSem.wait()
+        // startedSem.wait()
 
         let sem = DispatchSemaphore(value: 0)
         stream?.stopCapture(completionHandler: { error in
@@ -60,7 +60,7 @@ class SwiftCaptureView: NSView {
             }
             sem.signal()
         })
-        sem.wait()
+        // sem.wait()
 
         continuation?.finish()
     }
