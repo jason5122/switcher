@@ -33,8 +33,10 @@
 
         // TODO: Make this work with CaptureView.
         // _captureView = [[CaptureView alloc] initWithFrame:captureFrame configuration:config];
-        _captureView = [[SwiftCaptureView alloc] initWithFrame:captureFrame configuration:config];
-        // _captureView = [[GLCaptureView alloc] initWithFrame:captureFrame configuration:config];
+        // _captureView = [[SwiftCaptureView alloc] initWithFrame:captureFrame
+        // configuration:config]; _captureView = [[GLCaptureView alloc] initWithFrame:captureFrame
+        // configuration:config];
+        _captureView = [[TimerView alloc] initWithFrame:captureFrame];
         [stackView addSubview:_captureView];
 
         titleText = [NSTextField labelWithString:@""];
@@ -57,10 +59,10 @@
 - (void)updateWithWindowId:(CGWindowID)wid {
     _wid = wid;
 
-    SCWindow* targetWindow = [[SCWindow alloc] initWithId:wid];
-    SCContentFilter* filter =
-        [[SCContentFilter alloc] initWithDesktopIndependentWindow:targetWindow];
-    [_captureView updateWithFilter:filter];
+    // SCWindow* targetWindow = [[SCWindow alloc] initWithId:wid];
+    // SCContentFilter* filter =
+    //     [[SCContentFilter alloc] initWithDesktopIndependentWindow:targetWindow];
+    // [_captureView updateWithFilter:filter];
 
     titleText.stringValue = CGWindowGetTitle(wid);
 

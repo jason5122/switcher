@@ -59,7 +59,7 @@
     std::vector<CGWindowID> window_ids = apps.get_valid_window_ids(activeAppOnly);
     [mainView updateWithWindowIds:window_ids];
 
-    [mainView startCaptureSubviews];
+    // [mainView startCaptureSubviews];
 
     NSSize contentSize =
         NSMakeSize((size.width + padding + innerPadding) * self.window.contentView.subviews.count +
@@ -67,17 +67,18 @@
                    size.height + (padding + innerPadding) * 2 + titleTextPadding);
     [self.window setContentSize:contentSize];
 
-    // [self.window actuallyCenter];
-    // [self.window makeKeyAndOrderFront:nil];
-    numDelays++;  // Multiple delayed triggers should only show when the latest delay ends.
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 80 * NSEC_PER_MSEC), dispatch_get_main_queue(),
-                   ^{
-                     if (numDelays == 1 && _shown) {
-                         [self.window actuallyCenter];
-                         [self.window makeKeyAndOrderFront:nil];
-                     }
-                     numDelays--;
-                   });
+    [self.window actuallyCenter];
+    [self.window makeKeyAndOrderFront:nil];
+    // numDelays++;  // Multiple delayed triggers should only show when the latest delay ends.
+    // dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 80 * NSEC_PER_MSEC),
+    // dispatch_get_main_queue(),
+    //                ^{
+    //                  if (numDelays == 1 && _shown) {
+    //                      [self.window actuallyCenter];
+    //                      [self.window makeKeyAndOrderFront:nil];
+    //                  }
+    //                  numDelays--;
+    //                });
 }
 
 - (void)hideWindow {
@@ -86,7 +87,7 @@
 
     [self.window orderOut:nil];
 
-    [mainView stopCaptureSubviews];
+    // [mainView stopCaptureSubviews];
     [mainView reset];
 }
 

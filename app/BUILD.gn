@@ -25,6 +25,7 @@ macos_app_bundle("app") {
     "view/CaptureView.mm",
     "view/GLCaptureView.mm",
     "view/MainView.mm",
+    "view/TimerView.mm",
   ]
 
   frameworks = [

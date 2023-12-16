@@ -2,6 +2,7 @@
 #import "swift_capture_view.h"
 #import "view/CaptureView.h"
 #import "view/GLCaptureView.h"
+#import "view/TimerView.h"
 #import <Cocoa/Cocoa.h>
 
 @interface CaptureViewController : NSViewController {
@@ -13,7 +14,8 @@
 // @property(nonatomic) CaptureView* captureView;
 // @property(nonatomic) SwiftCaptureView* captureView;
 // @property(nonatomic) GLCaptureView* captureView;
-@property(nonatomic) id captureView;
+// @property(nonatomic) id captureView;
+@property(nonatomic) TimerView* captureView;
 @property(nonatomic) CGWindowID wid;
 
 - (instancetype)initWithWindowId:(CGWindowID)wid
