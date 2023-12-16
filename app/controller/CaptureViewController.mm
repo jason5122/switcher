@@ -63,6 +63,7 @@
     // SCContentFilter* filter =
     //     [[SCContentFilter alloc] initWithDesktopIndependentWindow:targetWindow];
     // [_captureView updateWithFilter:filter];
+    [_captureView updateWindowId:wid];
 
     titleText.stringValue = CGWindowGetTitle(wid);
 

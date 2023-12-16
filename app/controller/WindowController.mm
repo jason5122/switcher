@@ -59,7 +59,7 @@
     std::vector<CGWindowID> window_ids = apps.get_valid_window_ids(activeAppOnly);
     [mainView updateWithWindowIds:window_ids];
 
-    // [mainView startCaptureSubviews];
+    [mainView startCaptureSubviews];
 
     NSSize contentSize =
         NSMakeSize((size.width + padding + innerPadding) * self.window.contentView.subviews.count +
@@ -87,7 +87,7 @@
 
     [self.window orderOut:nil];
 
-    // [mainView stopCaptureSubviews];
+    [mainView stopCaptureSubviews];
     [mainView reset];
 }
 

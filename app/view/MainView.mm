@@ -69,7 +69,7 @@
         // dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0),
         //                ^{ [controller.captureView startCapture]; });
         // dispatch_async(dispatch_get_main_queue(), ^{ [controller.captureView startCapture]; });
-        // [controller.captureView startCapture];
+        [controller.captureView startCapture];
     }
 }
 
@@ -78,7 +78,7 @@
         // dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0),
         //                ^{ [controller.captureView stopCapture]; });
         // dispatch_async(dispatch_get_main_queue(), ^{ [controller.captureView stopCapture]; });
-        // [controller.captureView stopCapture];
+        [controller.captureView stopCapture];
     }
 }
 

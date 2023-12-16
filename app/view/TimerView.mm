@@ -8,35 +8,40 @@
     self = [super initWithFrame:frame];
     if (self) {
         wid = theWid;
-
-        self.wantsLayer = true;
-        self.layer.contents = [NSImage imageWithSystemSymbolName:@"star.fill"
-                                        accessibilityDescription:@"Status bar icon"];
-
-        timer = [NSTimer scheduledTimerWithTimeInterval:1.0f / 60
-                                                 target:self
-                                               selector:@selector(setRandomColor)
-                                               userInfo:nil
-                                                repeats:true];
     }
     return self;
 }
 
-- (void)setRandomColor {
-    // NSArray<NSColor*>* colors = @[ NSColor.redColor, NSColor.blueColor, NSColor.greenColor ];
-    // NSUInteger randNum = arc4random() % [colors count];
-    // self.layer.backgroundColor = [colors objectAtIndex:randNum].CGColor;
+- (void)startCapture {
+    timer = [NSTimer scheduledTimerWithTimeInterval:1.0f / 60
+                                             target:self
+                                           selector:@selector(captureFrame)
+                                           userInfo:nil
+                                            repeats:true];
+}
 
+- (void)stopCapture {
+    [timer invalidate];
+    timer = nil;
+}
+
+- (void)updateWindowId:(CGWindowID)theWid {
+    wid = theWid;
+}
+
+- (void)captureFrame {
     bool captureAtNominalResolution = true;
 
     CGSWindowCaptureOptions options = kCGSCaptureIgnoreGlobalClipShape;
     if (captureAtNominalResolution) options |= kCGSWindowCaptureNominalResolution;
 
     CFArrayRef thumbnailList = CGSHWCaptureWindowList(CGSMainConnectionID(), &wid, 1, options);
-    CGImageRef thumbnail = (CGImageRef)CFArrayGetValueAtIndex(thumbnailList, 0);
-    self.layer.contents = (__bridge id)thumbnail;
-
+    CGImageRef frame = (CGImageRef)CFArrayGetValueAtIndex(thumbnailList, 0);
+    CFRetain(frame);
     CFRelease(thumbnailList);
+
+    self.layer.contents = (__bridge id)frame;
+    CFRelease(frame);
 }
 
 @end

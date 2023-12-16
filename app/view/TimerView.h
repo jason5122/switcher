@@ -6,6 +6,8 @@
 }
 
 - (instancetype)initWithFrame:(CGRect)frame windowId:(CGWindowID)wid;
-- (void)setRandomColor;
+- (void)startCapture;
+- (void)stopCapture;
+- (void)updateWindowId:(CGWindowID)theWid;
 
 @end
