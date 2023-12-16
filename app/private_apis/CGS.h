@@ -25,3 +25,12 @@ extern "C" CGError CGSCopyWindowProperty(CGSConnectionID cid, CGWindowID wid, CF
 extern "C" CGError CGSGetWindowOwner(CGSConnectionID cid, CGWindowID wid,
                                      CGSConnectionID* outOwner);
 extern "C" CGError CGSGetConnectionPSN(CGSConnectionID cid, ProcessSerialNumber* psn);
+
+enum {
+    kCGSWindowCaptureNominalResolution = 0x0200,
+    kCGSCaptureIgnoreGlobalClipShape = 0x0800,
+};
+typedef uint32_t CGSWindowCaptureOptions;
+
+extern "C" CFArrayRef CGSHWCaptureWindowList(CGSConnectionID cid, CGWindowID* wid,
+                                             uint32_t windowCount, uint32_t options);

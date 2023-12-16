@@ -36,7 +36,7 @@
         // _captureView = [[SwiftCaptureView alloc] initWithFrame:captureFrame
         // configuration:config]; _captureView = [[GLCaptureView alloc] initWithFrame:captureFrame
         // configuration:config];
-        _captureView = [[TimerView alloc] initWithFrame:captureFrame];
+        _captureView = [[TimerView alloc] initWithFrame:captureFrame windowId:wid];
         [stackView addSubview:_captureView];
 
         titleText = [NSTextField labelWithString:@""];
