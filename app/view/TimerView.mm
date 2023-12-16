@@ -35,6 +35,8 @@
     CFArrayRef thumbnailList = CGSHWCaptureWindowList(CGSMainConnectionID(), &wid, 1, options);
     CGImageRef thumbnail = (CGImageRef)CFArrayGetValueAtIndex(thumbnailList, 0);
     self.layer.contents = (__bridge id)thumbnail;
+
+    CFRelease(thumbnailList);
 }
 
 @end
