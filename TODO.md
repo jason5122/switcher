@@ -25,6 +25,7 @@
 ### Refactor
 
 - Use [three-letter prefixes](https://google.github.io/styleguide/objcguide.html#prefixes)
+- Clean up GN Python stuff
 
 ## Repo/Project Tasks
 
