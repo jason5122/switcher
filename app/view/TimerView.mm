@@ -40,6 +40,8 @@
     CFRetain(frame);
     CFRelease(thumbnailList);
 
+    // https://stackoverflow.com/a/39548167/14698275
+    self.layer.minificationFilter = kCAFilterTrilinear;
     self.layer.contents = (__bridge id)frame;
     CFRelease(frame);
 }
