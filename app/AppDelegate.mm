@@ -22,7 +22,8 @@
             [NSApp terminate:nil];
         }
 
-        CGSize size = CGSizeMake(160, 100);
+        // CGSize size = CGSizeMake(160, 100);
+        CGSize size = CGSizeMake(320, 200);
         CGFloat padding = 20;
         CGFloat innerPadding = 15;
         CGFloat titleTextPadding = 15;

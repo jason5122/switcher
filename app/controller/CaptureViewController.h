@@ -14,8 +14,8 @@
 // @property(nonatomic) CaptureView* captureView;
 // @property(nonatomic) SwiftCaptureView* captureView;
 // @property(nonatomic) GLCaptureView* captureView;
-// @property(nonatomic) id captureView;
-@property(nonatomic) TimerView* captureView;
+@property(nonatomic) id captureView;
+// @property(nonatomic) TimerView* captureView;
 @property(nonatomic) CGWindowID wid;
 
 - (instancetype)initWithWindowId:(CGWindowID)wid
